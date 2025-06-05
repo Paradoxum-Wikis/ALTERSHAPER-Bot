@@ -12,8 +12,13 @@ import {
   Routes,
   Interaction,
   Collection,
+  MessageReaction,
+  User,
+  PartialMessageReaction,
+  PartialUser,
 } from "discord.js";
 import { loadCommands, Command } from "./utils/commandLoader.js";
+import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
 
 class AlterShaperBot {
   private client: Client;
@@ -29,6 +34,7 @@ class AlterShaperBot {
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildModeration,
+        GatewayIntentBits.GuildMessageReactions,
       ],
     });
 
@@ -43,10 +49,13 @@ class AlterShaperBot {
       );
       this.client.user?.setActivity("OVER ALTER EGOISTS", { type: 3 });
       await this.registerSlashCommands();
+      await ReactionRoleHandler.initialize(this.client);
     });
 
     this.client.on("interactionCreate", this.handleInteraction.bind(this));
     this.client.on("guildMemberAdd", this.handleMemberJoin.bind(this));
+    this.client.on("messageReactionAdd", this.handleReactionAdd.bind(this));
+    this.client.on("messageReactionRemove", this.handleReactionRemove.bind(this));
   }
 
   private async registerSlashCommands(): Promise<void> {
@@ -78,7 +87,6 @@ class AlterShaperBot {
     if (!member) return;
 
     try {
-      // Help command doesn't need executor parameter
       if (interaction.commandName === "help") {
         await command.execute(interaction);
       } else {
@@ -120,6 +128,62 @@ class AlterShaperBot {
     }
   }
 
+  private async handleReactionAdd(
+    reaction: MessageReaction | PartialMessageReaction,
+    user: User | PartialUser,
+  ): Promise<void> {
+    if (reaction.partial) {
+      try {
+        await reaction.fetch();
+      } catch (error) {
+        console.error("Failed to fetch reaction:", error);
+        return;
+      }
+    }
+
+    if (user.partial) {
+      try {
+        await user.fetch();
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        return;
+      }
+    }
+
+    await ReactionRoleHandler.handleReactionAdd(
+      reaction as MessageReaction,
+      user as User,
+    );
+  }
+
+  private async handleReactionRemove(
+    reaction: MessageReaction | PartialMessageReaction,
+    user: User | PartialUser,
+  ): Promise<void> {
+    if (reaction.partial) {
+      try {
+        await reaction.fetch();
+      } catch (error) {
+        console.error("Failed to fetch reaction:", error);
+        return;
+      }
+    }
+
+    if (user.partial) {
+      try {
+        await user.fetch();
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        return;
+      }
+    }
+
+    await ReactionRoleHandler.handleReactionRemove(
+      reaction as MessageReaction,
+      user as User,
+    );
+  }
+
   public async start(): Promise<void> {
     if (!this.BOT_TOKEN) {
       console.error("❌ DISCORD_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES");
@@ -135,6 +199,5 @@ class AlterShaperBot {
   }
 }
 
-// Start the bot
 const bot = new AlterShaperBot();
 bot.start();

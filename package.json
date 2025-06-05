@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "A Discord moderation bot for ALTER EGO Wiki server",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx src/index.ts",
     "watch": "tsc -w",
     "lint": "prettier . --write"
   },
@@ -15,11 +16,11 @@
   "dependencies": {
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.4"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   }
 }
