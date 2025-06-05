@@ -72,7 +72,7 @@ export async function execute(
 
     const deleted = await channel.bulkDelete(amount, true);
 
-    const entryId = await ModerationLogger.addEntry({
+    await ModerationLogger.addEntry({
       type: "clear",
       userId: "N/A",
       userTag: "N/A",
@@ -95,7 +95,7 @@ export async function execute(
           value: `${executor.user.tag}`,
           inline: true,
         },
-        { name: "ACTION ID", value: `${entryId}`, inline: true },
+        { name: "ACTION ID", value: `${tempActionId}`, inline: true },
         {
           name: "MESSAGES ARCHIVED",
           value: `${messagesArray.length} MESSAGES SAVED TO THE SERAPHIC ARCHIVES`,

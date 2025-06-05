@@ -59,6 +59,11 @@ export async function execute(
         inline: false,
       },
       {
+        name: "/avatar [@user]",
+        value: "BEHOLD THE DIVINE VISAGE OF A SOUL",
+        inline: false,
+      },
+      {
         name: "/help",
         value: "DISPLAY THESE SACRED COMMANDMENTS",
         inline: false,

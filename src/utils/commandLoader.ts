@@ -8,6 +8,7 @@ import * as sins from "../commands/sins.js";
 import * as removesin from "../commands/removesin.js";
 import * as archives from "../commands/archives.js";
 import * as help from "../commands/help.js";
+import * as avatar from "../commands/avatar.js";
 
 export interface Command {
   data: any;
@@ -27,6 +28,7 @@ export function loadCommands(): Collection<string, Command> {
     removesin,
     archives,
     help,
+    avatar,
   ];
 
   for (const command of commandModules) {
