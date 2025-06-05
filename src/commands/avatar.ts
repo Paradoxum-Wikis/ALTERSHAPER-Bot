@@ -2,6 +2,7 @@ import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
   EmbedBuilder,
+  MessageFlags,
 } from "discord.js";
 
 export const data = new SlashCommandBuilder()
@@ -29,7 +30,7 @@ export async function execute(
     console.error("Error displaying avatar:", error);
     await interaction.reply({
       content: "**Failed to display avatar!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

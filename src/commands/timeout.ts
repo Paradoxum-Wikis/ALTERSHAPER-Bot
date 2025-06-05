@@ -4,6 +4,7 @@ import {
   GuildMember,
   EmbedBuilder,
   PermissionFlagsBits,
+  MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
 
@@ -39,7 +40,7 @@ export async function execute(
     await interaction.reply({
       content:
         "**THOU EGO LACKEST THE AUTHORITY TO IMPOSE SILENCE UPON THE WAYWARD!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -53,7 +54,7 @@ export async function execute(
   if (!targetMember) {
     await interaction.reply({
       content: "**THE TRANSGRESSOR HATH VANISHED FROM OUR SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -61,7 +62,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -113,7 +114,7 @@ export async function execute(
     await interaction.reply({
       content:
         "**THE DIVINE POWERS HAVE BEEN THWARTED! THE TRANSGRESSOR REMAINS BEYOND REACH!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

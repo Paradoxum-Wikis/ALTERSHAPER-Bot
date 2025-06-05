@@ -16,6 +16,7 @@ import {
   User,
   PartialMessageReaction,
   PartialUser,
+  MessageFlags,
 } from "discord.js";
 import { loadCommands, Command } from "./utils/commandLoader.js";
 import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
@@ -99,9 +100,9 @@ class AlterShaperBot {
         "**THE DIVINE POWERS HAVE ENCOUNTERED AN UNEXPECTED ERROR!**";
 
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: errorMessage, ephemeral: true });
+        await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
       } else {
-        await interaction.reply({ content: errorMessage, ephemeral: true });
+        await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
       }
     }
   }

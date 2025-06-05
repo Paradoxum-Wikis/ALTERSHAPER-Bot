@@ -8,6 +8,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ComponentType,
+  MessageFlags,
 } from "discord.js";
 import { MessageLogger } from "../utils/messageLogger.js";
 
@@ -108,7 +109,7 @@ export async function execute(
     await interaction.reply({
       content:
         "**THOU EGO LACKEST THE AUTHORITY TO ACCESS THE SERAPHIC ARCHIVES!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -116,7 +117,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -133,7 +134,7 @@ export async function execute(
       if (purgedMessages.length === 0) {
         await interaction.reply({
           content: `**NO ARCHIVED MESSAGES FOUND FOR ACTION ID: ${actionId}**`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -145,7 +146,7 @@ export async function execute(
       if (purgedMessages.length === 0) {
         await interaction.reply({
           content: "**NO ARCHIVED MESSAGES FOUND FOR THIS GUILD**",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -169,7 +170,7 @@ export async function execute(
     const response = await interaction.reply({
       embeds: [embed],
       components: totalPages > 1 ? [buttons] : [],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
 
     if (totalPages > 1) {
@@ -182,7 +183,7 @@ export async function execute(
         if (buttonInteraction.user.id !== interaction.user.id) {
           await buttonInteraction.reply({
             content: "**THOU CANNOT CONTROL ANOTHER'S ARCHIVES!**",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -254,7 +255,7 @@ export async function execute(
     console.error("Error retrieving archived messages:", error);
     await interaction.reply({
       content: "**THE DIVINE POWERS HAVE FAILED TO ACCESS THE ARCHIVES!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

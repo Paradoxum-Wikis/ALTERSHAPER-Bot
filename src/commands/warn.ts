@@ -4,6 +4,7 @@ import {
   GuildMember,
   EmbedBuilder,
   PermissionFlagsBits,
+  MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
 
@@ -30,7 +31,7 @@ export async function execute(
   if (!executor.permissions.has(PermissionFlagsBits.KickMembers)) {
     await interaction.reply({
       content: "**THOU EGO LACKEST THE AUTHORITY TO ISSUE DIVINE WARNINGS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -43,7 +44,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -100,14 +101,14 @@ export async function execute(
     } catch (error) {
       await interaction.followUp({
         content: "**THE DIVINE MESSAGE COULD NOT REACH THE WARNED SOUL!**",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   } catch (error) {
     console.error("Error logging warning:", error);
     await interaction.reply({
       content: "**THE DIVINE POWERS HAVE FAILED TO RECORD THIS WARNING!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

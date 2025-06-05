@@ -6,6 +6,7 @@ import {
   PermissionFlagsBits,
   ChannelType,
   TextChannel,
+  MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
 import { MessageLogger } from "../utils/messageLogger.js";
@@ -30,7 +31,7 @@ export async function execute(
     await interaction.reply({
       content:
         "**THOU EGO LACKEST THE AUTHORITY TO PURGE THE SACRED RECORDS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -41,7 +42,7 @@ export async function execute(
     await interaction.reply({
       content:
         "**DIVINE PURIFICATION CAN ONLY BE PERFORMED IN GUILD CHANNELS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -49,7 +50,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -109,13 +110,13 @@ export async function execute(
       )
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   } catch (error) {
     console.error("Error during purge operation:", error);
     await interaction.reply({
       content:
         "**THE DIVINE POWERS HAVE BEEN THWARTED! THE PURIFICATION FAILED!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

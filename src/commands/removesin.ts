@@ -4,6 +4,7 @@ import {
   GuildMember,
   EmbedBuilder,
   PermissionFlagsBits,
+  MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
 
@@ -26,7 +27,7 @@ export async function execute(
   if (!executor.permissions.has(PermissionFlagsBits.KickMembers)) {
     await interaction.reply({
       content: "**THOU EGO LACKEST THE AUTHORITY TO GRANT DIVINE ABSOLUTION!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -36,7 +37,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -47,7 +48,7 @@ export async function execute(
     if (!entry || entry.mercy) {
       await interaction.reply({
         content: `**ENTRY ${entryId} COULD NOT BE FOUND IN THE RECORDS OF THE DAMNED!**`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -116,7 +117,7 @@ export async function execute(
     if (!removed) {
       await interaction.reply({
         content: `**ENTRY ${entryId} COULD NOT BE REMOVED FROM THE RECORDS OF THE DAMNED!**`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -159,14 +160,14 @@ export async function execute(
       await interaction.followUp({
         content:
           "**THE DIVINE MESSAGE OF MERCY COULD NOT REACH THE PARDONED SOUL!**",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   } catch (error) {
     console.error("Error granting mercy:", error);
     await interaction.reply({
       content: "**THE DIVINE POWERS HAVE FAILED TO GRANT ABSOLUTION!**",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }
