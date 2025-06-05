@@ -24,15 +24,25 @@ jobs:
     - name: Build project
       run: npm run build
     
-    - name: Copy files to server
+    - name: Copy package.json and package-lock.json
       uses: appleboy/scp-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USER }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        source: "package*.json,./dist/*"
+        source: "package*.json"
         target: "${{ secrets.DEPLOY_PATH }}/"
+        
+    - name: Copy built files
+      uses: appleboy/scp-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        source: "./dist/*"
+        target: "${{ secrets.DEPLOY_PATH }}/dist/"
         strip_components: 1
         
     - name: Install dependencies and restart bot
