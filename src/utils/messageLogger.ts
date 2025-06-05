@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { Message } from 'discord.js';
+import fs from "fs/promises";
+import path from "path";
+import { Message } from "discord.js";
 
 export interface PurgedMessage {
   id: string;
@@ -19,7 +19,11 @@ export interface PurgedMessage {
 }
 
 export class MessageLogger {
-  private static readonly PURGED_FILE = path.join(process.cwd(), 'data', 'purged_messages.json');
+  private static readonly PURGED_FILE = path.join(
+    process.cwd(),
+    "data",
+    "purged_messages.json",
+  );
 
   private static async ensureDataDirectory(): Promise<void> {
     const dataDir = path.dirname(this.PURGED_FILE);
@@ -33,14 +37,16 @@ export class MessageLogger {
   private static async readPurgedMessages(): Promise<PurgedMessage[]> {
     try {
       await this.ensureDataDirectory();
-      const data = await fs.readFile(this.PURGED_FILE, 'utf-8');
+      const data = await fs.readFile(this.PURGED_FILE, "utf-8");
       return JSON.parse(data);
     } catch {
       return [];
     }
   }
 
-  private static async writePurgedMessages(messages: PurgedMessage[]): Promise<void> {
+  private static async writePurgedMessages(
+    messages: PurgedMessage[],
+  ): Promise<void> {
     await this.ensureDataDirectory();
     await fs.writeFile(this.PURGED_FILE, JSON.stringify(messages, null, 2));
   }
@@ -48,43 +54,48 @@ export class MessageLogger {
   public static async logPurgedMessages(
     messages: Message[],
     purgedBy: string,
-    actionId: string
+    actionId: string,
   ): Promise<void> {
     const existingMessages = await this.readPurgedMessages();
     const purgedAt = new Date().toISOString();
 
-    const newPurgedMessages: PurgedMessage[] = messages.map(message => ({
+    const newPurgedMessages: PurgedMessage[] = messages.map((message) => ({
       id: message.id,
-      content: message.content || '[NO TEXT CONTENT]',
+      content: message.content || "[NO TEXT CONTENT]",
       authorId: message.author.id,
       authorTag: message.author.tag,
       channelId: message.channel.id,
-      channelName: message.channel.type === 0 ? message.channel.name : 'Unknown Channel',
-      guildId: message.guild?.id || 'Unknown Guild',
+      channelName:
+        message.channel.type === 0 ? message.channel.name : "Unknown Channel",
+      guildId: message.guild?.id || "Unknown Guild",
       timestamp: message.createdAt.toISOString(),
-      attachments: message.attachments.map(att => att.url),
-      embeds: message.embeds.map(embed => embed.toJSON()),
+      attachments: message.attachments.map((att) => att.url),
+      embeds: message.embeds.map((embed) => embed.toJSON()),
       purgedBy: purgedBy,
       purgedAt: purgedAt,
-      purgeActionId: actionId
+      purgeActionId: actionId,
     }));
 
     existingMessages.push(...newPurgedMessages);
     await this.writePurgedMessages(existingMessages);
   }
 
-  public static async getPurgedMessages(guildId?: string): Promise<PurgedMessage[]> {
+  public static async getPurgedMessages(
+    guildId?: string,
+  ): Promise<PurgedMessage[]> {
     const messages = await this.readPurgedMessages();
-    
+
     if (guildId) {
-      return messages.filter(msg => msg.guildId === guildId);
+      return messages.filter((msg) => msg.guildId === guildId);
     }
-    
+
     return messages;
   }
 
-  public static async getPurgedMessagesByActionId(actionId: string): Promise<PurgedMessage[]> {
+  public static async getPurgedMessagesByActionId(
+    actionId: string,
+  ): Promise<PurgedMessage[]> {
     const messages = await this.readPurgedMessages();
-    return messages.filter(msg => msg.purgeActionId === actionId);
+    return messages.filter((msg) => msg.purgeActionId === actionId);
   }
 }

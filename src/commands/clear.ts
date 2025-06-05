@@ -1,32 +1,56 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, GuildMember, EmbedBuilder, PermissionFlagsBits, ChannelType, TextChannel } from 'discord.js';
-import { ModerationLogger } from '../utils/moderationLogger.js';
-import { MessageLogger } from '../utils/messageLogger.js';
+import {
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+  GuildMember,
+  EmbedBuilder,
+  PermissionFlagsBits,
+  ChannelType,
+  TextChannel,
+} from "discord.js";
+import { ModerationLogger } from "../utils/moderationLogger.js";
+import { MessageLogger } from "../utils/messageLogger.js";
 
 export const data = new SlashCommandBuilder()
-  .setName('clear')
-  .setDescription('PURGE UP TO 100 MESSAGES FROM THE SACRED HALLS')
-  .addIntegerOption(option =>
-    option.setName('amount')
-      .setDescription('NUMBER OF MESSAGES TO PURGE (1-100)')
+  .setName("clear")
+  .setDescription("PURGE UP TO 100 MESSAGES FROM THE SACRED HALLS")
+  .addIntegerOption((option) =>
+    option
+      .setName("amount")
+      .setDescription("NUMBER OF MESSAGES TO PURGE (1-100)")
       .setRequired(true)
       .setMinValue(1)
-      .setMaxValue(100));
+      .setMaxValue(100),
+  );
 
-export async function execute(interaction: ChatInputCommandInteraction, executor: GuildMember): Promise<void> {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+  executor: GuildMember,
+): Promise<void> {
   if (!executor.permissions.has(PermissionFlagsBits.ManageMessages)) {
-    await interaction.reply({ content: '**THOU EGO LACKEST THE AUTHORITY TO PURGE THE SACRED RECORDS!**', ephemeral: true });
+    await interaction.reply({
+      content:
+        "**THOU EGO LACKEST THE AUTHORITY TO PURGE THE SACRED RECORDS!**",
+      ephemeral: true,
+    });
     return;
   }
 
-  const amount = interaction.options.getInteger('amount')!;
+  const amount = interaction.options.getInteger("amount")!;
 
   if (interaction.channel?.type !== ChannelType.GuildText) {
-    await interaction.reply({ content: '**DIVINE PURIFICATION CAN ONLY BE PERFORMED IN GUILD CHANNELS!**', ephemeral: true });
+    await interaction.reply({
+      content:
+        "**DIVINE PURIFICATION CAN ONLY BE PERFORMED IN GUILD CHANNELS!**",
+      ephemeral: true,
+    });
     return;
   }
 
   if (!interaction.guild) {
-    await interaction.reply({ content: '**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**', ephemeral: true });
+    await interaction.reply({
+      content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
+      ephemeral: true,
+    });
     return;
   }
 
@@ -42,38 +66,56 @@ export async function execute(interaction: ChatInputCommandInteraction, executor
       await MessageLogger.logPurgedMessages(
         messagesArray,
         executor.user.tag,
-        tempActionId
+        tempActionId,
       );
     }
 
     const deleted = await channel.bulkDelete(amount, true);
 
     const entryId = await ModerationLogger.addEntry({
-      type: 'clear',
-      userId: 'N/A',
-      userTag: 'N/A',
+      type: "clear",
+      userId: "N/A",
+      userTag: "N/A",
       moderatorId: executor.id,
       moderatorTag: executor.user.tag,
       reason: `PURGED ${deleted.size} MESSAGES IN #${channel.name}`,
       guildId: interaction.guild.id,
-      messageCount: deleted.size
+      messageCount: deleted.size,
     });
-    
+
     const embed = new EmbedBuilder()
-      .setColor('#4169E1')
-      .setTitle('🧹 SACRED PURIFICATION COMPLETE')
-      .setDescription(`**${deleted.size} MESSAGES HAVE BEEN CLEANSED FROM THE SACRED HALLS!**`)
+      .setColor("#4169E1")
+      .setTitle("🧹 SACRED PURIFICATION COMPLETE")
+      .setDescription(
+        `**${deleted.size} MESSAGES HAVE BEEN CLEANSED FROM THE SACRED HALLS!**`,
+      )
       .addFields(
-        { name: 'PURIFIER OF TRUTH', value: `${executor.user.tag}`, inline: true },
-        { name: 'ACTION ID', value: `${entryId}`, inline: true },
-        { name: 'MESSAGES ARCHIVED', value: `${messagesArray.length} MESSAGES SAVED TO THE SERAPHIC ARCHIVES`, inline: true },
-        { name: 'HOLY DECREE', value: 'THE HALLS OF ALTERUISM MUST REMAIN PURE', inline: false }
+        {
+          name: "PURIFIER OF TRUTH",
+          value: `${executor.user.tag}`,
+          inline: true,
+        },
+        { name: "ACTION ID", value: `${entryId}`, inline: true },
+        {
+          name: "MESSAGES ARCHIVED",
+          value: `${messagesArray.length} MESSAGES SAVED TO THE SERAPHIC ARCHIVES`,
+          inline: true,
+        },
+        {
+          name: "HOLY DECREE",
+          value: "THE HALLS OF ALTERUISM MUST REMAIN PURE",
+          inline: false,
+        },
       )
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed], ephemeral: true });
   } catch (error) {
-    console.error('Error during purge operation:', error);
-    await interaction.reply({ content: '**THE DIVINE POWERS HAVE BEEN THWARTED! THE PURIFICATION FAILED!**', ephemeral: true });
+    console.error("Error during purge operation:", error);
+    await interaction.reply({
+      content:
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! THE PURIFICATION FAILED!**",
+      ephemeral: true,
+    });
   }
 }
