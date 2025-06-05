@@ -1,0 +1,49 @@
+name: Deploy the bot
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build project
+      run: npm run build
+    
+    - name: Copy files to server
+      uses: appleboy/scp-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        source: "package*.json,./dist/*"
+        target: "${{ secrets.DEPLOY_PATH }}/"
+        strip_components: 1
+        
+    - name: Install dependencies and restart bot
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          npm ci --production
+          npm list -g pm2 || npm install -g pm2
+          pm2 restart altershaper-bot || pm2 start dist/index.js --name altershaper-bot
