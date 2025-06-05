@@ -19,10 +19,12 @@ Extensive documentation will be found here: https://alter-ego.fandom.com/wiki/He
 Use `npm run dev` if you want to skip the compiling.
 
 ## Required Permissions
-- Kick/Ban/Moderate Members
+- Kick, Approve and Reject Members
+- Ban Members
 - Manage Messages
-- Send Messages & Embed Links
-- Maybe more that I forgot about xd
+- Send Messages
+- Embed Links
+- Maybe more that I forgot about xd—but to be honest, if you're selfhosting then you're better off just turning everything on
 
 ## Invite
 See the OAUTH2 section in your bot settings on the Discord Developer Portal.
