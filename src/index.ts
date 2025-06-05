@@ -47,7 +47,7 @@ class AlterShaperBot {
       console.log(
         `✅ ALTERSHAPER BOT HATH AWAKENED AS ${this.client.user?.tag}`,
       );
-      this.client.user?.setActivity("OVER ALTER EGOISTS", { type: 3 });
+      this.client.user?.setActivity("ALTER EGOISTS", { type: 3 });
       await this.registerSlashCommands();
       await ReactionRoleHandler.initialize(this.client);
     });
