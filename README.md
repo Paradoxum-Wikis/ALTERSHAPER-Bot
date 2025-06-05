@@ -1,5 +1,5 @@
 # ALTERSHAPER Bot - ALTER EGO Wiki Moderation Bot
-A lawful angel Discord moderator - speaks in CAPS with pseudo-biblical English.
+A lawful angel Discord moderator—speaks in CAPS with pseudo-biblical English.
 
 Extensive documentation will be found here: https://alter-ego.fandom.com/wiki/Help:ALTERSHAPER
 
