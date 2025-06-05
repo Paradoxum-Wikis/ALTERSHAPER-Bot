@@ -45,7 +45,7 @@ jobs:
         target: "${{ secrets.DEPLOY_PATH }}/dist/"
         strip_components: 1
         
-    - name: Install dependencies and restart bot
+    - name: Install dependencies
       uses: appleboy/ssh-action@v1.2.2
       with:
         host: ${{ secrets.HOST }}
@@ -55,5 +55,3 @@ jobs:
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
           npm ci --production
-          npm list -g pm2 || npm install -g pm2
-          pm2 restart altershaper-bot || pm2 start dist/index.js --name altershaper-bot
