@@ -16,6 +16,8 @@ Extensive documentation will be found here: https://alter-ego.fandom.com/wiki/He
 3. `npm run build`
 4. `npm start`
 
+Use `npm run dev` if you want to skip the compiling.
+
 ## Required Permissions
 - Kick/Ban/Moderate Members
 - Manage Messages
