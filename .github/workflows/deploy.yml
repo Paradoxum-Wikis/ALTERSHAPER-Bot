@@ -41,9 +41,8 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        source: "./dist/*"
-        target: "${{ secrets.DEPLOY_PATH }}/dist/"
-        strip_components: 1
+        source: "dist/"
+        target: "${{ secrets.DEPLOY_PATH }}/"
         
     - name: Install dependencies
       uses: appleboy/ssh-action@v1.2.2
