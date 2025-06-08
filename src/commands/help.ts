@@ -64,6 +64,11 @@ export async function execute(
         inline: false,
       },
       {
+        name: "/info",
+        value: "BEHOLD THE KNOWLEDGE OF THE ALTERSHAPER",
+        inline: false,
+      },
+      {
         name: "/help",
         value: "DISPLAY THESE SACRED COMMANDMENTS",
         inline: false,

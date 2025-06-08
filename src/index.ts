@@ -21,7 +21,7 @@ import {
 import { loadCommands, Command } from "./utils/commandLoader.js";
 import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
 
-class AlterShaperBot {
+class AltershaperBot {
   private client: Client;
   private readonly BOT_TOKEN = process.env.DISCORD_TOKEN;
   private readonly WELCOME_CHANNEL_ID = "1366495690796040315";
@@ -200,5 +200,5 @@ class AlterShaperBot {
   }
 }
 
-const bot = new AlterShaperBot();
+const bot = new AltershaperBot();
 bot.start();
