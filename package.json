@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "watch": "tsc -w",
-    "lint": "prettier . --write"
+    "format": "prettier . --write"
   },
   "author": "t7ru",
   "license": "MIT",
