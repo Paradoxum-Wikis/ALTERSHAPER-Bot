@@ -20,16 +20,17 @@ Use `npm run dev` if you want to skip the compiling.
 
 ## Required Permissions
 You can give the bot its permissions by one of these options:
-| Role Permissions (In-server)       | Bot Permissions (Dev Portal)   |
-|------------------------------------|--------------------------------|
-| Kick, Approve and Reject Members   | Read Messages/View Channels    |
-| Ban Members                        | Send Messages                  |
-| Time out members                   | Embed Links                    |
-| Manage Messages                    | Manage Messages                |
-| Send Messages                      | Kick Members                   |
-| Embed Links                        | Ban Members                    |
-| Read Message History               | Moderate Members               |
-| Add Reactions                      |                                |       
+| Role Permissions (In-server)     | Bot Permissions (Dev Portal)            |
+| -------------------------------- | --------------------------------------- |
+| Kick, Approve and Reject Members | Kick Members                            |
+| Ban Members                      | Ban Members                             |
+| Time out members                 | Moderate Members                        |
+| Manage Messages                  | Manage Messages                         |
+| Send Messages                    | Send Messages                           |
+| Embed Links                      | Embed Links                             |
+| Read Message History             | Read Message History                    |
+| Add Reactions                    | Add Reactions                           |
+| View Channels                    | View Channels                           |
 
 
 Maybe more that I forgot about xd—but to be honest, if you're selfhosting then you're better off just turning everything on
