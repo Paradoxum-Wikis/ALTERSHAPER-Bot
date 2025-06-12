@@ -19,12 +19,20 @@ Extensive documentation will be found here: https://alter-ego.fandom.com/wiki/He
 Use `npm run dev` if you want to skip the compiling.
 
 ## Required Permissions
-- Kick, Approve and Reject Members
-- Ban Members
-- Manage Messages
-- Send Messages
-- Embed Links
-- Maybe more that I forgot about xd—but to be honest, if you're selfhosting then you're better off just turning everything on
+You can give the bot its permissions by one of these options:
+| Role Permissions (In-server)       | Bot Permissions (Dev Portal)   |
+|------------------------------------|--------------------------------|
+| Kick, Approve and Reject Members   | Read Messages/View Channels    |
+| Ban Members                        | Send Messages                  |
+| Time out members                   | Embed Links                    |
+| Manage Messages                    | Manage Messages                |
+| Send Messages                      | Kick Members                   |
+| Embed Links                        | Ban Members                    |
+| Read Message History               | Moderate Members               |
+| Add Reactions                      |                                |       
+
+
+Maybe more that I forgot about xd—but to be honest, if you're selfhosting then you're better off just turning everything on
 
 ## Invite
 See the OAUTH2 section in your bot settings on the Discord Developer Portal.
