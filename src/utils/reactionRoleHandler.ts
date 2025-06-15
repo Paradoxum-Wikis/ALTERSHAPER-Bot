@@ -1,7 +1,7 @@
 import { MessageReaction, User, TextChannel, Client } from 'discord.js';
 
 export class ReactionRoleHandler {
-  private static readonly REACTION_MESSAGE_ID = '1380189529800970292';
+  private static readonly REACTION_MESSAGE_ID = '1383900105106522283';
   private static readonly REACTION_CHANNEL_ID = '1366498883001257984';
   private static readonly TARGET_ROLE_ID = '1362093143830298704';
   private static readonly TARGET_EMOJI = '🖋️';
