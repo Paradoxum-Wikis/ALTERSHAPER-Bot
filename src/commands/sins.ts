@@ -51,7 +51,6 @@ export async function execute(
         return;
       }
 
-      // Count by type
       const counts = {
         warn: userEntries.filter((e) => e.type === "warn").length,
         kick: userEntries.filter((e) => e.type === "kick").length,
@@ -129,7 +128,6 @@ export async function execute(
         return;
       }
 
-      // Count by type
       const typeCounts = {
         warn: allEntries.filter((e) => e.type === "warn").length,
         kick: allEntries.filter((e) => e.type === "kick").length,

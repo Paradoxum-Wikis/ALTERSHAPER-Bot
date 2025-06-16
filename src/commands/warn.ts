@@ -50,7 +50,7 @@ export async function execute(
   }
 
   try {
-    // Log the warning
+    // Log warning
     const entryId = await ModerationLogger.addEntry({
       type: "warn",
       userId: targetUser.id,
@@ -61,7 +61,6 @@ export async function execute(
       guildId: interaction.guild.id,
     });
 
-    // Get total warn count for this user
     const userWarns = await ModerationLogger.getUserWarns(
       targetUser.id,
       interaction.guild.id,

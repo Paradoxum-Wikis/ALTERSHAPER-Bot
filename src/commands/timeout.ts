@@ -70,7 +70,7 @@ export async function execute(
   try {
     await targetMember.timeout(duration * 60 * 1000, reason);
 
-    // Log the timeout
+    // Log timeout
     const entryId = await ModerationLogger.addEntry({
       type: "timeout",
       userId: targetUser.id,
