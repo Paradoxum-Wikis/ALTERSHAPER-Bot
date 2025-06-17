@@ -6,7 +6,8 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
-import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
+import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID, TOP_CONTRIBUTORS_ROLE_ID } from "../utils/roleConstants.js";
+import { TopContributorsManager } from "../utils/topContributors.js";
 
 interface FandomUserQueryUser {
   userid: number;
@@ -151,16 +152,29 @@ export async function execute(
       }
       const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
       
+      const topContributorResult = await TopContributorsManager.manageTopContributorRole(member, canonicalFandomUsername);
+      
       const syncEmbed = new EmbedBuilder()
         .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
         .setTitle("🔗 ALTER AND SOUL SYNCHRONIZED!")
         .setDescription(`**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES SYNCHRONIZED!**`);
       
-      if (grantedRoleNames.length > 0) {
-        const roleMentions = grantedRoleNames.map(name => {
+      let allGrantedRoles = [...grantedRoleNames];
+      if (topContributorResult.roleGranted) {
+        const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+        if (topRole) allGrantedRoles.push(topRole.name);
+      }
+      
+      if (allGrantedRoles.length > 0) {
+        const roleMentions = allGrantedRoles.map(name => {
           const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
           if (linkedRole && linkedRole.name === name) {
               return `<@&${LINKED_ROLE_ID}>`;
+          }
+          
+          const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+          if (topRole && topRole.name === name) {
+              return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
           }
           
           const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
@@ -170,6 +184,11 @@ export async function execute(
       } else {
         syncEmbed.addFields({ name: "ROLES STATUS", value: "No new Fandom specific roles were applicable or needed granting at this time." });
       }
+      
+      if (topContributorResult.rank) {
+        syncEmbed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: `**RANK #${topContributorResult.rank}** in current week's top contributors!` });
+      }
+      
       if (failedRoleNames.length > 0) {
         syncEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.` });
       }
@@ -262,16 +281,29 @@ export async function execute(
         const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
         await LinkLogger.addLink(interaction.user.id, interaction.user.tag, canonicalFandomUsername, fandomUserId);
 
+        const topContributorResult = await TopContributorsManager.manageTopContributorRole(member, canonicalFandomUsername);
+
         const successEmbed = new EmbedBuilder()
           .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
           .setTitle("🔗 ALTER AND SOUL INTERTWINED!")
           .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely linked with thy Fandom alter: ${canonicalFandomUsername}!**`);
         
-        if (grantedRoleNames.length > 0) {
-            const roleMentions = grantedRoleNames.map(name => {
+        let allGrantedRoles = [...grantedRoleNames];
+        if (topContributorResult.roleGranted) {
+          const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+          if (topRole) allGrantedRoles.push(topRole.name);
+        }
+        
+        if (allGrantedRoles.length > 0) {
+            const roleMentions = allGrantedRoles.map(name => {
                 const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
                 if (linkedRole && linkedRole.name === name) {
                     return `<@&${LINKED_ROLE_ID}>`;
+                }
+                
+                const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+                if (topRole && topRole.name === name) {
+                    return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
                 }
                 
                 const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
@@ -281,6 +313,11 @@ export async function execute(
         } else {
           successEmbed.addFields({ name: "ROLES STATUS", value: "No specific Fandom staff roles were applicable at this time." });
         }
+        
+        if (topContributorResult.rank) {
+          successEmbed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: `**🏆 CONGRATULATIONS! RANK #${topContributorResult.rank}** in current week's top contributors!` });
+        }
+        
         if (failedRoleNames.length > 0) {
             successEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.`});
         }

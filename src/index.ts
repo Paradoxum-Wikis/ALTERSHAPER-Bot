@@ -21,12 +21,15 @@ import {
 import { loadCommands, Command } from "./utils/commandLoader.js";
 import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
 import { RolePermissions } from "./utils/rolePermissions.js";
+import { WebhookServer } from "./utils/webhookServer.js";
 
 class AltershaperBot {
   private client: Client;
   private readonly BOT_TOKEN = process.env.DISCORD_TOKEN;
   private readonly WELCOME_CHANNEL_ID = "1366495690796040315";
+  private readonly GUILD_ID = process.env.GUILD_ID;
   private commands: Collection<string, Command>;
+  private webhookServer?: WebhookServer;
 
   constructor() {
     this.client = new Client({
@@ -52,6 +55,18 @@ class AltershaperBot {
       this.client.user?.setActivity("ALTER EGOISTS", { type: 3 });
       await this.registerSlashCommands();
       await ReactionRoleHandler.initialize(this.client);
+
+      if (this.GUILD_ID) {
+        const guild = this.client.guilds.cache.get(this.GUILD_ID);
+        if (guild) {
+          this.webhookServer = new WebhookServer(guild);
+          this.webhookServer.start();
+        } else {
+          console.warn('⚠️ Guild not found, webhook server not started');
+        }
+      } else {
+        console.warn('⚠️ GUILD_ID not set, webhook server not started');
+      }
     });
 
     this.client.on("interactionCreate", this.handleInteraction.bind(this));
@@ -207,6 +222,21 @@ class AltershaperBot {
       console.error("❌ FAILED TO LOGIN:", error);
       process.exit(1);
     }
+
+    // Graceful shutdown
+    process.on('SIGINT', () => {
+      console.log('🛑 Shutting down gracefully...');
+      this.webhookServer?.stop();
+      this.client.destroy();
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', () => {
+      console.log('🛑 Shutting down gracefully...');
+      this.webhookServer?.stop();
+      this.client.destroy();
+      process.exit(0);
+    });
   }
 }
 

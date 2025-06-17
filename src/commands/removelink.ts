@@ -121,7 +121,7 @@ export async function execute(
             },
             {
               name: "ROLES REMOVED",
-              value: targetMember ? "All linked and Fandom-specific roles have been stripped." : "User not in server - roles could not be removed.",
+              value: targetMember ? "All linked and Fandom specific roles have been stripped." : "User not in server - roles could not be removed.",
               inline: false,
             }
           )

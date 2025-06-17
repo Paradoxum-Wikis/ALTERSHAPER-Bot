@@ -6,7 +6,8 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
-import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
+import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID, TOP_CONTRIBUTORS_ROLE_ID } from "../utils/roleConstants.js";
+import { TopContributorsManager } from "../utils/topContributors.js";
 
 interface FandomUserQueryUser {
   userid: number;
@@ -154,11 +155,15 @@ export async function execute(
     let rolesSynced = false;
     let grantedRoleNames: string[] = [];
     let failedRoleNames: string[] = [];
+    let topContributorResult: any = { roleGranted: false, roleRemoved: false };
 
     if (fandomDataStatus === "ACTIVE") {
       const roleResult = await manageFandomRoles(targetMember, fandomGroups, interaction.guild);
       grantedRoleNames = roleResult.grantedRoleNames;
       failedRoleNames = roleResult.failedRoleNames;
+      
+      topContributorResult = await TopContributorsManager.manageTopContributorRole(targetMember, existingLink.fandomUsername);
+      
       rolesSynced = true;
     }
 
@@ -195,11 +200,22 @@ export async function execute(
       );
 
     if (rolesSynced) {
-      if (grantedRoleNames.length > 0) {
-        const roleMentions = grantedRoleNames.map(name => {
+      let allGrantedRoles = [...grantedRoleNames];
+      if (topContributorResult.roleGranted) {
+        const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+        if (topRole) allGrantedRoles.push(topRole.name);
+      }
+      
+      if (allGrantedRoles.length > 0) {
+        const roleMentions = allGrantedRoles.map(name => {
           const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
           if (linkedRole && linkedRole.name === name) {
               return `<@&${LINKED_ROLE_ID}>`;
+          }
+          
+          const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+          if (topRole && topRole.name === name) {
+              return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
           }
           
           const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
@@ -207,7 +223,13 @@ export async function execute(
         }).join(", ");
         embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
       } else {
-        embed.addFields({ name: "ROLES SYNCHRONIZED", value: "No Fandom-specific roles were applicable or needed changes." });
+        embed.addFields({ name: "ROLES SYNCHRONIZED", value: "No Fandom specific roles were applicable or needed changes." });
+      }
+
+      if (topContributorResult.rank) {
+        embed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: `**🏆 RANK #${topContributorResult.rank}** in current week's top contributors!` });
+      } else if (topContributorResult.roleRemoved) {
+        embed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: "No longer in top 5 contributors - role removed." });
       }
 
       if (failedRoleNames.length > 0) {

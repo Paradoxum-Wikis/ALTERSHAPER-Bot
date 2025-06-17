@@ -103,4 +103,8 @@ export class LinkLogger {
     await this.writeLinks(filteredLinks);
     return true;
   }
+
+  public static async getAllLinks(): Promise<LinkEntry[]> {
+    return await this.readLinks();
+  }
 }
