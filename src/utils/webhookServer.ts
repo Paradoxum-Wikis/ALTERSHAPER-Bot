@@ -5,7 +5,8 @@ export class WebhookServer {
   private app: express.Application;
   private server: any;
   private readonly BOT_WEBHOOK_SECRET = process.env.BOT_WEBHOOK_SECRET;
-  private readonly PORT = process.env.WEBHOOK_PORT;
+  private readonly PORT = process.env.WEBHOOK_PORT || 3000;
+  private readonly PUBLIC_URL = process.env.PUBLIC_URL || "https://services-t7ru.alwaysdata.net";
   private guild: any;
 
   constructor(guild: any) {
@@ -66,11 +67,13 @@ export class WebhookServer {
       }
     }) as express.RequestHandler);
 
-    this.app.get("/health", (req, res) => {
+    this.app.get("/health", (_req, res) => {
       res.status(200).json({
         status: "OK",
         timestamp: new Date().toISOString(),
         guild: this.guild ? this.guild.name : "Not connected",
+        port: this.PORT,
+        publicUrl: this.PUBLIC_URL,
       });
     });
   }
@@ -78,10 +81,8 @@ export class WebhookServer {
   public start(): void {
     this.server = this.app.listen(this.PORT, () => {
       console.log(`🌐 Webhook server listening on port ${this.PORT}`);
-      console.log(`📡 Health check: http://localhost:${this.PORT}/health`);
-      console.log(
-        `🔔 Webhook endpoint: http://localhost:${this.PORT}/webhook/recap-update`,
-      );
+      console.log(`📡 Health check: ${this.PUBLIC_URL}/health`);
+      console.log(`🔔 Webhook endpoint: ${this.PUBLIC_URL}/webhook/recap-update`);
     });
   }
 
