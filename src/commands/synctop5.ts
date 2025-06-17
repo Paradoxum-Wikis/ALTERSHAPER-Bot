@@ -41,7 +41,7 @@ export async function execute(
     const embed = new EmbedBuilder()
       .setColor(result.errors.length > 0 ? "#FFA500" : "#00FF00")
       .setTitle("🏆 TOP CONTRIBUTORS SYNCHRONIZATION COMPLETE")
-      .setDescription("**THE RANKINGS HAVE BEEN SYNCHRONIZED WITH THE DIVINE ROLES!**")
+      .setDescription("**THE RANKINGS HAVE BEEN SYNCHRONIZED WITH THE REVERENT ROLE!**")
       .addFields(
         {
           name: "📊 SYNCHRONIZATION STATISTICS",
