@@ -75,7 +75,12 @@ export async function execute(
       },
       {
         name: "/unlink @user",
-        value: "SEVER THE BINDING BETWEEN A DISCORD SOUL AND A FANDOM ALTER",
+        value: "SEVER THE LINKING BETWEEN A DISCORD SOUL AND A FANDOM ALTER",
+        inline: false,
+      },
+      {
+        name: "/checklink @user",
+        value: "CHECK IF A USER IS LINKED TO FANDOM AND SYNC ROLES",
         inline: false,
       },
       {

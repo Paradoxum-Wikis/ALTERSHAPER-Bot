@@ -10,7 +10,7 @@ import { FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
 
 export const data = new SlashCommandBuilder()
   .setName("unlink")
-  .setDescription("SEVER THE BINDING BETWEEN DISCORD AND FANDOM SOULS")
+  .setDescription("SEVER THE LINK BETWEEN DISCORD AND FANDOM SOULS")
   .addUserOption((option) =>
     option
       .setName("user")
@@ -38,7 +38,7 @@ export async function execute(
     
     if (!existingLink) {
       await interaction.reply({
-        content: `**${targetUser.tag} HATH NO BINDING TO SEVER! THE SOUL IS ALREADY UNBOUND!**`,
+        content: `**${targetUser.tag} HATH NO LINK TO SEVER! THE SOUL IS ALREADY UNBOUND!**`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -46,12 +46,12 @@ export async function execute(
 
     const confirmationEmbed = new EmbedBuilder()
       .setColor("#FF0000")
-      .setTitle("⚠️ BINDING SEVERANCE")
-      .setDescription(`**THOU ART ABOUT TO SEVER THE BINDING BETWEEN DISCORD SOUL ${targetUser.tag} AND FANDOM ALTER: ${existingLink.fandomUsername}**`)
+      .setTitle("⚠️ LINKING SEVERANCE")
+      .setDescription(`**THOU ART ABOUT TO SEVER THE LINK BETWEEN DISCORD SOUL ${targetUser.tag} AND FANDOM ALTER: ${existingLink.fandomUsername}**`)
       .addFields(
         {
           name: "🔒 PERMANENT ACTION",
-          value: "**THIS SEVERANCE IS IRREVERSIBLE! THE USER MUST RE-LINK MANUALLY TO RESTORE THE BINDING!**",
+          value: "**THIS SEVERANCE IS IRREVERSIBLE! THE USER MUST RE-LINK MANUALLY TO RESTORE THE LINK!**",
           inline: false,
         },
         {
@@ -106,8 +106,8 @@ export async function execute(
 
         const successEmbed = new EmbedBuilder()
           .setColor("#FF0000")
-          .setTitle("💔 BINDING SEVERED!")
-          .setDescription(`**THE BINDING BETWEEN ${targetUser.tag} AND FANDOM ALTER "${existingLink.fandomUsername}" HATH BEEN SEVERED!**`)
+          .setTitle("💔 LINKING SEVERED!")
+          .setDescription(`**THE LINK BETWEEN ${targetUser.tag} AND FANDOM ALTER "${existingLink.fandomUsername}" HATH BEEN SEVERED!**`)
           .addFields(
             {
               name: "EXECUTOR OF SEVERANCE",
@@ -115,7 +115,7 @@ export async function execute(
               inline: true,
             },
             {
-              name: "SEVERED BINDING",
+              name: "SEVERED LINKING",
               value: `Discord: ${targetUser.tag}\nFandom: ${existingLink.fandomUsername}`,
               inline: true,
             },
@@ -131,7 +131,7 @@ export async function execute(
 
         try {
           await targetUser.send(
-            `**THY BINDING HATH BEEN SEVERED!\n\nThy connection to the Fandom alter "${existingLink.fandomUsername}" has been severed by ${executor.user.tag}.\n\nTo restore thy binding, thou must use the /link command again and verify thy identity anew.**`
+            `**THY LINK HATH BEEN SEVERED!\n\nThy connection to the Fandom alter "${existingLink.fandomUsername}" has been severed by ${executor.user.tag}.\n\nTo restore thy link, thou must use the /link command again and verify thy identity anew.**`
           );
         } catch (dmError) {
           console.log("Failed to send DM to unlinked user:", dmError);

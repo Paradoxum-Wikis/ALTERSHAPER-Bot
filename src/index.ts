@@ -98,7 +98,7 @@ class AltershaperBot {
         return;
       }
 
-      if (interaction.commandName === "help" || interaction.commandName === "info" || interaction.commandName === "sins" || interaction.commandName === "link") {
+      if (interaction.commandName === "help" || interaction.commandName === "info" || interaction.commandName === "sins" || interaction.commandName === "link" || interaction.commandName === "checklink") {
         await command.execute(interaction);
       } else {
         await command.execute(interaction, member);

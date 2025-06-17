@@ -216,17 +216,17 @@ export async function execute(
 
     const confirmationEmbed = new EmbedBuilder()
       .setColor("#FF6B35")
-      .setTitle("⚠️ BINDING CONFIRMATION")
-      .setDescription(`**THOU ART ABOUT TO BIND THY DISCORD SOUL WITH THE FANDOM ALTER: ${canonicalFandomUsername}**`)
+      .setTitle("⚠️ LINKING CONFIRMATION")
+      .setDescription(`**THOU ART ABOUT TO LINK THY DISCORD SOUL WITH THE FANDOM ALTER: ${canonicalFandomUsername}**`)
       .addFields(
         {
           name: "🔒 PERMANENT ACTION",
-          value: "**THIS BINDING IS ETERNAL AND CANNOT BE UNDONE WITHOUT ALTERMINISTRATOR INTERVENTION!**",
+          value: "**THIS LINKING IS ETERNAL AND CANNOT BE UNDONE WITHOUT ALTERMINISTRATOR INTERVENTION!**",
           inline: false,
         },
         {
           name: "📜 CONFIRMATION REQUIRED",
-          value: "React with 🖋️ within 1 minute to proceed with the binding ritual.",
+          value: "React with 🖋️ within 1 minute to proceed with the linking ritual.",
           inline: false,
         }
       )
@@ -265,7 +265,7 @@ export async function execute(
         const successEmbed = new EmbedBuilder()
           .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
           .setTitle("🔗 ALTER AND SOUL INTERTWINED!")
-          .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely binded with thy Fandom alter: ${canonicalFandomUsername}!**`);
+          .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely linked with thy Fandom alter: ${canonicalFandomUsername}!**`);
         
         if (grantedRoleNames.length > 0) {
             const roleMentions = grantedRoleNames.map(name => {
@@ -290,11 +290,11 @@ export async function execute(
     } catch (error) {
       const timeoutEmbed = new EmbedBuilder()
         .setColor("#FF0000")
-        .setTitle("⏰ BINDING RITUAL EXPIRED")
-        .setDescription("**THE BINDING CONFIRMATION HAS EXPIRED. NO CHANGES WERE MADE.**")
+        .setTitle("⏰ LINKING RITUAL EXPIRED")
+        .setDescription("**THE LINKING CONFIRMATION HAS EXPIRED. NO CHANGES WERE MADE.**")
         .addFields({
           name: "TO RETRY",
-          value: "Run the `/link` command again to restart the binding process.",
+          value: "Run the `/link` command again to restart the linking process.",
           inline: false,
         });
 
@@ -307,7 +307,7 @@ export async function execute(
   } catch (error) {
     console.error("Error during Fandom account linking:", error);
     await interaction.reply({
-      content: "**A DISTURBANCE IN THE SCARED HALLS! The binding ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
+      content: "**A DISTURBANCE IN THE SCARED HALLS! The linking ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
       flags: MessageFlags.Ephemeral,
     });
   }

@@ -21,11 +21,12 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   "archives": PermissionLevel.MODERATOR,
   "sins": PermissionLevel.MODERATOR,
   
-  // Basic 
+  // Basic
   "help": PermissionLevel.BASIC,
   "info": PermissionLevel.BASIC,
   "avatar": PermissionLevel.BASIC,
   "link": PermissionLevel.BASIC,
+  "checklink": PermissionLevel.BASIC,
 };
 
 // permission levels
