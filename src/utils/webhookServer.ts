@@ -5,7 +5,7 @@ export class WebhookServer {
   private app: express.Application;
   private server: any;
   private readonly BOT_WEBHOOK_SECRET = process.env.BOT_WEBHOOK_SECRET;
-  private readonly PORT = process.env.WEBHOOK_PORT || 3000;
+  private readonly PORT = Number(process.env.WEBHOOK_PORT);
   private readonly PUBLIC_URL = process.env.PUBLIC_URL || "https://services-t7ru.alwaysdata.net";
   private guild: any;
 
@@ -31,14 +31,9 @@ export class WebhookServer {
           return res.status(401).json({ error: "Unauthorized" });
         }
 
-        console.log(
-          "📊 Recap update notification received, syncing top contributors...",
-        );
+        console.log("📊 Recap update notification received, syncing top contributors...");
 
-        // Sync all top contributor roles
-        const result = await TopContributorsManager.syncAllTopContributorRoles(
-          this.guild,
-        );
+        const result = await TopContributorsManager.syncAllTopContributorRoles(this.guild);
 
         console.log(`✅ Top contributor sync complete:`, {
           processed: result.processed,
@@ -79,8 +74,8 @@ export class WebhookServer {
   }
 
   public start(): void {
-    this.server = this.app.listen(this.PORT, () => {
-      console.log(`🌐 Webhook server listening on port ${this.PORT}`);
+    this.server = this.app.listen(this.PORT, "::", () => {
+      console.log(`🌐 Webhook server listening on port ${this.PORT} (IPv6)`);
       console.log(`📡 Health check: ${this.PUBLIC_URL}/health`);
       console.log(`🔔 Webhook endpoint: ${this.PUBLIC_URL}/webhook/recap-update`);
     });
