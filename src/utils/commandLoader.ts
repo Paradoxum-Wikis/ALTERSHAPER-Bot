@@ -13,6 +13,7 @@ import * as info from "../commands/info.js";
 import * as link from "../commands/link.js";
 import * as unlink from "../commands/removelink.js";
 import * as checklink from "../commands/checklink.js";
+import * as synctop5 from "../commands/synctop5.js";
 
 export interface Command {
   data: any;
@@ -37,6 +38,7 @@ export function loadCommands(): Collection<string, Command> {
     link,
     unlink,
     checklink,
+    synctop5,
   ];
 
   for (const command of commandModules) {

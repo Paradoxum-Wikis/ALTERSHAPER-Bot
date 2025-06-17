@@ -117,7 +117,7 @@ export async function execute(
   if (!interaction.guild) {
     await interaction.reply({
       content:
-        "**THIS SACRED RITE CAN ONLY BE PERFORMED WITHIN THE GUILD HALLS!**",
+        "**THIS SACRED RITE CAN ONLY BE PERFORMED WITHIN THE SACRED HALLS!**",
       flags: MessageFlags.Ephemeral,
     });
     return;
