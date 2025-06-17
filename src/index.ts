@@ -20,6 +20,7 @@ import {
 } from "discord.js";
 import { loadCommands, Command } from "./utils/commandLoader.js";
 import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
+import { RolePermissions } from "./utils/rolePermissions.js";
 
 class AltershaperBot {
   private client: Client;
@@ -88,7 +89,16 @@ class AltershaperBot {
     if (!member) return;
 
     try {
-      if (interaction.commandName === "help") {
+      if (!RolePermissions.hasCommandPermission(member, interaction.commandName)) {
+        const errorMessage = RolePermissions.getPermissionErrorMessage(interaction.commandName);
+        await interaction.reply({ 
+          content: errorMessage, 
+          flags: MessageFlags.Ephemeral 
+        });
+        return;
+      }
+
+      if (interaction.commandName === "help" || interaction.commandName === "info" || interaction.commandName === "sins" || interaction.commandName === "link") {
         await command.execute(interaction);
       } else {
         await command.execute(interaction, member);

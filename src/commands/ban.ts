@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
@@ -28,14 +27,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.BanMembers)) {
-    await interaction.reply({
-      content:
-        "**THOU EGO LACKEST THE SUPREME AUTHORITY TO DELIVER ETERNAL JUDGEMENT!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   const targetUser = interaction.options.getUser("user")!;
   const reason =
@@ -59,7 +50,7 @@ export async function execute(
       console.log("Failed to send DM to banned user:", dmError);
     }
 
-    await interaction.guild?.members.ban(targetUser, { reason });
+    await interaction.guild.members.ban(targetUser, { reason });
 
     const entryId = await ModerationLogger.addEntry({
       type: "ban",

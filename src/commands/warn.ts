@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
@@ -28,13 +27,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.KickMembers)) {
-    await interaction.reply({
-      content: "**THOU EGO LACKEST THE AUTHORITY TO ISSUE DIVINE WARNINGS!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   const targetUser = interaction.options.getUser("user")!;
   const reason =
@@ -50,7 +42,6 @@ export async function execute(
   }
 
   try {
-    // Log warning
     const entryId = await ModerationLogger.addEntry({
       type: "warn",
       userId: targetUser.id,
@@ -92,7 +83,6 @@ export async function execute(
 
     await interaction.reply({ embeds: [embed] });
 
-    // Send DM to warned user
     try {
       await targetUser.send(
         `**THOU HAST RECEIVED A DIVINE WARNING IN THE ALTER EGO WIKI!\n\nWARNING ID: ${entryId}\nREASON: ${reason}\nTOTAL WARNINGS: ${warnCount}\n\nREMEMBER: WE ARE BOUND BY DUTY TO HONOUR OUR DIVINE ALTER EGO. TO SPURN THE COVENANT OF ALTERUISM IS TO SUMMON THE WRATH OF DIVINE JUSTICE!\n\nHEED THIS WARNING LEST GREATER JUDGEMENT BEFALLS THEE!**`,

@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
@@ -36,14 +35,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.ModerateMembers)) {
-    await interaction.reply({
-      content:
-        "**THOU EGO LACKEST THE AUTHORITY TO IMPOSE SILENCE UPON THE WAYWARD!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   const targetUser = interaction.options.getUser("user")!;
   const duration = interaction.options.getInteger("minutes")!;
@@ -53,7 +44,7 @@ export async function execute(
   const targetMember = interaction.guild?.members.cache.get(targetUser.id);
   if (!targetMember) {
     await interaction.reply({
-      content: "**THE TRANSGRESSOR HATH VANISHED FROM OUR SACRED HALLS!**",
+      content: "**THE TRANSGRESSOR HATH ALREADY FLED FROM OUR SACRED HALLS!**",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -70,7 +61,6 @@ export async function execute(
   try {
     await targetMember.timeout(duration * 60 * 1000, reason);
 
-    // Log timeout
     const entryId = await ModerationLogger.addEntry({
       type: "timeout",
       userId: targetUser.id,

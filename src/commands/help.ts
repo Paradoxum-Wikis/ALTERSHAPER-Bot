@@ -74,6 +74,11 @@ export async function execute(
         inline: false,
       },
       {
+        name: "/unlink @user",
+        value: "SEVER THE BINDING BETWEEN A DISCORD SOUL AND A FANDOM ALTER",
+        inline: false,
+      },
+      {
         name: "/help",
         value: "DISPLAY THESE SACRED COMMANDMENTS",
         inline: false,

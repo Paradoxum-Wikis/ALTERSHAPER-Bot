@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   ChannelType,
   TextChannel,
   MessageFlags,
@@ -27,14 +26,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.ManageMessages)) {
-    await interaction.reply({
-      content:
-        "**THOU EGO LACKEST THE AUTHORITY TO PURGE THE SACRED RECORDS!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   const amount = interaction.options.getInteger("amount")!;
 

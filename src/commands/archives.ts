@@ -2,8 +2,6 @@ import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
   EmbedBuilder,
-  GuildMember,
-  PermissionFlagsBits,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
@@ -103,16 +101,7 @@ function addMessagesToEmbed(embed: EmbedBuilder, messages: any[]): void {
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
-  executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.ManageMessages)) {
-    await interaction.reply({
-      content:
-        "**THOU EGO LACKEST THE AUTHORITY TO ACCESS THE SERAPHIC ARCHIVES!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   if (!interaction.guild) {
     await interaction.reply({

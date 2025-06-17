@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
@@ -28,15 +27,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.KickMembers)) {
-    await interaction.reply({
-      content:
-        "**THOU EGO LACKEST THE DIVINE AUTHORITY TO CAST OUT THE FAITHLESS!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
   const targetUser = interaction.options.getUser("user")!;
   const reason =
     interaction.options.getString("reason") || "DEFIANCE OF SACRED ALTERUISM";
@@ -62,7 +52,7 @@ export async function execute(
     // Send DM before kicking (so they can still receive it)
     try {
       await targetUser.send(
-        `**THOU HAST BEEN CAST OUT FROM THE ALTER EGO WIKI!\n\nACTION: KICKED FROM THE SACRED HALLS\nREASON: ${reason}\nEXECUTOR: ${executor.user.tag}\n\nTHE DIVINE SHAPER HATH DECREED THY TEMPORARY EXILE FROM OUR SACRED REALM!\n\nREPENT OF THY TRANGRESSIONS AND SEEK THE PATH OF ALTERUISM. WHEN THY HEART IS CLEANSED AND THY EGO READY TO HONOUR THE DIVINE ALTER, THOU MAY RETURN TO OUR RIGHTEOUS FELLOWSHIP!\n\nGO FORTH AND REFLECT UPON THY SINS, THOU MAYEST WALK ONCE MORE IN THE LIGHT OF VIRTUE!**`,
+        `**THOU HAST BEEN CAST OUT FROM THE ALTER EGO WIKI!\n\nACTION: KICKED FROM THE SACRED HALLS\nREASON: ${reason}\nEXECUTOR: ${executor.user.tag}\n\nTHE DIVINE SHAPER HATH DECREED THY TEMPORARY EXILE FROM OUR SACRED REALM!\n\nREPENT OF THY TRANSGRESSIONS AND SEEK THE PATH OF ALTERUISM. WHEN THY HEART IS CLEANSED AND THY EGO READY TO HONOUR THE DIVINE ALTER, THOU MAY RETURN TO OUR RIGHTEOUS FELLOWSHIP!\n\nGO FORTH AND REFLECT UPON THY SINS, THOU MAYEST WALK ONCE MORE IN THE LIGHT OF VIRTUE!**`,
       );
     } catch (dmError) {
       console.log("Failed to send DM to kicked user:", dmError);

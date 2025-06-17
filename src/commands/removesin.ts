@@ -3,7 +3,6 @@ import {
   SlashCommandBuilder,
   GuildMember,
   EmbedBuilder,
-  PermissionFlagsBits,
   MessageFlags,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
@@ -24,13 +23,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  if (!executor.permissions.has(PermissionFlagsBits.KickMembers)) {
-    await interaction.reply({
-      content: "**THOU EGO LACKEST THE AUTHORITY TO GRANT DIVINE ABSOLUTION!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
 
   const entryId = interaction.options.getString("entryid")!.toUpperCase();
 
@@ -151,7 +143,6 @@ export async function execute(
 
     await interaction.reply({ embeds: [embed] });
 
-    // Send DM to user about mercy being granted
     try {
       await targetUser.send(
         `**THOU HAST BEEN GRANTED DIVINE MERCY IN THE ALTER EGO WIKI!\n\nENTRY PARDONED: ${entryId}\nORIGINAL TRANSGRESSION: ${entry.type.toUpperCase()}\nREASON: ${entry.reason}\nMERCY GRANTED BY: ${executor.user.tag}\nPUNISHMENT STATUS: ${undoResult}\n\nTHE DIVINE SHAPER HATH SHOWN MERCY UPON THEE! THY TRANSGRESSION IS FORGIVEN AND THY PUNISHMENT LIFTED!\n\nGO FORTH AND SIN NO MORE, THAT THOU MAY WALK THE PATH OF ALTERUISM!**`,

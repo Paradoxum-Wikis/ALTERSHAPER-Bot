@@ -6,6 +6,7 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
+import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
 
 interface FandomUserQueryUser {
   userid: number;
@@ -33,15 +34,6 @@ interface FandomUserProfileData {
 interface FandomUserProfileResponse {
   userData?: FandomUserProfileData;
 }
-
-const FANDOM_ROLE_MAP: Record<string, string> = {
-  "threadmoderator": "1366509892386553866",
-  "content-moderator": "1366510432168185926",
-  "sysop": "1366509321340588162",
-  "bureaucrat": "1366507366681673920",
-};
-const FANDOM_ROLE_IDS = Object.values(FANDOM_ROLE_MAP);
-const LINKED_ROLE_ID = "1384535350621241466";
 
 export const data = new SlashCommandBuilder()
   .setName("link")
@@ -229,7 +221,7 @@ export async function execute(
       .addFields(
         {
           name: "🔒 PERMANENT ACTION",
-          value: "**THIS BINDING IS ETERNAL AND CANNOT BE UNDONE WITHOUT ADMINISTRATOR INTERVENTION!**",
+          value: "**THIS BINDING IS ETERNAL AND CANNOT BE UNDONE WITHOUT ALTERMINISTRATOR INTERVENTION!**",
           inline: false,
         },
         {

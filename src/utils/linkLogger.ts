@@ -90,4 +90,17 @@ export class LinkLogger {
     const link = await this.getLinkByFandomId(fandomUserId);
     return !!link;
   }
+
+  public static async removeLink(discordUserId: string): Promise<boolean> {
+    const links = await this.readLinks();
+    const initialLength = links.length;
+    const filteredLinks = links.filter(link => link.discordUserId !== discordUserId);
+    
+    if (filteredLinks.length === initialLength) {
+      return false;
+    }
+    
+    await this.writeLinks(filteredLinks);
+    return true;
+  }
 }

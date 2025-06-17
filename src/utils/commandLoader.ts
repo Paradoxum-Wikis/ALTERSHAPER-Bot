@@ -11,6 +11,7 @@ import * as help from "../commands/help.js";
 import * as avatar from "../commands/avatar.js";
 import * as info from "../commands/info.js";
 import * as link from "../commands/link.js";
+import * as unlink from "../commands/removelink.js";
 
 export interface Command {
   data: any;
@@ -33,6 +34,7 @@ export function loadCommands(): Collection<string, Command> {
     avatar,
     info,
     link,
+    unlink,
   ];
 
   for (const command of commandModules) {
