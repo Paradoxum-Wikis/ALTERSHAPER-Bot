@@ -43,7 +43,6 @@ const FANDOM_ROLE_MAP: Record<string, string> = {
 const FANDOM_ROLE_IDS = Object.values(FANDOM_ROLE_MAP);
 const LINKED_ROLE_ID = "1384535350621241466";
 
-
 export const data = new SlashCommandBuilder()
   .setName("link")
   .setDescription("LINK THY DISCORD ACCOUNT WITH THY FANDOM ACCOUNT")
@@ -105,7 +104,6 @@ async function manageFandomRoles(
   return { grantedRoleNames, failedRoleNames };
 }
 
-
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
@@ -163,11 +161,16 @@ export async function execute(
       
       const syncEmbed = new EmbedBuilder()
         .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
-        .setTitle("🔗 ALTERS SYNCHRONIZED!")
+        .setTitle("🔗 ALTER AND SOUL SYNCHRONIZED!")
         .setDescription(`**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES SYNCHRONIZED!**`);
       
       if (grantedRoleNames.length > 0) {
         const roleMentions = grantedRoleNames.map(name => {
+          const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
+          if (linkedRole && linkedRole.name === name) {
+              return `<@&${LINKED_ROLE_ID}>`;
+          }
+          
           const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
           return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
         }).join(", ");
@@ -219,33 +222,100 @@ export async function execute(
     return;
     }
 
-    const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
-    await LinkLogger.addLink(interaction.user.id, interaction.user.tag, canonicalFandomUsername, fandomUserId);
+    const confirmationEmbed = new EmbedBuilder()
+      .setColor("#FF6B35")
+      .setTitle("⚠️ BINDING CONFIRMATION")
+      .setDescription(`**THOU ART ABOUT TO BIND THY DISCORD SOUL WITH THE FANDOM ALTER: ${canonicalFandomUsername}**`)
+      .addFields(
+        {
+          name: "🔒 PERMANENT ACTION",
+          value: "**THIS BINDING IS ETERNAL AND CANNOT BE UNDONE WITHOUT ADMINISTRATOR INTERVENTION!**",
+          inline: false,
+        },
+        {
+          name: "📜 CONFIRMATION REQUIRED",
+          value: "React with 🖋️ within 1 minute to proceed with the binding ritual.",
+          inline: false,
+        }
+      )
+      .setFooter({ text: "This confirmation will expire in 60 seconds" })
+      .setTimestamp();
 
-    const successEmbed = new EmbedBuilder()
-      .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
-      .setTitle("🔗 ALTERS INTERTWINED!")
-      .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely linked with thy Fandom alter: ${canonicalFandomUsername}!**`);
-    
-    if (grantedRoleNames.length > 0) {
-        const roleMentions = grantedRoleNames.map(name => {
-            const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
-            return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
-        }).join(", ");
-      successEmbed.addFields({ name: "ROLES BESTOWED/CONFIRMED", value: roleMentions });
-    } else {
-      successEmbed.addFields({ name: "ROLES STATUS", value: "No specific Fandom staff roles were applicable at this time." });
-    }
-    if (failedRoleNames.length > 0) {
-        successEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.`});
+    const confirmationMessage = await interaction.reply({ 
+      embeds: [confirmationEmbed], 
+      flags: MessageFlags.Ephemeral 
+    });
+
+    const message = await confirmationMessage.fetch();
+
+    try {
+      await message.react("🖋️");
+    } catch (error) {
+      console.error("Failed to add reaction:", error);
     }
 
-    await interaction.reply({ embeds: [successEmbed] });
+    const filter = (reaction: any, user: any) => {
+      return reaction.emoji.name === "🖋️" && user.id === interaction.user.id;
+    };
+
+    try {
+      const collected = await message.awaitReactions({
+        filter,
+        max: 1,
+        time: 60000,
+        errors: ['time']
+      });
+
+      if (collected.size > 0) {
+        const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
+        await LinkLogger.addLink(interaction.user.id, interaction.user.tag, canonicalFandomUsername, fandomUserId);
+
+        const successEmbed = new EmbedBuilder()
+          .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
+          .setTitle("🔗 ALTER AND SOUL INTERTWINED!")
+          .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely binded with thy Fandom alter: ${canonicalFandomUsername}!**`);
+        
+        if (grantedRoleNames.length > 0) {
+            const roleMentions = grantedRoleNames.map(name => {
+                const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
+                if (linkedRole && linkedRole.name === name) {
+                    return `<@&${LINKED_ROLE_ID}>`;
+                }
+                
+                const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
+                return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
+            }).join(", ");
+          successEmbed.addFields({ name: "ROLES BESTOWED/CONFIRMED", value: roleMentions });
+        } else {
+          successEmbed.addFields({ name: "ROLES STATUS", value: "No specific Fandom staff roles were applicable at this time." });
+        }
+        if (failedRoleNames.length > 0) {
+            successEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.`});
+        }
+
+        await interaction.followUp({ embeds: [successEmbed] });
+      }
+    } catch (error) {
+      const timeoutEmbed = new EmbedBuilder()
+        .setColor("#FF0000")
+        .setTitle("⏰ BINDING RITUAL EXPIRED")
+        .setDescription("**THE BINDING CONFIRMATION HAS EXPIRED. NO CHANGES WERE MADE.**")
+        .addFields({
+          name: "TO RETRY",
+          value: "Run the `/link` command again to restart the binding process.",
+          inline: false,
+        });
+
+      await interaction.followUp({ 
+        embeds: [timeoutEmbed], 
+        flags: MessageFlags.Ephemeral 
+      });
+    }
 
   } catch (error) {
     console.error("Error during Fandom account linking:", error);
     await interaction.reply({
-      content: "**A DISTURBANCE IN THE SCARED HALLS! The linking ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
+      content: "**A DISTURBANCE IN THE SCARED HALLS! The binding ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
       flags: MessageFlags.Ephemeral,
     });
   }
