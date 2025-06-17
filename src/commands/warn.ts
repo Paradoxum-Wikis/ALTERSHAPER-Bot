@@ -27,7 +27,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-
   const targetUser = interaction.options.getUser("user")!;
   const reason =
     interaction.options.getString("reason") ||

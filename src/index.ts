@@ -62,17 +62,20 @@ class AltershaperBot {
           this.webhookServer = new WebhookServer(guild);
           this.webhookServer.start();
         } else {
-          console.warn('⚠️ Guild not found, webhook server not started');
+          console.warn("⚠️ Guild not found, webhook server not started");
         }
       } else {
-        console.warn('⚠️ GUILD_ID not set, webhook server not started');
+        console.warn("⚠️ GUILD_ID not set, webhook server not started");
       }
     });
 
     this.client.on("interactionCreate", this.handleInteraction.bind(this));
     this.client.on("guildMemberAdd", this.handleMemberJoin.bind(this));
     this.client.on("messageReactionAdd", this.handleReactionAdd.bind(this));
-    this.client.on("messageReactionRemove", this.handleReactionRemove.bind(this));
+    this.client.on(
+      "messageReactionRemove",
+      this.handleReactionRemove.bind(this),
+    );
   }
 
   private async registerSlashCommands(): Promise<void> {
@@ -104,16 +107,26 @@ class AltershaperBot {
     if (!member) return;
 
     try {
-      if (!RolePermissions.hasCommandPermission(member, interaction.commandName)) {
-        const errorMessage = RolePermissions.getPermissionErrorMessage(interaction.commandName);
-        await interaction.reply({ 
-          content: errorMessage, 
-          flags: MessageFlags.Ephemeral 
+      if (
+        !RolePermissions.hasCommandPermission(member, interaction.commandName)
+      ) {
+        const errorMessage = RolePermissions.getPermissionErrorMessage(
+          interaction.commandName,
+        );
+        await interaction.reply({
+          content: errorMessage,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
 
-      if (interaction.commandName === "help" || interaction.commandName === "info" || interaction.commandName === "sins" || interaction.commandName === "link" || interaction.commandName === "checklink") {
+      if (
+        interaction.commandName === "help" ||
+        interaction.commandName === "info" ||
+        interaction.commandName === "sins" ||
+        interaction.commandName === "link" ||
+        interaction.commandName === "checklink"
+      ) {
         await command.execute(interaction);
       } else {
         await command.execute(interaction, member);
@@ -125,9 +138,15 @@ class AltershaperBot {
         "**THE DIVINE POWERS HAVE ENCOUNTERED AN UNEXPECTED ERROR!**";
 
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+        await interaction.followUp({
+          content: errorMessage,
+          flags: MessageFlags.Ephemeral,
+        });
       } else {
-        await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+          content: errorMessage,
+          flags: MessageFlags.Ephemeral,
+        });
       }
     }
   }
@@ -224,15 +243,15 @@ class AltershaperBot {
     }
 
     // Graceful shutdown
-    process.on('SIGINT', () => {
-      console.log('🛑 Shutting down gracefully...');
+    process.on("SIGINT", () => {
+      console.log("🛑 Shutting down gracefully...");
       this.webhookServer?.stop();
       this.client.destroy();
       process.exit(0);
     });
 
-    process.on('SIGTERM', () => {
-      console.log('🛑 Shutting down gracefully...');
+    process.on("SIGTERM", () => {
+      console.log("🛑 Shutting down gracefully...");
       this.webhookServer?.stop();
       this.client.destroy();
       process.exit(0);

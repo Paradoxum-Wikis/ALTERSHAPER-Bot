@@ -26,7 +26,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-
   const amount = interaction.options.getInteger("amount")!;
 
   if (interaction.channel?.type !== ChannelType.GuildText) {

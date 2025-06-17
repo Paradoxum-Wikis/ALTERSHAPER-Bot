@@ -54,26 +54,33 @@ export class TopContributorsManager {
   private static async getNewestRecapFile(): Promise<string | null> {
     const currentYear = this.getCurrentYear();
     const apiUrl = `https://api.github.com/repos/Paradoxum-Wikis/AEWiki-Recap/contents/data/${currentYear}`;
-    
+
     try {
       const response = await fetch(apiUrl);
       if (!response.ok) {
-        console.log(`Failed to fetch directory contents for year ${currentYear}: ${response.status}`);
+        console.log(
+          `Failed to fetch directory contents for year ${currentYear}: ${response.status}`,
+        );
         return null;
       }
-      
-      const files = await response.json() as unknown as GitHubApiResponse[];
-      
+
+      const files = (await response.json()) as unknown as GitHubApiResponse[];
+
       // Filter for recap files and sort by filename (which contains date)
       const recapFiles = files
-        .filter(file => file.type === 'file' && file.name.startsWith('recap-') && file.name.endsWith('.json'))
+        .filter(
+          (file) =>
+            file.type === "file" &&
+            file.name.startsWith("recap-") &&
+            file.name.endsWith(".json"),
+        )
         .sort((a, b) => b.name.localeCompare(a.name));
-      
+
       if (recapFiles.length === 0) {
         console.log(`No recap files found for year ${currentYear}`);
         return null;
       }
-      
+
       // Return the newest file's name
       return recapFiles[0].name;
     } catch (error) {
@@ -88,26 +95,32 @@ export class TopContributorsManager {
   private static async fetchTopContributors(): Promise<ContributorData[]> {
     const currentYear = this.getCurrentYear();
     const newestFile = await this.getNewestRecapFile();
-    
+
     if (!newestFile) {
       console.log(`No recap files found for ${currentYear}`);
       return [];
     }
-    
+
     const url = `https://raw.githubusercontent.com/Paradoxum-Wikis/AEWiki-Recap/main/data/${currentYear}/${newestFile}`;
-    
+
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        console.log(`Failed to fetch top contributors data from ${newestFile}: ${response.status}`);
+        console.log(
+          `Failed to fetch top contributors data from ${newestFile}: ${response.status}`,
+        );
         return [];
       }
-      
-      const data = await response.json() as RecapData;
-      console.log(`Successfully loaded top contributors data from ${newestFile}`);
+
+      const data = (await response.json()) as RecapData;
+      console.log(
+        `Successfully loaded top contributors data from ${newestFile}`,
+      );
       return data.contributors || [];
     } catch (error) {
-      console.error(`Error fetching top contributors data from ${newestFile}: ${error}`);
+      console.error(
+        `Error fetching top contributors data from ${newestFile}: ${error}`,
+      );
       return [];
     }
   }
@@ -115,17 +128,19 @@ export class TopContributorsManager {
   /**
    * Check if a Fandom username is in the top 5 contributors
    */
-  public static async isTopContributor(fandomUsername: string): Promise<{ isTop5: boolean; rank?: number }> {
+  public static async isTopContributor(
+    fandomUsername: string,
+  ): Promise<{ isTop5: boolean; rank?: number }> {
     const contributors = await this.fetchTopContributors();
-    
-    const contributor = contributors.find(c => 
-      c.userName.toLowerCase() === fandomUsername.toLowerCase()
+
+    const contributor = contributors.find(
+      (c) => c.userName.toLowerCase() === fandomUsername.toLowerCase(),
     );
-    
+
     if (!contributor) {
       return { isTop5: false };
     }
-    
+
     const isTop5 = contributor.index <= 5;
     return { isTop5, rank: contributor.index };
   }
@@ -135,17 +150,17 @@ export class TopContributorsManager {
    */
   public static async manageTopContributorRole(
     member: GuildMember,
-    fandomUsername: string
-  ): Promise<{ 
-    roleGranted: boolean; 
-    roleRemoved: boolean; 
-    rank?: number; 
-    error?: string 
+    fandomUsername: string,
+  ): Promise<{
+    roleGranted: boolean;
+    roleRemoved: boolean;
+    rank?: number;
+    error?: string;
   }> {
     try {
       const { isTop5, rank } = await this.isTopContributor(fandomUsername);
       const hasRole = member.roles.cache.has(TOP_CONTRIBUTORS_ROLE_ID);
-      
+
       if (isTop5 && !hasRole) {
         // Grant role
         try {
@@ -153,7 +168,12 @@ export class TopContributorsManager {
           return { roleGranted: true, roleRemoved: false, rank };
         } catch (error) {
           console.error(`Failed to grant top contributor role: ${error}`);
-          return { roleGranted: false, roleRemoved: false, rank, error: "Failed to grant role" };
+          return {
+            roleGranted: false,
+            roleRemoved: false,
+            rank,
+            error: "Failed to grant role",
+          };
         }
       } else if (!isTop5 && hasRole) {
         // Remove role
@@ -162,7 +182,11 @@ export class TopContributorsManager {
           return { roleGranted: false, roleRemoved: true };
         } catch (error) {
           console.error(`Failed to remove top contributor role: ${error}`);
-          return { roleGranted: false, roleRemoved: false, error: "Failed to remove role" };
+          return {
+            roleGranted: false,
+            roleRemoved: false,
+            error: "Failed to remove role",
+          };
         }
       } else if (isTop5 && hasRole) {
         // Already has role and deserves it
@@ -173,7 +197,11 @@ export class TopContributorsManager {
       }
     } catch (error) {
       console.error(`Error managing top contributor role: ${error}`);
-      return { roleGranted: false, roleRemoved: false, error: "Failed to check contributor status" };
+      return {
+        roleGranted: false,
+        roleRemoved: false,
+        error: "Failed to check contributor status",
+      };
     }
   }
 
@@ -187,23 +215,27 @@ export class TopContributorsManager {
     errors: string[];
   }> {
     const contributors = await this.fetchTopContributors();
-    const top5Contributors = contributors.filter(c => c.index <= 5);
-    const top5Usernames = top5Contributors.map(c => c.userName.toLowerCase());
-    
+    const top5Contributors = contributors.filter((c) => c.index <= 5);
+    const top5Usernames = top5Contributors.map((c) => c.userName.toLowerCase());
+
     const allLinks = await LinkLogger.getAllLinks();
     const errors: string[] = [];
     let processed = 0;
     let rolesGranted = 0;
     let rolesRemoved = 0;
-    
+
     for (const link of allLinks) {
       try {
-        const member = await guild.members.fetch(link.discordUserId).catch(() => null);
+        const member = await guild.members
+          .fetch(link.discordUserId)
+          .catch(() => null);
         if (!member) continue;
-        
-        const shouldHaveRole = top5Usernames.includes(link.fandomUsername.toLowerCase());
+
+        const shouldHaveRole = top5Usernames.includes(
+          link.fandomUsername.toLowerCase(),
+        );
         const hasRole = member.roles.cache.has(TOP_CONTRIBUTORS_ROLE_ID);
-        
+
         if (shouldHaveRole && !hasRole) {
           await member.roles.add(TOP_CONTRIBUTORS_ROLE_ID);
           rolesGranted++;
@@ -211,13 +243,13 @@ export class TopContributorsManager {
           await member.roles.remove(TOP_CONTRIBUTORS_ROLE_ID);
           rolesRemoved++;
         }
-        
+
         processed++;
       } catch (error) {
         errors.push(`Failed to process ${link.fandomUsername}: ${error}`);
       }
     }
-    
+
     return { processed, rolesGranted, rolesRemoved, errors };
   }
 }

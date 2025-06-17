@@ -23,7 +23,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-
   const entryId = interaction.options.getString("entryid")!.toUpperCase();
 
   if (!interaction.guild) {

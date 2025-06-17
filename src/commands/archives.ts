@@ -39,7 +39,10 @@ function createEmbed(
   return embed;
 }
 
-function createButtons(currentPage: number, totalPages: number): ActionRowBuilder<ButtonBuilder> {
+function createButtons(
+  currentPage: number,
+  totalPages: number,
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId("first")
@@ -102,7 +105,6 @@ function addMessagesToEmbed(embed: EmbedBuilder, messages: any[]): void {
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
-
   if (!interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
@@ -147,11 +149,19 @@ export async function execute(
     const totalPages = Math.ceil(purgedMessages.length / messagesPerPage);
     let currentPage = 0;
 
-    const embed = createEmbed(purgedMessages, currentPage, totalPages, actionId);
+    const embed = createEmbed(
+      purgedMessages,
+      currentPage,
+      totalPages,
+      actionId,
+    );
     const startIndex = currentPage * messagesPerPage;
-    const endIndex = Math.min(startIndex + messagesPerPage, purgedMessages.length);
+    const endIndex = Math.min(
+      startIndex + messagesPerPage,
+      purgedMessages.length,
+    );
     const pageMessages = purgedMessages.slice(startIndex, endIndex);
-    
+
     addMessagesToEmbed(embed, pageMessages);
 
     const buttons = createButtons(currentPage, totalPages);
@@ -192,11 +202,22 @@ export async function execute(
             break;
         }
 
-        const newEmbed = createEmbed(purgedMessages, currentPage, totalPages, actionId);
+        const newEmbed = createEmbed(
+          purgedMessages,
+          currentPage,
+          totalPages,
+          actionId,
+        );
         const newStartIndex = currentPage * messagesPerPage;
-        const newEndIndex = Math.min(newStartIndex + messagesPerPage, purgedMessages.length);
-        const newPageMessages = purgedMessages.slice(newStartIndex, newEndIndex);
-        
+        const newEndIndex = Math.min(
+          newStartIndex + messagesPerPage,
+          purgedMessages.length,
+        );
+        const newPageMessages = purgedMessages.slice(
+          newStartIndex,
+          newEndIndex,
+        );
+
         addMessagesToEmbed(newEmbed, newPageMessages);
 
         const newButtons = createButtons(currentPage, totalPages);
@@ -208,28 +229,29 @@ export async function execute(
       });
 
       collector.on("end", async () => {
-        const disabledButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId("first")
-            .setLabel("⏮️ First")
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true),
-          new ButtonBuilder()
-            .setCustomId("previous")
-            .setLabel("◀️ Previous")
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true),
-          new ButtonBuilder()
-            .setCustomId("next")
-            .setLabel("Next ▶️")
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true),
-          new ButtonBuilder()
-            .setCustomId("last")
-            .setLabel("Last ⏭️")
-            .setStyle(ButtonStyle.Secondary)
-            .setDisabled(true),
-        );
+        const disabledButtons =
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId("first")
+              .setLabel("⏮️ First")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId("previous")
+              .setLabel("◀️ Previous")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId("next")
+              .setLabel("Next ▶️")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+            new ButtonBuilder()
+              .setCustomId("last")
+              .setLabel("Last ⏭️")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(true),
+          );
 
         response.edit({ components: [disabledButtons] }).catch(() => {});
       });

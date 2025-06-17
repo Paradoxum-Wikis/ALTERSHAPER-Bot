@@ -6,7 +6,12 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
-import { FANDOM_ROLE_MAP, FANDOM_ROLE_IDS, LINKED_ROLE_ID, TOP_CONTRIBUTORS_ROLE_ID } from "../utils/roleConstants.js";
+import {
+  FANDOM_ROLE_MAP,
+  FANDOM_ROLE_IDS,
+  LINKED_ROLE_ID,
+  TOP_CONTRIBUTORS_ROLE_ID,
+} from "../utils/roleConstants.js";
 import { TopContributorsManager } from "../utils/topContributors.js";
 
 interface FandomUserQueryUser {
@@ -39,8 +44,8 @@ export const data = new SlashCommandBuilder()
 async function manageFandomRoles(
   member: GuildMember,
   fandomGroups: string[],
-  interactionGuild: ChatInputCommandInteraction['guild'],
-): Promise<{ grantedRoleNames: string[], failedRoleNames: string[] }> {
+  interactionGuild: ChatInputCommandInteraction["guild"],
+): Promise<{ grantedRoleNames: string[]; failedRoleNames: string[] }> {
   const rolesToGrantIds: string[] = [];
   const grantedRoleNames: string[] = [];
   const failedRoleNames: string[] = [];
@@ -55,18 +60,21 @@ async function manageFandomRoles(
   }
 
   let rolesToRemoveFromMember: string[] = [];
-  member.roles.cache.forEach(role => {
-      if (FANDOM_ROLE_IDS.includes(role.id) && !rolesToGrantIds.includes(role.id)) {
-          rolesToRemoveFromMember.push(role.id);
-      }
+  member.roles.cache.forEach((role) => {
+    if (
+      FANDOM_ROLE_IDS.includes(role.id) &&
+      !rolesToGrantIds.includes(role.id)
+    ) {
+      rolesToRemoveFromMember.push(role.id);
+    }
   });
 
   if (rolesToRemoveFromMember.length > 0) {
-      try {
-          await member.roles.remove(rolesToRemoveFromMember);
-      } catch (e) {
-          console.error("Error removing roles from member:", e);
-      }
+    try {
+      await member.roles.remove(rolesToRemoveFromMember);
+    } catch (e) {
+      console.error("Error removing roles from member:", e);
+    }
   }
 
   for (const roleId of rolesToGrantIds) {
@@ -91,11 +99,14 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
   const targetUser = interaction.options.getUser("user", true);
-  const targetMember = await interaction.guild?.members.fetch(targetUser.id).catch(() => null);
+  const targetMember = await interaction.guild?.members
+    .fetch(targetUser.id)
+    .catch(() => null);
 
   if (!interaction.guild) {
     await interaction.reply({
-      content: "**THIS SACRED RITE CAN ONLY BE PERFORMED WITHIN THE GUILD HALLS!**",
+      content:
+        "**THIS SACRED RITE CAN ONLY BE PERFORMED WITHIN THE GUILD HALLS!**",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -111,19 +122,19 @@ export async function execute(
 
   try {
     const existingLink = await LinkLogger.getLinkByDiscordId(targetUser.id);
-    
+
     if (!existingLink) {
       const embed = new EmbedBuilder()
         .setColor("#808080")
         .setTitle("🔍 LINK STATUS CHECK")
-        .setDescription(`**${targetUser.tag} IS NOT BOUND TO ANY FANDOM ALTER!**`)
-        .addFields(
-          {
-            name: "STATUS",
-            value: "UNLINKED",
-            inline: true,
-          },
+        .setDescription(
+          `**${targetUser.tag} IS NOT BOUND TO ANY FANDOM ALTER!**`,
         )
+        .addFields({
+          name: "STATUS",
+          value: "UNLINKED",
+          inline: true,
+        })
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed] });
@@ -134,14 +145,21 @@ export async function execute(
     const userQueryResponse = await fetch(userQueryUrl);
 
     if (!userQueryResponse.ok) {
-      throw new Error(`MediaWiki API responded with status: ${userQueryResponse.status}`);
+      throw new Error(
+        `MediaWiki API responded with status: ${userQueryResponse.status}`,
+      );
     }
-    const userQueryData = (await userQueryResponse.json()) as FandomUserQueryResponse;
+    const userQueryData =
+      (await userQueryResponse.json()) as FandomUserQueryResponse;
 
     let fandomGroups: string[] = [];
     let fandomDataStatus = "ACTIVE";
 
-    if (!userQueryData.query || !userQueryData.query.users || userQueryData.query.users.length === 0) {
+    if (
+      !userQueryData.query ||
+      !userQueryData.query.users ||
+      userQueryData.query.users.length === 0
+    ) {
       fandomDataStatus = "FANDOM USER NOT FOUND";
     } else {
       const fandomUser = userQueryData.query.users[0];
@@ -158,19 +176,29 @@ export async function execute(
     let topContributorResult: any = { roleGranted: false, roleRemoved: false };
 
     if (fandomDataStatus === "ACTIVE") {
-      const roleResult = await manageFandomRoles(targetMember, fandomGroups, interaction.guild);
+      const roleResult = await manageFandomRoles(
+        targetMember,
+        fandomGroups,
+        interaction.guild,
+      );
       grantedRoleNames = roleResult.grantedRoleNames;
       failedRoleNames = roleResult.failedRoleNames;
-      
-      topContributorResult = await TopContributorsManager.manageTopContributorRole(targetMember, existingLink.fandomUsername);
-      
+
+      topContributorResult =
+        await TopContributorsManager.manageTopContributorRole(
+          targetMember,
+          existingLink.fandomUsername,
+        );
+
       rolesSynced = true;
     }
 
     const embed = new EmbedBuilder()
       .setColor(fandomDataStatus === "ACTIVE" ? "#00FF00" : "#FFA500")
       .setTitle("🔍 LINK STATUS CHECK & SYNC")
-      .setDescription(`**${targetUser.tag} IS BOUND TO FANDOM ALTER: ${existingLink.fandomUsername}**`)
+      .setDescription(
+        `**${targetUser.tag} IS BOUND TO FANDOM ALTER: ${existingLink.fandomUsername}**`,
+      )
       .addFields(
         {
           name: "DISCORD USER",
@@ -194,69 +222,96 @@ export async function execute(
         },
         {
           name: "ROLE SYNC",
-          value: rolesSynced ? "PERFORMED" : "SKIPPED (FANDOM DATA UNAVAILABLE)",
+          value: rolesSynced
+            ? "PERFORMED"
+            : "SKIPPED (FANDOM DATA UNAVAILABLE)",
           inline: true,
-        }
+        },
       );
 
     if (rolesSynced) {
       let allGrantedRoles = [...grantedRoleNames];
       if (topContributorResult.roleGranted) {
-        const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
+        const topRole = interaction.guild?.roles.cache.get(
+          TOP_CONTRIBUTORS_ROLE_ID,
+        );
         if (topRole) allGrantedRoles.push(topRole.name);
       }
-      
+
       if (allGrantedRoles.length > 0) {
-        const roleMentions = allGrantedRoles.map(name => {
-          const linkedRole = interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
-          if (linkedRole && linkedRole.name === name) {
+        const roleMentions = allGrantedRoles
+          .map((name) => {
+            const linkedRole =
+              interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
+            if (linkedRole && linkedRole.name === name) {
               return `<@&${LINKED_ROLE_ID}>`;
-          }
-          
-          const topRole = interaction.guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
-          if (topRole && topRole.name === name) {
+            }
+
+            const topRole = interaction.guild?.roles.cache.get(
+              TOP_CONTRIBUTORS_ROLE_ID,
+            );
+            if (topRole && topRole.name === name) {
               return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
-          }
-          
-          const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
-          return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
-        }).join(", ");
+            }
+
+            const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(
+              ([, id]) => interaction.guild?.roles.cache.get(id)?.name === name,
+            );
+            return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
+          })
+          .join(", ");
         embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
       } else {
-        embed.addFields({ name: "ROLES SYNCHRONIZED", value: "No Fandom specific roles were applicable or needed changes." });
+        embed.addFields({
+          name: "ROLES SYNCHRONIZED",
+          value: "No Fandom specific roles were applicable or needed changes.",
+        });
       }
 
       if (topContributorResult.rank) {
-        embed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: `**🏆 RANK #${topContributorResult.rank}** in current week's top contributors!` });
+        embed.addFields({
+          name: "TOP CONTRIBUTOR STATUS",
+          value: `**🏆 RANK #${topContributorResult.rank}** in current week's top contributors!`,
+        });
       } else if (topContributorResult.roleRemoved) {
-        embed.addFields({ name: "TOP CONTRIBUTOR STATUS", value: "No longer in top 5 contributors - role removed." });
+        embed.addFields({
+          name: "TOP CONTRIBUTOR STATUS",
+          value: "No longer in top 5 contributors - role removed.",
+        });
       }
 
       if (failedRoleNames.length > 0) {
-        embed.addFields({ name: "ROLE SYNC ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.` });
+        embed.addFields({
+          name: "ROLE SYNC ISSUES",
+          value: `Failed to grant: ${failedRoleNames.map((rName) => `\`${rName}\``).join(", ")}.`,
+        });
         embed.setColor("#FFA500");
       }
 
       if (fandomGroups.length > 0) {
-        embed.addFields({ name: "FANDOM GROUPS", value: fandomGroups.map(group => `\`${group}\``).join(", ") });
+        embed.addFields({
+          name: "FANDOM GROUPS",
+          value: fandomGroups.map((group) => `\`${group}\``).join(", "),
+        });
       }
     }
 
     if (fandomDataStatus !== "ACTIVE") {
-      embed.addFields({ 
-        name: "⚠️ WARNING", 
-        value: "The linked Fandom account could not be found. The user may need to re-link their account or the Fandom username may have changed." 
+      embed.addFields({
+        name: "⚠️ WARNING",
+        value:
+          "The linked Fandom account could not be found. The user may need to re-link their account or the Fandom username may have changed.",
       });
     }
 
     embed.setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
-
   } catch (error) {
     console.error("Error during link check:", error);
     await interaction.reply({
-      content: "**A DISTURBANCE IN THE SACRED HALLS! The link check ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
+      content:
+        "**A DISTURBANCE IN THE SACRED HALLS! The link check ritual failed. The oracles are perplexed. Try again later, or consult the high scribes.**",
       flags: MessageFlags.Ephemeral,
     });
   }

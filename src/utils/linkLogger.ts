@@ -31,7 +31,7 @@ export class LinkLogger {
       const data = await fs.readFile(this.LINK_FILE, "utf-8");
       return JSON.parse(data);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
         return [];
       }
       console.error("Error reading link file, returning empty array:", error);
@@ -52,7 +52,9 @@ export class LinkLogger {
   ): Promise<void> {
     const links = await this.readLinks();
     const existingLinkIndex = links.findIndex(
-      (link) => link.discordUserId === discordUserId || link.fandomUserId === fandomUserId
+      (link) =>
+        link.discordUserId === discordUserId ||
+        link.fandomUserId === fandomUserId,
     );
 
     const newLink: LinkedAccount = {
@@ -71,22 +73,30 @@ export class LinkLogger {
     await this.writeLinks(links);
   }
 
-  public static async getLinkByDiscordId(discordUserId: string): Promise<LinkedAccount | null> {
+  public static async getLinkByDiscordId(
+    discordUserId: string,
+  ): Promise<LinkedAccount | null> {
     const links = await this.readLinks();
     return links.find((link) => link.discordUserId === discordUserId) || null;
   }
 
-  public static async getLinkByFandomId(fandomUserId: number): Promise<LinkedAccount | null> {
+  public static async getLinkByFandomId(
+    fandomUserId: number,
+  ): Promise<LinkedAccount | null> {
     const links = await this.readLinks();
     return links.find((link) => link.fandomUserId === fandomUserId) || null;
   }
 
-  public static async isDiscordUserLinked(discordUserId: string): Promise<boolean> {
+  public static async isDiscordUserLinked(
+    discordUserId: string,
+  ): Promise<boolean> {
     const link = await this.getLinkByDiscordId(discordUserId);
     return !!link;
   }
 
-  public static async isFandomUserLinked(fandomUserId: number): Promise<boolean> {
+  public static async isFandomUserLinked(
+    fandomUserId: number,
+  ): Promise<boolean> {
     const link = await this.getLinkByFandomId(fandomUserId);
     return !!link;
   }
@@ -94,17 +104,19 @@ export class LinkLogger {
   public static async removeLink(discordUserId: string): Promise<boolean> {
     const links = await this.readLinks();
     const initialLength = links.length;
-    const filteredLinks = links.filter(link => link.discordUserId !== discordUserId);
-    
+    const filteredLinks = links.filter(
+      (link) => link.discordUserId !== discordUserId,
+    );
+
     if (filteredLinks.length === initialLength) {
       return false;
     }
-    
+
     await this.writeLinks(filteredLinks);
     return true;
   }
 
-  public static async getAllLinks(): Promise<LinkEntry[]> {
+  public static async getAllLinks(): Promise<LinkedAccount[]> {
     return await this.readLinks();
   }
 }

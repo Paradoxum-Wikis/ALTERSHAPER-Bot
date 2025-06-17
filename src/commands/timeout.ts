@@ -35,7 +35,6 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-
   const targetUser = interaction.options.getUser("user")!;
   const duration = interaction.options.getInteger("minutes")!;
   const reason =
