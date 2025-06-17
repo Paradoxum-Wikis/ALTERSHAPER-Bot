@@ -69,6 +69,11 @@ export async function execute(
         inline: false,
       },
       {
+        name: "/link [fandomusername]",
+        value: "LINK THY DISCORD SOUL WITH THY FANDOM ACCOUNT",
+        inline: false,
+      },
+      {
         name: "/help",
         value: "DISPLAY THESE SACRED COMMANDMENTS",
         inline: false,

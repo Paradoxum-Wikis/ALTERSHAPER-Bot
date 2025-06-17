@@ -10,6 +10,7 @@ import * as archives from "../commands/archives.js";
 import * as help from "../commands/help.js";
 import * as avatar from "../commands/avatar.js";
 import * as info from "../commands/info.js";
+import * as link from "../commands/link.js";
 
 export interface Command {
   data: any;
@@ -31,6 +32,7 @@ export function loadCommands(): Collection<string, Command> {
     help,
     avatar,
     info,
+    link,
   ];
 
   for (const command of commandModules) {
