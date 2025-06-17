@@ -45,7 +45,7 @@ jobs:
           target: "${{ secrets.DEPLOY_PATH }}/dist/"
           strip_components: 1
 
-      - name: Install dependencies
+      - name: Install dependencies on server
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.HOST }}
@@ -55,3 +55,7 @@ jobs:
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
             npm ci --production
+
+      - name: Restart ALTERSHAPER
+        run: |
+          curl -X POST -u "${{ secrets.API_KEY }}:" ${{ secrets.API_URL }}
