@@ -134,7 +134,7 @@ export class TopContributorsManager {
     const contributors = await this.fetchTopContributors();
 
     const contributor = contributors.find(
-      (c) => c.userName.toLowerCase() === fandomUsername.toLowerCase(),
+      (c) => c.userName === fandomUsername,
     );
 
     if (!contributor) {
@@ -216,7 +216,7 @@ export class TopContributorsManager {
   }> {
     const contributors = await this.fetchTopContributors();
     const top5Contributors = contributors.filter((c) => c.index <= 5);
-    const top5Usernames = top5Contributors.map((c) => c.userName.toLowerCase());
+    const top5Usernames = top5Contributors.map((c) => c.userName);
 
     const allLinks = await LinkLogger.getAllLinks();
     const errors: string[] = [];
@@ -232,7 +232,7 @@ export class TopContributorsManager {
         if (!member) continue;
 
         const shouldHaveRole = top5Usernames.includes(
-          link.fandomUsername.toLowerCase(),
+          link.fandomUsername,
         );
         const hasRole = member.roles.cache.has(TOP_CONTRIBUTORS_ROLE_ID);
 

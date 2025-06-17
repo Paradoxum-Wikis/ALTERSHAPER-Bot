@@ -8,11 +8,11 @@ import {
 
 export const data = new SlashCommandBuilder()
   .setName("avatar")
-  .setDescription("BEHOLD THE VISAGE OF A SOUL")
+  .setDescription("Behold the visage of a soul")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE SOUL WHOSE VISAGE THOU SEEKEST TO VIEW")
+      .setDescription("The soul whose visage thou seekest to view")
       .setRequired(false),
   );
 

@@ -43,11 +43,11 @@ interface FandomUserProfileResponse {
 
 export const data = new SlashCommandBuilder()
   .setName("link")
-  .setDescription("LINK THY DISCORD ACCOUNT WITH THY FANDOM ACCOUNT")
+  .setDescription("Link thy Discord soul with thy Fandom account")
   .addStringOption((option) =>
     option
       .setName("fandomusername")
-      .setDescription("THY USERNAME ON FANDOM")
+      .setDescription("Thy username on Fandom")
       .setRequired(true),
   );
 

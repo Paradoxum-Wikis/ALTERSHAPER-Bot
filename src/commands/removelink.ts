@@ -10,11 +10,11 @@ import { FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
 
 export const data = new SlashCommandBuilder()
   .setName("unlink")
-  .setDescription("SEVER THE LINK BETWEEN DISCORD AND FANDOM SOULS")
+  .setDescription("Sever the link between a Discord soul and a Fandom alter")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE DISCORD SOUL TO UNLINK FROM FANDOM")
+      .setDescription("The Discord soul to unlink from Fandom")
       .setRequired(true),
   );
 

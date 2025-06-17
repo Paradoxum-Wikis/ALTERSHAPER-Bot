@@ -151,7 +151,7 @@ class AltershaperBot {
         .setColor("#00FF00")
         .setTitle("🌟 A NEW SOUL ENTERS THE SACRED REALM")
         .setDescription(
-          `**Welcome to the Alterpedia Discord server, ${member.user.tag}!**\n\nThou hast entered the sacred halls of Alteruism!\nHere we honour our alter egos and embrace the righteous path!\n\nRead the sacred laws and contribute to our divine mission!\nKnow that defiance of Alteruism shall bring righteous correction!`,
+          `**Welcome to the ALTER EGO Wiki Discord server, ${member.user.tag}!**\n\nThou hast entered the sacred halls of Alteruism!\nHere we honour our alter egos and embrace the righteous path!\n\nRead the sacred laws and contribute to our divine mission!\nKnow that defiance of Alteruism shall bring righteous correction!`,
         )
         .setThumbnail(member.user.displayAvatarURL())
         .setFooter({

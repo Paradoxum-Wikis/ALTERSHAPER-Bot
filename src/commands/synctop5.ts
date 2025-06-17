@@ -10,7 +10,7 @@ import { RolePermissions } from "../utils/rolePermissions.js";
 
 export const data = new SlashCommandBuilder()
   .setName("synctop5")
-  .setDescription("SYNCHRONIZE THE TOP 5 CONTRIBUTORS ROLES WITH THE RANKINGS");
+  .setDescription("Synchronize the top 5 contributors roles with the rankings");
 
 export async function execute(
   interaction: ChatInputCommandInteraction,

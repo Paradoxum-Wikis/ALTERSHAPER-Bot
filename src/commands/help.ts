@@ -11,7 +11,7 @@ import {
 
 export const data = new SlashCommandBuilder()
   .setName("help")
-  .setDescription("Display these sacred commandments");
+  .setDescription("Display sacred instruments available to the faithful");
 
 interface CommandInfo {
   name: string;
@@ -95,7 +95,7 @@ const commands: CommandInfo[] = [
   },
   {
     name: "/help",
-    value: "Display these sacred commandments",
+    value: "Display these instruments",
     category: "basic",
   },
 ];
@@ -123,9 +123,9 @@ function createEmbed(categoryIndex: number): EmbedBuilder {
   
   const embed = new EmbedBuilder()
     .setColor("#00CED1")
-    .setTitle("📜 DIVINE COMMANDMENTS OF THE ALTERSHAPER")
+    .setTitle("📜 DIVINE INSTRUMENTS OF THE ALTERSHAPER")
     .setDescription(
-      `**These be the sacred commands!**\n\n*"I am the hand of judgement, and upon the faithless shall I deliver righteous correction."*\n\n${category.description}\n\n**Page ${categoryIndex + 1} of ${categories.length}**`
+      `**These be the sacred instruments!**\n\n*"I am the hand of judgement, and upon the faithless shall I deliver righteous correction."*\n\n${category.description}\n\n**Page ${categoryIndex + 1} of ${categories.length}**`
     )
     .addFields({
       name: category.name,
