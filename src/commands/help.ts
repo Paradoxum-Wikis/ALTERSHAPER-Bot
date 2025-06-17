@@ -84,6 +84,11 @@ export async function execute(
         inline: false,
       },
       {
+        name: "/synctop5",
+        value: "SYNCHRONIZE THE TOP 5 CONTRIBUTORS ROLES WITH THE RANKINGS",
+        inline: false,
+      },
+      {
         name: "/help",
         value: "DISPLAY THESE SACRED COMMANDMENTS",
         inline: false,

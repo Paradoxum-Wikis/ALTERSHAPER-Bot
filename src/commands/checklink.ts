@@ -33,7 +33,7 @@ interface FandomUserQueryResponse {
 
 export const data = new SlashCommandBuilder()
   .setName("checklink")
-  .setDescription("CHECK IF A USER IS LINKED TO FANDOM AND SYNC THEIR ROLES")
+  .setDescription("CHECK IF A USER IS LINKED TO FANDOM AND SYNC ROLES")
   .addUserOption((option) =>
     option
       .setName("user")
@@ -300,7 +300,7 @@ export async function execute(
       embed.addFields({
         name: "⚠️ WARNING",
         value:
-          "The linked Fandom account could not be found. The user may need to re-link their account or the Fandom username may have changed.",
+          "The linked Fandom account could not be found.",
       });
     }
 
