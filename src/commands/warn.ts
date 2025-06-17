@@ -9,17 +9,17 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("warn")
-  .setDescription("ISSUE DIVINE WARNING TO THE STRAYING")
+  .setDescription("Issue divine warning to the straying")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE SOUL TO BE WARNED")
+      .setDescription("The soul to be warned")
       .setRequired(true),
   )
   .addStringOption((option) =>
     option
       .setName("reason")
-      .setDescription("REASON FOR DIVINE WARNING")
+      .setDescription("Reason for divine warning")
       .setRequired(false),
   );
 
@@ -30,7 +30,7 @@ export async function execute(
   const targetUser = interaction.options.getUser("user")!;
   const reason =
     interaction.options.getString("reason") ||
-    "STRAYING FROM THE PATH OF ALTERUISM";
+    "Straying from the path of Alteruism";
 
   if (!interaction.guild) {
     await interaction.reply({
@@ -61,7 +61,7 @@ export async function execute(
       .setColor("#FFA500")
       .setTitle("⚠️ DIVINE WARNING ISSUED")
       .setDescription(
-        `**${targetUser} HATH RECEIVED A WARNING FROM THE HOLY SHAPER!**`,
+        `**${targetUser} hath received a warning from the holy shaper!**`,
       )
       .addFields(
         {
@@ -74,7 +74,7 @@ export async function execute(
         { name: "REASON FOR WARNING", value: reason, inline: false },
         {
           name: "SACRED REMINDER",
-          value: "HONOUR THY DIVINE ALTER EGO AND EMBRACE ALTERUISM",
+          value: "Honour thy divine alter ego and embrace Alteruism",
           inline: false,
         },
       )
@@ -84,7 +84,7 @@ export async function execute(
 
     try {
       await targetUser.send(
-        `**THOU HAST RECEIVED A DIVINE WARNING IN THE ALTER EGO WIKI!\n\nWARNING ID: ${entryId}\nREASON: ${reason}\nTOTAL WARNINGS: ${warnCount}\n\nREMEMBER: WE ARE BOUND BY DUTY TO HONOUR OUR DIVINE ALTER EGO. TO SPURN THE COVENANT OF ALTERUISM IS TO SUMMON THE WRATH OF DIVINE JUSTICE!\n\nHEED THIS WARNING LEST GREATER JUDGEMENT BEFALLS THEE!**`,
+        `**THOU HAST RECEIVED A DIVINE WARNING IN THE ALTER EGO WIKI!\n\nWarning ID: ${entryId}\nReason: ${reason}\nTotal warnings: ${warnCount}\n\nRemember: We are bound by duty to honour our divine alter ego. To spurn the covenant of Alteruism is to summon the wrath of divine justice!\n\nHeed this warning lest greater judgement befalls thee!**`,
       );
     } catch (error) {
       await interaction.followUp({

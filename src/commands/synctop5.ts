@@ -41,15 +41,15 @@ export async function execute(
     const embed = new EmbedBuilder()
       .setColor(result.errors.length > 0 ? "#FFA500" : "#00FF00")
       .setTitle("🏆 TOP CONTRIBUTORS SYNCHRONIZATION COMPLETE")
-      .setDescription("**THE RANKINGS HAVE BEEN SYNCHRONIZED WITH THE REVERENT ROLE!**")
+      .setDescription("**The rankings have been synchronized with the reverent roles!**")
       .addFields(
         {
           name: "📊 SYNCHRONIZATION STATISTICS",
           value: [
-            `**Linked Users Processed**: ${result.processed}`,
-            `**Roles Granted**: ${result.rolesGranted}`,
-            `**Roles Removed**: ${result.rolesRemoved}`,
-            `**Errors Encountered**: ${result.errors.length}`
+            `**Linked Users Processed:** ${result.processed}`,
+            `**Roles Granted:** ${result.rolesGranted}`,
+            `**Roles Removed:** ${result.rolesRemoved}`,
+            `**Errors Encountered:** ${result.errors.length}`
           ].join('\n'),
           inline: false,
         }

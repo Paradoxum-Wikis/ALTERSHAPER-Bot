@@ -12,11 +12,11 @@ import { MessageLogger } from "../utils/messageLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("archives")
-  .setDescription("VIEW THE SERAPHIC ARCHIVES OF PURGED MESSAGES")
+  .setDescription("View the seraphic archives of purged messages")
   .addStringOption((option) =>
     option
       .setName("actionid")
-      .setDescription("THE ACTION ID TO VIEW PURGED MESSAGES FROM")
+      .setDescription("The action ID to view purged messages from")
       .setRequired(false),
   );
 
@@ -31,8 +31,8 @@ function createEmbed(
     .setTitle("📚 SERAPHIC ARCHIVES OF PURGED MESSAGES")
     .setDescription(
       actionId
-        ? `**MESSAGES FROM ACTION ${actionId}**\n**TOTAL ARCHIVED: ${messages.length}**\n**PAGE ${currentPage + 1} OF ${totalPages}**`
-        : `**ALL ARCHIVED MESSAGES FOR THIS GUILD**\n**TOTAL ARCHIVED: ${messages.length}**\n**PAGE ${currentPage + 1} OF ${totalPages}**`,
+        ? `**Messages from action ${actionId}**\n**Total archived:** ${messages.length}\n**Page ${currentPage + 1} of ${totalPages}**`
+        : `**All archived messages for this guild**\n**Total archived:** ${messages.length}\n**Page ${currentPage + 1} of ${totalPages}**`,
     )
     .setTimestamp();
 
@@ -97,7 +97,7 @@ function addMessagesToEmbed(embed: EmbedBuilder, messages: any[]): void {
   embed.addFields({
     name: "SACRED REMINDER",
     value:
-      "THESE ARCHIVES ARE FOR MODERATION PURPOSES ONLY. PLEASE HANDLE WITH DISCRETION.",
+      "These archives are for moderation purposes only. Please handle with discretion.",
     inline: false,
   });
 }
@@ -124,7 +124,7 @@ export async function execute(
 
       if (purgedMessages.length === 0) {
         await interaction.reply({
-          content: `**NO ARCHIVED MESSAGES FOUND FOR ACTION ID: ${actionId}**`,
+          content: `**No archived messages found for action ID: ${actionId}**`,
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -136,7 +136,7 @@ export async function execute(
 
       if (purgedMessages.length === 0) {
         await interaction.reply({
-          content: "**NO ARCHIVED MESSAGES FOUND FOR THIS GUILD**",
+          content: "**No archived messages found for this guild**",
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -181,7 +181,7 @@ export async function execute(
       collector.on("collect", async (buttonInteraction) => {
         if (buttonInteraction.user.id !== interaction.user.id) {
           await buttonInteraction.reply({
-            content: "**THOU CANNOT CONTROL ANOTHER'S ARCHIVES!**",
+            content: "**Thou cannot control another's archives!**",
             flags: MessageFlags.Ephemeral,
           });
           return;
@@ -193,7 +193,7 @@ export async function execute(
             break;
           case "previous":
             currentPage = Math.max(0, currentPage - 1);
-            break;
+          break;
           case "next":
             currentPage = Math.min(totalPages - 1, currentPage + 1);
             break;

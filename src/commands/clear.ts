@@ -12,11 +12,11 @@ import { MessageLogger } from "../utils/messageLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("clear")
-  .setDescription("PURGE UP TO 100 MESSAGES FROM THE SACRED HALLS")
+  .setDescription("Purge up to 100 messages from the sacred halls")
   .addIntegerOption((option) =>
     option
       .setName("amount")
-      .setDescription("NUMBER OF MESSAGES TO PURGE (1-100)")
+      .setDescription("Number of messages to purge (1-100)")
       .setRequired(true)
       .setMinValue(1)
       .setMaxValue(100),
@@ -69,7 +69,7 @@ export async function execute(
       userTag: "N/A",
       moderatorId: executor.id,
       moderatorTag: executor.user.tag,
-      reason: `PURGED ${deleted.size} MESSAGES IN #${channel.name}`,
+      reason: `Purged ${deleted.size} messages in #${channel.name}`,
       guildId: interaction.guild.id,
       messageCount: deleted.size,
     });
@@ -78,7 +78,7 @@ export async function execute(
       .setColor("#4169E1")
       .setTitle("🧹 SACRED PURIFICATION COMPLETE")
       .setDescription(
-        `**${deleted.size} MESSAGES HAVE BEEN CLEANSED FROM THE SACRED HALLS!**`,
+        `**${deleted.size} messages have been cleansed from the sacred halls!**`,
       )
       .addFields(
         {
@@ -89,12 +89,12 @@ export async function execute(
         { name: "ACTION ID", value: `${tempActionId}`, inline: true },
         {
           name: "MESSAGES ARCHIVED",
-          value: `${messagesArray.length} MESSAGES SAVED TO THE SERAPHIC ARCHIVES`,
+          value: `${messagesArray.length} messages saved to the seraphic archives`,
           inline: true,
         },
         {
           name: "HOLY DECREE",
-          value: "THE HALLS OF ALTERUISM MUST REMAIN PURE",
+          value: "The halls of Alteruism must remain pure",
           inline: false,
         },
       )
@@ -105,7 +105,7 @@ export async function execute(
     console.error("Error during purge operation:", error);
     await interaction.reply({
       content:
-        "**THE DIVINE POWERS HAVE BEEN THWARTED! THE PURIFICATION FAILED!**",
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! The purification failed!**",
       flags: MessageFlags.Ephemeral,
     });
   }

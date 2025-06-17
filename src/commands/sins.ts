@@ -8,11 +8,11 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("sins")
-  .setDescription("BEHOLD THE RECORDS OF THE DAMNED")
+  .setDescription("Behold the records of the damned")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE SOUL WHOSE SINS THOU SEEKEST TO VIEW")
+      .setDescription("The soul whose sins thou seekest to view")
       .setRequired(false),
   );
 
@@ -42,7 +42,7 @@ export async function execute(
           .setColor("#00FF00")
           .setTitle("📋 RECORDS OF THE DAMNED")
           .setDescription(
-            `**${targetUser.tag} HATH A CLEAN SLATE!**\n\nNO SINS RECORDED IN THE RECORDS OF THE DAMNED.`,
+            `**${targetUser.tag} hath a clean slate!**\n\nNo sins recorded in the records of the damned.`,
           )
           .setThumbnail(targetUser.displayAvatarURL())
           .setTimestamp();
@@ -62,7 +62,7 @@ export async function execute(
         .setColor("#FFA500")
         .setTitle("📋 RECORDS OF THE DAMNED")
         .setDescription(
-          `**${targetUser.tag}'s SINS**\n**TOTAL ENTRIES: ${userEntries.length}**\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
+          `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
         )
         .setThumbnail(targetUser.displayAvatarURL())
         .setTimestamp();
@@ -104,7 +104,7 @@ export async function execute(
 
       if (userEntries.length > 10) {
         embed.setFooter({
-          text: `SHOWING LATEST 10 OF ${userEntries.length} ENTRIES`,
+          text: `Showing latest 10 of ${userEntries.length} entries`,
         });
       }
 
@@ -120,7 +120,7 @@ export async function execute(
           .setColor("#00FF00")
           .setTitle("📊 HOLY STATISTICS OF RIGHTEOUSNESS")
           .setDescription(
-            "**THE SACRED HALLS REMAIN PURE!**\n\nNO TRANSGRESSIONS HAVE BEEN RECORDED IN THIS REALM.",
+            "**The sacred halls remain pure!**\n\nNo transgressions have been recorded in this realm.",
           )
           .setTimestamp();
 
@@ -157,7 +157,7 @@ export async function execute(
         .setColor("#FF6B6B")
         .setTitle("📊 HOLY STATISTICS OF TRANSGRESSIONS")
         .setDescription(
-          `**TOTAL ACTIONS RECORDED: ${allEntries.length}**\n\n**⚠️ Warnings:** ${typeCounts.warn}\n**👢 Kicks:** ${typeCounts.kick}\n**🔨 Bans:** ${typeCounts.ban}\n**🤐 Timeouts:** ${typeCounts.timeout}\n**🧹 Purges:** ${typeCounts.clear}`,
+          `**Total actions recorded:** ${allEntries.length}\n\n**⚠️ Warnings:** ${typeCounts.warn}\n**👢 Kicks:** ${typeCounts.kick}\n**🔨 Bans:** ${typeCounts.ban}\n**🤐 Timeouts:** ${typeCounts.timeout}\n**🧹 Purges:** ${typeCounts.clear}`,
         )
         .setTimestamp();
 

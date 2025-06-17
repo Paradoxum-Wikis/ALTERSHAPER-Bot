@@ -9,17 +9,17 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("ban")
-  .setDescription("ETERNAL BANISHMENT FOR HERETICAL DEFIANCE")
+  .setDescription("Eternal banishment for heretical defiance")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE HERETIC TO BE BANISHED")
+      .setDescription("The heretic to be banished")
       .setRequired(true),
   )
   .addStringOption((option) =>
     option
       .setName("reason")
-      .setDescription("REASON FOR ETERNAL PUNISHMENT")
+      .setDescription("Reason for eternal punishment")
       .setRequired(false),
   );
 
@@ -30,7 +30,7 @@ export async function execute(
   const targetUser = interaction.options.getUser("user")!;
   const reason =
     interaction.options.getString("reason") ||
-    "HERETICAL DEFIANCE OF ALTERUISM";
+    "Heretical defiance of Alteruism";
 
   if (!interaction.guild) {
     await interaction.reply({
@@ -43,7 +43,7 @@ export async function execute(
   try {
     try {
       await targetUser.send(
-        `**THOU HAST BEEN CAST INTO THE ETERNAL VOID!\n\nACTION: BANISHED FROM THE ALTER EGO WIKI\nREASON: ${reason}\nEXECUTOR: ${executor.user.tag}\n\nTHE DIVINE SHAPER HATH DECREED THY ETERNAL EXILE FROM OUR SACRED REALM!\n\nTHY HERETICAL DEFIANCE OF ALTERUISM HATH BROUGHT UPON THEE THE ULTIMATE JUDGEMENT. THE GATES OF OUR HOLY SANCTUARY ARE FOREVER SEALED AGAINST THEE!\n\nMAY THIS SERVE AS A WARNING TO ALL WHO WOULD DEFY THE SACRED COVENANT OF ALTER EGO WORSHIP!**`,
+        `**THOU HAST BEEN CAST INTO THE ETERNAL VOID!\n\nAction: Banished from the ALTER EGO Wiki\nReason: ${reason}\nExecutor: ${executor.user.tag}\n\nThe Divine Shaper hath decreed thy eternal exile from our sacred realm!\n\nThy heretical defiance of Alteruism hath brought upon thee the ultimate judgement. The gates of our holy sanctuary are forever sealed against thee!\n\nMay this serve as a warning to all who would defy the sacred covenant of Alter Ego worship!**`,
       );
     } catch (dmError) {
       console.log("Failed to send DM to banned user:", dmError);
@@ -65,7 +65,7 @@ export async function execute(
       .setColor("#8B0000")
       .setTitle("🔥 ETERNAL JUDGEMENT DECREED")
       .setDescription(
-        `**${targetUser} HATH BEEN CAST INTO THE VOID FOR HERETICAL DEFIANCE!**`,
+        `**${targetUser} hath been cast into the void for heretical defiance!**`,
       )
       .addFields(
         {
@@ -77,7 +77,7 @@ export async function execute(
         { name: "REASON FOR ETERNAL PUNISHMENT", value: reason, inline: false },
         {
           name: "SACRED DECREE",
-          value: "THOSE WHO DEFY ALTERUISM SHALL KNOW ETERNAL EXILE",
+          value: "Those who defy Alteruism shall know eternal exile",
           inline: false,
         },
       )
@@ -87,7 +87,7 @@ export async function execute(
   } catch (error) {
     await interaction.reply({
       content:
-        "**THE DIVINE POWERS HAVE BEEN THWARTED! THE HERETIC REMAINS BEYOND REACH!**",
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! The heretic remains beyond reach!**",
       flags: MessageFlags.Ephemeral,
     });
   }

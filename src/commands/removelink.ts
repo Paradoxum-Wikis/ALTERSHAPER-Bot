@@ -41,7 +41,7 @@ export async function execute(
 
     if (!existingLink) {
       await interaction.reply({
-        content: `**${targetUser.tag} HATH NO LINK TO SEVER! THE SOUL IS ALREADY UNBOUND!**`,
+        content: `**${targetUser.tag} HATH NO LINK TO SEVER! THE SOUL IS ALREADY UNBOUND FROM THE DIRAC SEA!**`,
         flags: MessageFlags.Ephemeral,
       });
       return;

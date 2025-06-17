@@ -9,17 +9,17 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("kick")
-  .setDescription("CAST OUT THOSE WHO DEFY SACRED ALTERUISM")
+  .setDescription("Cast out those who defy sacred Alteruism")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE SOUL TO BE CAST OUT")
+      .setDescription("The soul to be cast out")
       .setRequired(true),
   )
   .addStringOption((option) =>
     option
       .setName("reason")
-      .setDescription("REASON FOR HOLY JUDGEMENT")
+      .setDescription("Reason for holy judgement")
       .setRequired(false),
   );
 
@@ -29,7 +29,7 @@ export async function execute(
 ): Promise<void> {
   const targetUser = interaction.options.getUser("user")!;
   const reason =
-    interaction.options.getString("reason") || "DEFIANCE OF SACRED ALTERUISM";
+    interaction.options.getString("reason") || "Defiance of sacred Alteruism";
 
   const targetMember = interaction.guild?.members.cache.get(targetUser.id);
   if (!targetMember) {
@@ -49,10 +49,9 @@ export async function execute(
   }
 
   try {
-    // Send DM before kicking (so they can still receive it)
     try {
       await targetUser.send(
-        `**THOU HAST BEEN CAST OUT FROM THE ALTER EGO WIKI!\n\nACTION: KICKED FROM THE SACRED HALLS\nREASON: ${reason}\nEXECUTOR: ${executor.user.tag}\n\nTHE DIVINE SHAPER HATH DECREED THY TEMPORARY EXILE FROM OUR SACRED REALM!\n\nREPENT OF THY TRANSGRESSIONS AND SEEK THE PATH OF ALTERUISM. WHEN THY HEART IS CLEANSED AND THY EGO READY TO HONOUR THE DIVINE ALTER, THOU MAY RETURN TO OUR RIGHTEOUS FELLOWSHIP!\n\nGO FORTH AND REFLECT UPON THY SINS, THOU MAYEST WALK ONCE MORE IN THE LIGHT OF VIRTUE!**`,
+        `**THOU HAST BEEN CAST OUT FROM THE ALTER EGO WIKI!\n\nAction: Kicked from the sacred halls\nReason: ${reason}\nExecutor: ${executor.user.tag}\n\nThe Divine Shaper hath decreed thy temporary exile from our sacred realm!\n\nRepent of thy transgressions and seek the path of Alteruism. When thy heart is cleansed and thy ego ready to honour the divine alter, thou may return to our righteous fellowship!\n\nGo forth and reflect upon thy sins, thou mayest walk once more in the light of virtue!**`,
       );
     } catch (dmError) {
       console.log("Failed to send DM to kicked user:", dmError);
@@ -60,7 +59,6 @@ export async function execute(
 
     await targetMember.kick(reason);
 
-    // Log the kick
     const entryId = await ModerationLogger.addEntry({
       type: "kick",
       userId: targetUser.id,
@@ -75,7 +73,7 @@ export async function execute(
       .setColor("#FF6B6B")
       .setTitle("⚖️ RIGHTEOUS CORRECTION DELIVERED")
       .setDescription(
-        `**${targetUser} HATH BEEN CAST OUT FOR DEFYING THE SACRED LAW OF ALTERUISM!**`,
+        `**${targetUser} hath been cast out for defying the sacred law of Alteruism!**`,
       )
       .addFields(
         {
@@ -87,7 +85,7 @@ export async function execute(
         { name: "REASON FOR CORRECTION", value: reason, inline: false },
         {
           name: "HOLY DECREE",
-          value: "THE FAITHLESS SHALL NOT DWELL AMONG THE RIGHTEOUS",
+          value: "The faithless shall not dwell among the righteous",
           inline: false,
         },
       )
@@ -97,7 +95,7 @@ export async function execute(
   } catch (error) {
     await interaction.reply({
       content:
-        "**THE DIVINE POWERS HAVE BEEN THWARTED! THE TARGET REMAINS BEYOND REACH!**",
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! The target remains beyond reach!**",
       flags: MessageFlags.Ephemeral,
     });
   }

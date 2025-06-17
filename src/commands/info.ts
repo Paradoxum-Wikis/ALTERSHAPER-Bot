@@ -17,12 +17,12 @@ interface GitHubCommit {
 
 export const data = new SlashCommandBuilder()
   .setName("info")
-  .setDescription("BEHOLD THE KNOWLEDGE OF THE ALTERSHAPER");
+  .setDescription("Behold the knowledge of the Altershaper");
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
-  let commitInfo = "**UNABLE TO RETRIEVE COMMIT DATA**";
+  let commitInfo = "**Unable to retrieve commit data**";
 
   try {
     const response = await fetch(
@@ -44,12 +44,12 @@ export async function execute(
   const embed = new EmbedBuilder()
     .setColor("#9932CC")
     .setTitle("ℹ️ KNOWLEDGE OF THE ALTERSHAPER")
-    .setDescription("**BEHOLD THE DIVINE INFORMATION OF THY SACRED ENFORCER!**")
+    .setDescription("**Behold the divine information of thy sacred enforcer!**")
     .addFields(
       {
         name: "📚 DOCUMENTATION",
         value:
-          "[ALTER EGO Wiki Help Page](https://alter-ego.fandom.com/wiki/Help:ALTERSHAPER)",
+          "[Alterpedia Help Page](https://alter-ego.fandom.com/wiki/Help:ALTERSHAPER)",
         inline: false,
       },
       {
@@ -70,7 +70,7 @@ export async function execute(
       },
     )
     .setFooter({
-      text: "THE ALTERSHAPER STANDS ETERNAL, GUARDIAN OF ALTERUISM AND ENFORCER OF RIGHTEOUS ORDER!",
+      text: "The Altershaper stands eternal, guardian of Alteruism and enforcer of righteous order!",
     })
     .setTimestamp();
 

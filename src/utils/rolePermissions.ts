@@ -99,11 +99,11 @@ export class RolePermissions {
 
     switch (requiredLevel) {
       case PermissionLevel.MODERATOR:
-        return "**THY EGO LACKEST THE DIVINE AUTHORITY TO PERFORM THIS SACRED DUTY! ONLY MODERATORS AND ABOVE MAY WIELD THIS POWER!**";
+        return "**THY EGO LACKEST THE DIVINE AUTHORITY TO PERFORM THIS SACRED DUTY!** Only moderators and above may wield this power.";
       case PermissionLevel.ADMIN:
-        return "**THY EGO LACKEST THE SUPREME DIVINE AUTHORITY! ONLY ALTERMINISTRATORS AND ABOVE MAY PERFORM THIS MOST SACRED RITUAL!**";
+        return "**THY EGO LACKEST THE SUPREME DIVINE AUTHORITY!** Only administrators and above may perform this most sacred ritual.";
       default:
-        return "**THY EGO LACKEST THE REQUIRED AUTHORITY TO PERFORM THIS ACTION!**";
+        return "**Thy ego lackest the required authority to perform this action.**";
     }
   }
 }

@@ -9,17 +9,17 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("timeout")
-  .setDescription("IMPOSE SILENCE UPON THE WAYWARD")
+  .setDescription("Impose silence upon the wayward")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE TRANSGRESSOR TO BE SILENCED")
+      .setDescription("The transgressor to be silenced")
       .setRequired(true),
   )
   .addIntegerOption((option) =>
     option
       .setName("minutes")
-      .setDescription("DURATION OF SILENCE IN MINUTES")
+      .setDescription("Duration of silence in minutes")
       .setRequired(true)
       .setMinValue(1)
       .setMaxValue(40320),
@@ -27,7 +27,7 @@ export const data = new SlashCommandBuilder()
   .addStringOption((option) =>
     option
       .setName("reason")
-      .setDescription("REASON FOR SILENCE")
+      .setDescription("Reason for silence")
       .setRequired(false),
   );
 
@@ -38,7 +38,7 @@ export async function execute(
   const targetUser = interaction.options.getUser("user")!;
   const duration = interaction.options.getInteger("minutes")!;
   const reason =
-    interaction.options.getString("reason") || "VIOLATION OF SACRED ALTERUISM";
+    interaction.options.getString("reason") || "Violation of sacred Alteruism";
 
   const targetMember = interaction.guild?.members.cache.get(targetUser.id);
   if (!targetMember) {
@@ -75,7 +75,7 @@ export async function execute(
       .setColor("#FFD700")
       .setTitle("🤐 DIVINE SILENCE IMPOSED")
       .setDescription(
-        `**${targetUser} HATH BEEN SILENCED FOR TRANSGRESSING AGAINST ALTERUISM!**`,
+        `**${targetUser} hath been silenced for transgressing against Alteruism!**`,
       )
       .addFields(
         {
@@ -86,13 +86,13 @@ export async function execute(
         { name: "ACTION ID", value: `${entryId}`, inline: true },
         {
           name: "DURATION OF REFLECTION",
-          value: `${duration} MINUTES`,
+          value: `${duration} minutes`,
           inline: true,
         },
         { name: "REASON FOR SILENCE", value: reason, inline: false },
         {
           name: "DIVINE WISDOM",
-          value: "IN SILENCE, THE WAYWARD MAY FIND THE PATH TO ALTERUISM",
+          value: "In silence, the wayward may find the path to Alteruism",
           inline: false,
         },
       )
@@ -102,7 +102,7 @@ export async function execute(
   } catch (error) {
     await interaction.reply({
       content:
-        "**THE DIVINE POWERS HAVE BEEN THWARTED! THE TRANSGRESSOR REMAINS BEYOND REACH!**",
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! The transgressor remains beyond reach!**",
       flags: MessageFlags.Ephemeral,
     });
   }

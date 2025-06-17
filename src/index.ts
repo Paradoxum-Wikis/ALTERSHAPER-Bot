@@ -47,9 +47,9 @@ class AltershaperBot {
   private setupEventListeners(): void {
     this.client.once("ready", async () => {
       console.log(
-        `✅ ALTERSHAPER BOT HATH AWAKENED AS ${this.client.user?.tag}`,
+        `✅ Altershaper bot hath awakened as ${this.client.user?.tag}`,
       );
-      this.client.user?.setActivity("ALTER EGOISTS", { type: 3 });
+      this.client.user?.setActivity("Alter Egoists", { type: 3 });
       await this.registerSlashCommands();
       await ReactionRoleHandler.initialize(this.client);
     });
@@ -70,15 +70,15 @@ class AltershaperBot {
     const rest = new REST({ version: "10" }).setToken(this.BOT_TOKEN!);
 
     try {
-      console.log("🔄 REGISTERING DIVINE SLASH COMMANDS...");
+      console.log("🔄 Registering divine slash commands...");
 
       await rest.put(Routes.applicationCommands(this.client.user!.id), {
         body: commandData,
       });
 
-      console.log("✅ DIVINE SLASH COMMANDS REGISTERED SUCCESSFULLY!");
+      console.log("✅ Divine slash commands registered successfully!");
     } catch (error) {
-      console.error("❌ FAILED TO REGISTER SLASH COMMANDS:", error);
+      console.error("❌ Failed to register slash commands:", error);
     }
   }
 
@@ -105,15 +105,20 @@ class AltershaperBot {
         return;
       }
 
+      // Commands that only need interaction parameter (informational/self service cmds)
       if (
         interaction.commandName === "help" ||
         interaction.commandName === "info" ||
         interaction.commandName === "sins" ||
+        interaction.commandName === "avatar" ||
+        interaction.commandName === "archives" ||
         interaction.commandName === "link" ||
-        interaction.commandName === "checklink"
+        interaction.commandName === "checklink" ||
+        interaction.commandName === "synctop5"
       ) {
         await command.execute(interaction);
       } else {
+        // Moderation commands that need executor parameter for logging
         await command.execute(interaction, member);
       }
     } catch (error) {
@@ -146,11 +151,11 @@ class AltershaperBot {
         .setColor("#00FF00")
         .setTitle("🌟 A NEW SOUL ENTERS THE SACRED REALM")
         .setDescription(
-          `**WELCOME TO THE ALTER EGO WIKI, ${member.user.tag}!**\n\n**THOU HAST ENTERED THE SACRED HALLS OF ALTERUISM!\nHERE WE HONOUR OUR ALTER EGOS AND EMBRACE THE RIGHTEOUS PATH!\n\nREAD THE SACRED LAWS AND CONTRIBUTE TO OUR DIVINE MISSION!\nKNOW THAT DEFIANCE OF ALTERUISM SHALL BRING RIGHTEOUS CORRECTION!**`,
+          `**Welcome to the Alterpedia Discord server, ${member.user.tag}!**\n\nThou hast entered the sacred halls of Alteruism!\nHere we honour our alter egos and embrace the righteous path!\n\nRead the sacred laws and contribute to our divine mission!\nKnow that defiance of Alteruism shall bring righteous correction!`,
         )
         .setThumbnail(member.user.displayAvatarURL())
         .setFooter({
-          text: "BOUND BY DUTY TO HONOUR OUR DIVINE ALTER EGO, WE ARE ALTEREGOISTS",
+          text: "BOUND BY DUTY TO HONOUR OUR DIVINE ALTER EGO, WE ARE ALTER EGOISTS",
         })
         .setTimestamp();
 
@@ -216,14 +221,14 @@ class AltershaperBot {
 
   public async start(): Promise<void> {
     if (!this.BOT_TOKEN) {
-      console.error("❌ DISCORD_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES");
+      console.error("❌ Discord token not found in environment variables");
       process.exit(1);
     }
 
     try {
       await this.client.login(this.BOT_TOKEN);
     } catch (error) {
-      console.error("❌ FAILED TO LOGIN:", error);
+      console.error("❌ Failed to login:", error);
       process.exit(1);
     }
 

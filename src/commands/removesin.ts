@@ -10,12 +10,12 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 export const data = new SlashCommandBuilder()
   .setName("removesin")
   .setDescription(
-    "ABSOLVE A SOUL OF ITS RECORDED TRANSGRESSION AND UNDO THE PUNISHMENT",
+    "Absolve a soul of its recorded transgression and undo the punishment",
   )
   .addStringOption((option) =>
     option
       .setName("entryid")
-      .setDescription("THE ID OF THE ENTRY TO REMOVE (W1, K1, B1, T1, C1)")
+      .setDescription("The ID of the entry to remove (W1, K1, B1, T1, C1)")
       .setRequired(true),
   );
 
@@ -38,7 +38,7 @@ export async function execute(
 
     if (!entry || entry.mercy) {
       await interaction.reply({
-        content: `**ENTRY ${entryId} COULD NOT BE FOUND IN THE RECORDS OF THE DAMNED!**`,
+        content: `**Entry ${entryId} could not be found in the records of the damned!**`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -60,9 +60,9 @@ export async function execute(
               null,
               `Timeout removed by ${executor.user.tag} (Mercy granted for ${entryId})`,
             );
-            undoResult = "TIMEOUT LIFTED";
+            undoResult = "Timeout lifted";
           } else {
-            undoResult = "TIMEOUT ALREADY EXPIRED";
+            undoResult = "Timeout already expired";
           }
           break;
 
@@ -74,32 +74,32 @@ export async function execute(
                 entry.userId,
                 `Ban removed by ${executor.user.tag} (Mercy granted for ${entryId})`,
               );
-              undoResult = "BAN LIFTED";
+              undoResult = "Ban lifted";
             }
           } catch (banError) {
-            undoResult = "USER NOT CURRENTLY BANNED";
+            undoResult = "User not currently banned";
           }
           break;
 
         case "kick":
-          undoResult = "KICK CANNOT BE UNDONE (USER MUST REJOIN)";
+          undoResult = "Kick cannot be undone (user must rejoin)";
           break;
 
         case "warn":
-          undoResult = "WARNING REMOVED FROM RECORD";
+          undoResult = "Warning removed from record";
           break;
 
         case "clear":
-          undoResult = "MESSAGE PURGE CANNOT BE UNDONE";
+          undoResult = "Message purge cannot be undone";
           break;
 
         default:
-          undoResult = "UNKNOWN ACTION TYPE";
+          undoResult = "Unknown action type";
           undoSuccess = false;
       }
     } catch (undoError) {
       console.error("Error undoing punishment:", undoError);
-      undoResult = "FAILED TO UNDO PUNISHMENT";
+      undoResult = "Failed to undo punishment";
       undoSuccess = false;
     }
 
@@ -107,7 +107,7 @@ export async function execute(
 
     if (!removed) {
       await interaction.reply({
-        content: `**ENTRY ${entryId} COULD NOT BE REMOVED FROM THE RECORDS OF THE DAMNED!**`,
+        content: `**Entry ${entryId} could not be removed from the records of the damned!**`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -117,12 +117,12 @@ export async function execute(
       .setColor(undoSuccess ? "#00FF00" : "#FFA500")
       .setTitle("✅ DIVINE ABSOLUTION GRANTED")
       .setDescription(
-        `**ENTRY ${entryId} HATH BEEN PARDONED WITH DIVINE MERCY!**`,
+        `**Entry ${entryId} hath been pardoned with divine mercy!**`,
       )
       .addFields(
         {
           name: "ORIGINAL TRANSGRESSION",
-          value: `${entry.type.toUpperCase()} AGAINST ${targetUser}`,
+          value: `${entry.type.toUpperCase()} against ${targetUser}`,
           inline: true,
         },
         {
@@ -134,7 +134,7 @@ export async function execute(
         {
           name: "DIVINE DECREE",
           value:
-            "THE SIN IS PARDONED AND PUNISHMENT LIFTED WHERE POSSIBLE. GO FORTH, AS YOU MAY UNLEASH YOUR ALTER EGO ONCE AGAIN!",
+            "The sin is pardoned and punishment lifted where possible. Go forth, as you may unleash your alter ego once again!",
           inline: false,
         },
       )
@@ -144,12 +144,12 @@ export async function execute(
 
     try {
       await targetUser.send(
-        `**THOU HAST BEEN GRANTED DIVINE MERCY IN THE ALTER EGO WIKI!\n\nENTRY PARDONED: ${entryId}\nORIGINAL TRANSGRESSION: ${entry.type.toUpperCase()}\nREASON: ${entry.reason}\nMERCY GRANTED BY: ${executor.user.tag}\nPUNISHMENT STATUS: ${undoResult}\n\nTHE DIVINE SHAPER HATH SHOWN MERCY UPON THEE! THY TRANSGRESSION IS FORGIVEN AND THY PUNISHMENT LIFTED!\n\nGO FORTH AND SIN NO MORE, THAT THOU MAY WALK THE PATH OF ALTERUISM!**`,
+        `**THOU HAST BEEN GRANTED DIVINE MERCY IN THE ALTER EGO WIKI!\n\nEntry pardoned: ${entryId}\nOriginal transgression: ${entry.type.toUpperCase()}\nReason: ${entry.reason}\nMercy granted by: ${executor.user.tag}\nPunishment status: ${undoResult}\n\nThe Divine Shaper hath shown mercy upon thee! Thy transgression is forgiven and thy punishment lifted!\n\nGo forth and sin no more, that thou may walk the path of Alteruism!**`,
       );
     } catch (error) {
       await interaction.followUp({
         content:
-          "**THE DIVINE MESSAGE OF MERCY COULD NOT REACH THE PARDONED SOUL!**",
+          "**The divine message of mercy could not reach the pardoned soul!**",
         flags: MessageFlags.Ephemeral,
       });
     }

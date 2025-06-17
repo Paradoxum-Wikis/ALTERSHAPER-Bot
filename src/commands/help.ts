@@ -15,82 +15,82 @@ export async function execute(
     .setColor("#00CED1")
     .setTitle("📜 DIVINE COMMANDMENTS OF THE ALTERSHAPER")
     .setDescription(
-      '**THESE BE THE SACRED COMMANDS!**\n\n*"I AM THE HAND OF JUDGEMENT, AND UPON THE FAITHLESS SHALL I DELIVER RIGHTEOUS CORRECTION."*',
+      '**THESE BE THE SACRED COMMANDS!**\n\n*"I am the hand of judgement, and upon the faithless shall I deliver righteous correction."*',
     )
     .addFields(
       {
         name: "/kick @user [reason]",
-        value: "CAST OUT THOSE WHO DEFY SACRED ALTERUISM",
+        value: "Cast out those who defy sacred alteruism",
         inline: false,
       },
       {
         name: "/ban @user [reason]",
-        value: "ETERNAL BANISHMENT FOR HERETICAL DEFIANCE",
+        value: "Eternal banishment for heretical defiance",
         inline: false,
       },
       {
         name: "/timeout @user [minutes] [reason]",
-        value: "IMPOSE SILENCE UPON THE WAYWARD",
+        value: "Impose silence upon the wayward",
         inline: false,
       },
       {
         name: "/clear [amount]",
-        value: "PURGE UP TO 100 MESSAGES FROM THE SACRED HALLS",
+        value: "Purge up to 100 messages from the sacred halls",
         inline: false,
       },
       {
         name: "/warn @user [reason]",
-        value: "ISSUE DIVINE WARNING TO THE STRAYING",
+        value: "Issue divine warning to the straying",
         inline: false,
       },
       {
         name: "/sins [@user]",
-        value: "BEHOLD THE RECORDS OF THE DAMNED",
+        value: "Behold the records of the damned",
         inline: false,
       },
       {
         name: "/removesin [entryid]",
-        value: "ABSOLVE A SOUL AND UNDO ITS PUNISHMENT",
+        value: "Absolve a soul and undo its punishment",
         inline: false,
       },
       {
         name: "/archives [actionid]",
-        value: "VIEW THE SERAPHIC ARCHIVES OF PURGED MESSAGES",
+        value: "View the seraphic archives of purged messages",
         inline: false,
       },
       {
         name: "/avatar [@user]",
-        value: "BEHOLD THE DIVINE VISAGE OF A SOUL",
+        value: "Behold the divine visage of a soul",
         inline: false,
       },
       {
         name: "/info",
-        value: "BEHOLD THE KNOWLEDGE OF THE ALTERSHAPER",
+        value: "Behold the knowledge of the altersaper",
         inline: false,
       },
       {
         name: "/link [fandomusername]",
-        value: "LINK THY DISCORD SOUL WITH THY FANDOM ACCOUNT",
+        value: "Link thy Discord soul with thy Fandom account",
         inline: false,
       },
       {
         name: "/unlink @user",
-        value: "SEVER THE LINKING BETWEEN A DISCORD SOUL AND A FANDOM ALTER",
+        value: "Sever the linking between a Discord soul and a Fandom alter",
         inline: false,
       },
       {
         name: "/checklink @user",
-        value: "CHECK IF A USER IS LINKED TO FANDOM AND SYNC ROLES",
+        value: "Check if a user is linked to Fandom and sync roles",
         inline: false,
       },
       {
         name: "/synctop5",
-        value: "SYNCHRONIZE THE TOP 5 CONTRIBUTORS ROLES WITH THE RANKINGS",
+        value: "Synchronize the top 5 contributors roles with the rankings",
         inline: false,
       },
       {
         name: "/help",
-        value: "DISPLAY THESE SACRED COMMANDMENTS",
+        value: "Display these sacred commandments",
         inline: false,
       },
     )

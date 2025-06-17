@@ -287,7 +287,7 @@ export async function execute(
       discordUserIdentifierToCompare.toLowerCase()
     ) {
       await interaction.reply({
-        content: `**A MISMATCH IN THE ASTRAL STREAMS!**\nThe Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Update thy Fandom profile, then try again.`,
+        content: `**A MISMATCH IN THE DIRAC SEA!**\nThe Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Update thy Fandom profile, then try again.`,
         flags: MessageFlags.Ephemeral,
       });
       return;

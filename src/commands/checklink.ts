@@ -33,11 +33,11 @@ interface FandomUserQueryResponse {
 
 export const data = new SlashCommandBuilder()
   .setName("checklink")
-  .setDescription("CHECK IF A USER IS LINKED TO FANDOM AND SYNC ROLES")
+  .setDescription("Check if a user is linked to Fandom and sync roles")
   .addUserOption((option) =>
     option
       .setName("user")
-      .setDescription("THE DISCORD SOUL TO CHECK")
+      .setDescription("The Discord soul to check")
       .setRequired(true),
   );
 
@@ -128,11 +128,11 @@ export async function execute(
         .setColor("#808080")
         .setTitle("🔍 LINK STATUS CHECK")
         .setDescription(
-          `**${targetUser.tag} IS NOT BOUND TO ANY FANDOM ALTER!**`,
+          `**${targetUser.tag} is not bound to any Fandom alter!**`,
         )
         .addFields({
           name: "STATUS",
-          value: "UNLINKED",
+          value: "Unlinked",
           inline: true,
         })
         .setTimestamp();
@@ -153,18 +153,18 @@ export async function execute(
       (await userQueryResponse.json()) as FandomUserQueryResponse;
 
     let fandomGroups: string[] = [];
-    let fandomDataStatus = "ACTIVE";
+    let fandomDataStatus = "Active";
 
     if (
       !userQueryData.query ||
       !userQueryData.query.users ||
       userQueryData.query.users.length === 0
     ) {
-      fandomDataStatus = "FANDOM USER NOT FOUND";
+      fandomDataStatus = "Fandom user not found";
     } else {
       const fandomUser = userQueryData.query.users[0];
       if (fandomUser.missing !== undefined) {
-        fandomDataStatus = "FANDOM USER NOT FOUND";
+        fandomDataStatus = "Fandom user not found";
       } else {
         fandomGroups = fandomUser.groups || [];
       }
@@ -175,7 +175,7 @@ export async function execute(
     let failedRoleNames: string[] = [];
     let topContributorResult: any = { roleGranted: false, roleRemoved: false };
 
-    if (fandomDataStatus === "ACTIVE") {
+    if (fandomDataStatus === "Active") {
       const roleResult = await manageFandomRoles(
         targetMember,
         fandomGroups,
@@ -194,10 +194,10 @@ export async function execute(
     }
 
     const embed = new EmbedBuilder()
-      .setColor(fandomDataStatus === "ACTIVE" ? "#00FF00" : "#FFA500")
+      .setColor(fandomDataStatus === "Active" ? "#00FF00" : "#FFA500")
       .setTitle("🔍 LINK STATUS CHECK & SYNC")
       .setDescription(
-        `**${targetUser.tag} IS BOUND TO FANDOM ALTER: ${existingLink.fandomUsername}**`,
+        `**${targetUser.tag} is bound to Fandom alter: ${existingLink.fandomUsername}**`,
       )
       .addFields(
         {
@@ -223,8 +223,8 @@ export async function execute(
         {
           name: "ROLE SYNC",
           value: rolesSynced
-            ? "PERFORMED"
-            : "SKIPPED (FANDOM DATA UNAVAILABLE)",
+            ? "Performed"
+            : "Skipped (Fandom data unavailable)",
           inline: true,
         },
       );
@@ -271,7 +271,7 @@ export async function execute(
       if (topContributorResult.rank) {
         embed.addFields({
           name: "TOP CONTRIBUTOR STATUS",
-          value: `**🏆 RANK #${topContributorResult.rank}** in current week's top contributors!`,
+          value: `**🏆 Rank #${topContributorResult.rank}** in current week's top contributors!`,
         });
       } else if (topContributorResult.roleRemoved) {
         embed.addFields({
@@ -296,7 +296,7 @@ export async function execute(
       }
     }
 
-    if (fandomDataStatus !== "ACTIVE") {
+    if (fandomDataStatus !== "Active") {
       embed.addFields({
         name: "⚠️ WARNING",
         value:
