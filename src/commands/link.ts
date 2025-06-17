@@ -11,6 +11,10 @@ interface FandomUserQueryUser {
   userid: number;
   name: string;
   missing?: string;
+  groups?: string[];
+  editcount?: number;
+  registration?: string;
+  gender?: string;
 }
 
 interface FandomUserQueryResponse {
@@ -30,7 +34,15 @@ interface FandomUserProfileResponse {
   userData?: FandomUserProfileData;
 }
 
+const FANDOM_ROLE_MAP: Record<string, string> = {
+  "threadmoderator": "1366509892386553866",
+  "content-moderator": "1366510432168185926",
+  "sysop": "1366509321340588162",
+  "bureaucrat": "1366507366681673920",
+};
+const FANDOM_ROLE_IDS = Object.values(FANDOM_ROLE_MAP);
 const LINKED_ROLE_ID = "1384535350621241466";
+
 
 export const data = new SlashCommandBuilder()
   .setName("link")
@@ -42,11 +54,63 @@ export const data = new SlashCommandBuilder()
       .setRequired(true),
   );
 
+async function manageFandomRoles(
+  member: GuildMember,
+  fandomGroups: string[],
+  interactionGuild: ChatInputCommandInteraction['guild'],
+): Promise<{ grantedRoleNames: string[], failedRoleNames: string[] }> {
+  const rolesToGrantIds: string[] = [];
+  const grantedRoleNames: string[] = [];
+  const failedRoleNames: string[] = [];
+
+  rolesToGrantIds.push(LINKED_ROLE_ID);
+
+  for (const group of fandomGroups) {
+    const roleId = FANDOM_ROLE_MAP[group.toLowerCase()];
+    if (roleId) {
+      rolesToGrantIds.push(roleId);
+    }
+  }
+
+  let rolesToRemoveFromMember: string[] = [];
+  member.roles.cache.forEach(role => {
+      if (FANDOM_ROLE_IDS.includes(role.id) && !rolesToGrantIds.includes(role.id)) {
+          rolesToRemoveFromMember.push(role.id);
+      }
+  });
+
+  if (rolesToRemoveFromMember.length > 0) {
+      try {
+          await member.roles.remove(rolesToRemoveFromMember);
+      } catch (e) {
+          console.error("Error removing roles from member:", e);
+      }
+  }
+
+  for (const roleId of rolesToGrantIds) {
+    if (member.roles.cache.has(roleId)) {
+      const role = interactionGuild?.roles.cache.get(roleId);
+      if (role) grantedRoleNames.push(role.name);
+      continue;
+    }
+    try {
+      await member.roles.add(roleId);
+      const role = interactionGuild?.roles.cache.get(roleId);
+      if (role) grantedRoleNames.push(role.name);
+    } catch (error) {
+      const role = interactionGuild?.roles.cache.get(roleId);
+      if (role) failedRoleNames.push(role.name);
+    }
+  }
+  return { grantedRoleNames, failedRoleNames };
+}
+
+
 export async function execute(
   interaction: ChatInputCommandInteraction,
-  executor: GuildMember,
 ): Promise<void> {
   const fandomUsernameInput = interaction.options.getString("fandomusername", true);
+  const member = interaction.member as GuildMember;
 
   if (!interaction.guild) {
     await interaction.reply({
@@ -56,18 +120,8 @@ export async function execute(
     return;
   }
 
-  const existingLink = await LinkLogger.getLinkByDiscordId(interaction.user.id);
-  if (existingLink) {
-    await interaction.reply({
-      content: `**THY ALTER IS ALREADY BOUND! THOU ART LINKED WITH: ${existingLink.fandomUsername}.**`,
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
   try {
-    // Get Fandom user id
-    const userQueryUrl = `https://tds.fandom.com/api.php?action=query&format=json&list=users&ususers=${encodeURIComponent(fandomUsernameInput)}`;
+    const userQueryUrl = `https://alter-ego.fandom.com/api.php?action=query&format=json&list=users&ususers=${encodeURIComponent(fandomUsernameInput)}&usprop=groups%7Cgender%7Cregistration%7Ceditcount`;
     const userQueryResponse = await fetch(userQueryUrl);
 
     if (!userQueryResponse.ok) {
@@ -94,8 +148,43 @@ export async function execute(
     
     const fandomUserId = fandomUser.userid;
     const canonicalFandomUsername = fandomUser.name;
+    const fandomGroups = fandomUser.groups || [];
+
+    const existingLink = await LinkLogger.getLinkByDiscordId(interaction.user.id);
+    if (existingLink) {
+      if (existingLink.fandomUserId !== fandomUserId) {
+        await interaction.reply({
+          content: `**THY ALTER IS ALREADY BOUND TO A DIFFERENT FANDOM PRESENCE (${existingLink.fandomUsername})!**`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
+      
+      const syncEmbed = new EmbedBuilder()
+        .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
+        .setTitle("🔗 ALTERS SYNCHRONIZED!")
+        .setDescription(`**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES SYNCHRONIZED!**`);
+      
+      if (grantedRoleNames.length > 0) {
+        const roleMentions = grantedRoleNames.map(name => {
+          const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
+          return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
+        }).join(", ");
+        syncEmbed.addFields({ name: "ROLES ENSURED/GRANTED", value: roleMentions });
+      } else {
+        syncEmbed.addFields({ name: "ROLES STATUS", value: "No new Fandom specific roles were applicable or needed granting at this time." });
+      }
+      if (failedRoleNames.length > 0) {
+        syncEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.` });
+      }
+      
+      await interaction.reply({ embeds: [syncEmbed] });
+      return;
+    }
+
     const fandomAccountAlreadyLinked = await LinkLogger.getLinkByFandomId(fandomUserId);
-    if (fandomAccountAlreadyLinked && fandomAccountAlreadyLinked.discordUserId !== interaction.user.id) {
+    if (fandomAccountAlreadyLinked) {
         await interaction.reply({
         content: `**THE ALTER "${canonicalFandomUsername}" IS ALREADY BOUND TO ANOTHER DISCORD PRESENCE!**`,
         flags: MessageFlags.Ephemeral,
@@ -103,9 +192,7 @@ export async function execute(
         return;
     }
 
-
-    // Get user profile data
-    const userProfileUrl = `https://tds.fandom.com/wikia.php?controller=UserProfile&method=getUserData&format=json&userId=${fandomUserId}`;
+    const userProfileUrl = `https://alter-ego.fandom.com/wikia.php?controller=UserProfile&method=getUserData&format=json&userId=${fandomUserId}`;
     const userProfileResponse = await fetch(userProfileUrl);
 
     if (!userProfileResponse.ok) {
@@ -121,11 +208,10 @@ export async function execute(
       return;
     }
 
-    // Verification
     const fandomDiscordHandle = userProfileData.userData.discordHandle;
     const discordUserIdentifierToCompare = interaction.user.username;
 
-    if (fandomDiscordHandle !== discordUserIdentifierToCompare) {
+    if (fandomDiscordHandle.toLowerCase() !== discordUserIdentifierToCompare.toLowerCase()) {
     await interaction.reply({
         content: `**A MISMATCH IN THE ASTRAL STREAMS!**\nThe Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Update thy Fandom profile, then try again.`,
         flags: MessageFlags.Ephemeral,
@@ -133,28 +219,26 @@ export async function execute(
     return;
     }
 
-    // Grant role and log
-    const member = interaction.member as GuildMember;
-    try {
-      await member.roles.add(LINKED_ROLE_ID);
-    } catch (roleError) {
-      console.error(`Failed to grant role ${LINKED_ROLE_ID} to ${interaction.user.tag}:`, roleError);
-      await interaction.reply({
-        content: "**A CELESTIAL SNAG! Thy Fandom account is verified, but the sacred role could not be bestowed. Alert the scribes!**",
-        flags: MessageFlags.Ephemeral,
-      });
-      await LinkLogger.addLink(interaction.user.id, interaction.user.tag, canonicalFandomUsername, fandomUserId);
-      return;
-    }
-
+    const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(member, fandomGroups, interaction.guild);
     await LinkLogger.addLink(interaction.user.id, interaction.user.tag, canonicalFandomUsername, fandomUserId);
 
     const successEmbed = new EmbedBuilder()
-      .setColor("#00FF00")
+      .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
       .setTitle("🔗 ALTERS INTERTWINED!")
-      .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely linked with thy Fandom alter: ${canonicalFandomUsername}!**`)
-      .addFields({ name: "ROLE GRANTED", value: `<@&${LINKED_ROLE_ID}> bestowed upon thee!` })
-      .setTimestamp();
+      .setDescription(`**PRAISE BE! Thy Discord presence, ${interaction.user.tag}, is now divinely linked with thy Fandom alter: ${canonicalFandomUsername}!**`);
+    
+    if (grantedRoleNames.length > 0) {
+        const roleMentions = grantedRoleNames.map(name => {
+            const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(([, id]) => interaction.guild?.roles.cache.get(id)?.name === name);
+            return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
+        }).join(", ");
+      successEmbed.addFields({ name: "ROLES BESTOWED/CONFIRMED", value: roleMentions });
+    } else {
+      successEmbed.addFields({ name: "ROLES STATUS", value: "No specific Fandom staff roles were applicable at this time." });
+    }
+    if (failedRoleNames.length > 0) {
+        successEmbed.addFields({ name: "ROLE GRANTING ISSUES", value: `Failed to grant: ${failedRoleNames.map(rName => `\`${rName}\``).join(", ")}.`});
+    }
 
     await interaction.reply({ embeds: [successEmbed] });
 
