@@ -242,13 +242,7 @@ export async function execute(
             .setDisabled(true),
         );
 
-        try {
-          await response.edit({
-            components: [disabledButtons],
-          });
-        } catch (error) {
-          // Ignore errors if message was already deleted
-        }
+        response.edit({ components: [disabledButtons] }).catch(() => {});
       });
     }
   } catch (error) {
