@@ -313,11 +313,11 @@ export async function execute(
         {
           name: "📜 CONFIRMATION REQUIRED",
           value:
-            "Click the button below to proceed with the linking ritual.",
+            "Make certain this is thy true will. Shouldst thou wish to proceed, click the button below to commence the linking ritual. The oracles shall commune with the Dirac sea and bind thee to thine alter.",
           inline: false,
         },
       )
-      .setFooter({ text: `This confirmation will expire in 1 minute` })
+      .setFooter({ text: `This confirmation will expire in 60 seconds` })
       .setTimestamp();
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
