@@ -33,7 +33,7 @@ const commands: CommandInfo[] = [
   },
   {
     name: "/unlink @user",
-    value: "Sever the linking between a Discord soul and a Fandom alter",
+    value: "Sever the link between a Discord soul and a Fandom alter",
     category: "admin",
   },
   // Moderator

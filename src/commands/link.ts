@@ -170,7 +170,7 @@ export async function execute(
     if (existingLink) {
       if (existingLink.fandomUserId !== fandomUserId) {
         await interaction.reply({
-          content: `**THY ALTER IS ALREADY BOUND TO A DIFFERENT FANDOM PRESENCE (${existingLink.fandomUsername})!**`,
+          content: `**THY SOUL AND PRESENCE IS ALREADY BOUND TO A DIFFERENT FANDOM ALTER (${existingLink.fandomUsername})!**`,
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -191,7 +191,7 @@ export async function execute(
         .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
         .setTitle("🔗 ALTER AND SOUL SYNCHRONIZED!")
         .setDescription(
-          `**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES SYNCHRONIZED!**`,
+          `**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES HAVE BEEN SYNCHRONIZED!**`,
         );
 
       let allGrantedRoles = [...grantedRoleNames];
@@ -410,7 +410,7 @@ export async function execute(
             })
             .join(", ");
           successEmbed.addFields({
-            name: "ROLES BESTOWED/CONFIRMED",
+            name: "ROLES BESTOWED",
             value: roleMentions,
           });
         } else {
