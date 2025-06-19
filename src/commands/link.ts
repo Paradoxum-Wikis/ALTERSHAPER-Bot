@@ -4,6 +4,10 @@ import {
   EmbedBuilder,
   GuildMember,
   MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
 import {
@@ -309,39 +313,46 @@ export async function execute(
         {
           name: "📜 CONFIRMATION REQUIRED",
           value:
-            "React with 🖋️ within 1 minute to proceed with the linking ritual.",
+            "Click the button below to proceed with the linking ritual.",
           inline: false,
         },
       )
-      .setFooter({ text: "This confirmation will expire in 60 seconds" })
+      .setFooter({ text: `This confirmation will expire in 1 minute` })
       .setTimestamp();
 
-    const confirmationMessage = await interaction.reply({
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setCustomId("confirm_link")
+        .setLabel("🖋️ Confirm Linking")
+        .setStyle(ButtonStyle.Primary),
+    );
+
+    const reply = await interaction.reply({
       embeds: [confirmationEmbed],
+      components: [row],
       flags: MessageFlags.Ephemeral,
     });
 
-    const message = await confirmationMessage.fetch();
-
     try {
-      await message.react("🖋️");
-    } catch (error) {
-      console.error("Failed to add reaction:", error);
-    }
-
-    const filter = (reaction: any, user: any) => {
-      return reaction.emoji.name === "🖋️" && user.id === interaction.user.id;
-    };
-
-    try {
-      const collected = await message.awaitReactions({
-        filter,
-        max: 1,
+      const collector = reply.createMessageComponentCollector({
+        componentType: ComponentType.Button,
         time: 60000,
-        errors: ["time"],
       });
 
-      if (collected.size > 0) {
+      let confirmed = false;
+
+      // In case I want to move this to non ephemeral later
+      collector.on("collect", async (i) => {
+        if (i.user.id !== interaction.user.id) {
+          await i.reply({
+            content: "You cannot confirm another's linking ritual.",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        confirmed = true;
+        collector.stop();
+
         const { grantedRoleNames, failedRoleNames } = await manageFandomRoles(
           member,
           fandomGroups,
@@ -424,8 +435,33 @@ export async function execute(
           });
         }
 
-        await interaction.followUp({ embeds: [successEmbed] });
-      }
+        await i.update({
+          embeds: [successEmbed],
+          components: [],
+        });
+      });
+
+      collector.on("end", async () => {
+        if (!confirmed) {
+          const timeoutEmbed = new EmbedBuilder()
+            .setColor("#FF0000")
+            .setTitle("⏰ LINKING RITUAL EXPIRED")
+            .setDescription(
+              "**THE LINKING CONFIRMATION HAS EXPIRED. NO CHANGES WERE MADE.**",
+            )
+            .addFields({
+              name: "TO RETRY",
+              value:
+                "Run the `/link` command again to restart the linking process.",
+              inline: false,
+            });
+
+          await interaction.editReply({
+            embeds: [timeoutEmbed],
+            components: [],
+          });
+        }
+      });
     } catch (error) {
       const timeoutEmbed = new EmbedBuilder()
         .setColor("#FF0000")
@@ -440,9 +476,9 @@ export async function execute(
           inline: false,
         });
 
-      await interaction.followUp({
+      await interaction.editReply({
         embeds: [timeoutEmbed],
-        flags: MessageFlags.Ephemeral,
+        components: [],
       });
     }
   } catch (error) {
