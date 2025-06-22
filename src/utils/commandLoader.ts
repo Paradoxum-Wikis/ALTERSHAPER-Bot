@@ -14,6 +14,7 @@ import * as link from "../commands/link.js";
 import * as unlink from "../commands/removelink.js";
 import * as checklink from "../commands/checklink.js";
 import * as synctop5 from "../commands/synctop5.js";
+import * as slowmode from "../commands/slowmode.js";
 
 export interface Command {
   data: any;
@@ -39,6 +40,7 @@ export function loadCommands(): Collection<string, Command> {
     unlink,
     checklink,
     synctop5,
+    slowmode,
   ];
 
   for (const command of commandModules) {

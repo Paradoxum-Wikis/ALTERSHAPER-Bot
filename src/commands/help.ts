@@ -67,6 +67,11 @@ const commands: CommandInfo[] = [
     value: "View the seraphic archives of purged messages",
     category: "moderator",
   },
+  {
+    name: "/slowmode [seconds] [reason]",
+    value: "Impose restraint upon the flow of messages",
+    category: "moderator",
+  },
   // Basic
   {
     name: "/avatar [@user]",

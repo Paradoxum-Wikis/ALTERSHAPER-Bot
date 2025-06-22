@@ -20,6 +20,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   clear: PermissionLevel.MODERATOR,
   archives: PermissionLevel.MODERATOR,
   sins: PermissionLevel.MODERATOR,
+  slowmode: PermissionLevel.MODERATOR,
 
   // Basic
   help: PermissionLevel.BASIC,
