@@ -1,6 +1,8 @@
 import { GuildMember } from "discord.js";
 import { FANDOM_ROLE_MAP } from "./roleConstants.js";
 
+const COMMANDS_CHANNEL_ID = "1366497229161894018";
+
 export enum PermissionLevel {
   BASIC = "basic",
   MODERATOR = "moderator",
@@ -106,5 +108,31 @@ export class RolePermissions {
       default:
         return "**Thy ego lackest the required authority to perform this action.**";
     }
+  }
+
+  /**
+   * Checks if a user can use commands in the current channel
+   * Basics can only use commands in the designated commands channel
+   */
+  public static canUseCommandInChannel(
+    member: GuildMember,
+    channelId: string,
+  ): boolean {
+    const userLevel = this.getUserPermissionLevel(member);
+    
+    // mods and admins can use commands anywhere
+    if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
+      return true;
+    }
+    
+    // Basic can only use commands in the designated channel
+    return channelId === COMMANDS_CHANNEL_ID;
+  }
+
+  /**
+   * Get error message for wrong channel usage
+   */
+  public static getChannelErrorMessage(): string {
+    return `**THOU MUST SPEAK THY COMMANDS IN THE DESIGNATED CHANNEL!** Please use <#${COMMANDS_CHANNEL_ID}> for bot commands.`;
   }
 }
