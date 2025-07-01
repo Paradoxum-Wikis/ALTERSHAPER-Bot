@@ -92,9 +92,7 @@ class AltershaperBot {
     if (!member) return;
 
     try {
-      if (
-        !RolePermissions.hasCommandPermission(member, interaction.commandName)
-      ) {
+      if (!RolePermissions.hasCommandPermission(member, interaction.commandName)) {
         const errorMessage = RolePermissions.getPermissionErrorMessage(
           interaction.commandName,
         );
@@ -105,7 +103,14 @@ class AltershaperBot {
         return;
       }
 
-      // Commands that only need interaction parameter (informational/self service cmds)
+      if (!RolePermissions.canUseCommandInChannel(member, interaction.channelId!)) {
+        await interaction.reply({
+          content: RolePermissions.getChannelErrorMessage(),
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
       if (
         interaction.commandName === "help" ||
         interaction.commandName === "info" ||
@@ -118,7 +123,6 @@ class AltershaperBot {
       ) {
         await command.execute(interaction);
       } else {
-        // Moderation commands that need executor parameter for logging
         await command.execute(interaction, member);
       }
     } catch (error) {
