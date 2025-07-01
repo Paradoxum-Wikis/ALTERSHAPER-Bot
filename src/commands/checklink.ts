@@ -197,7 +197,7 @@ export async function execute(
       .setColor(fandomDataStatus === "Active" ? "#00FF00" : "#FFA500")
       .setTitle("🔍 LINK STATUS CHECK & SYNC")
       .setDescription(
-        `**${targetUser.tag} is bound to Fandom alter: ${existingLink.fandomUsername}**`,
+        `**${targetUser.tag} is bound to the Fandom alter: ${existingLink.fandomUsername}**`,
       )
       .addFields(
         {

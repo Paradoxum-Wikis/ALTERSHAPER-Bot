@@ -44,6 +44,7 @@ export const ROLE_PERMISSIONS: Record<string, PermissionLevel> = {
 export class RolePermissions {
   /**
    * Get the highest permission level a user has based on one's roles
+   * Everyone defaults to BASIC, only specific roles grant higher permissions
    */
   public static getUserPermissionLevel(member: GuildMember): PermissionLevel {
     let highestLevel = PermissionLevel.BASIC;
@@ -54,10 +55,7 @@ export class RolePermissions {
         // Admin > moderator > basic
         if (rolePermission === PermissionLevel.ADMIN) {
           return PermissionLevel.ADMIN;
-        } else if (
-          rolePermission === PermissionLevel.MODERATOR &&
-          highestLevel === PermissionLevel.BASIC
-        ) {
+        } else if (rolePermission === PermissionLevel.MODERATOR) {
           highestLevel = PermissionLevel.MODERATOR;
         }
       }
@@ -83,10 +81,7 @@ export class RolePermissions {
       case PermissionLevel.BASIC:
         return true;
       case PermissionLevel.MODERATOR:
-        return (
-          userLevel === PermissionLevel.MODERATOR ||
-          userLevel === PermissionLevel.ADMIN
-        );
+        return userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN;
       case PermissionLevel.ADMIN:
         return userLevel === PermissionLevel.ADMIN;
       default:
