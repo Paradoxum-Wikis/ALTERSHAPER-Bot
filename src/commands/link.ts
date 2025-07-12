@@ -276,8 +276,24 @@ export async function execute(
       (await userProfileResponse.json()) as FandomUserProfileResponse;
 
     if (!userProfileData.userData || !userProfileData.userData.discordHandle) {
+      const profileUrl = `https://alter-ego.fandom.com/wiki/User:${encodeURIComponent(canonicalFandomUsername)}`;
+      const tutorialEmbed = new EmbedBuilder()
+        .setColor("#FFA500")
+        .setTitle("❓ HOW TO LINK YOUR FANDOM ACCOUNT")
+        .setDescription(
+          `**The alter "${canonicalFandomUsername}" hath not revealed one's Discord handle on the profile!**\n\n` +
+          `To link your Discord, follow these steps:\n\n` +
+          `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
+          `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
+          `3. Find the **"Discord"** field.\n` +
+          `4. Enter your Discord username (e.g. \`${interaction.user.username}\`).\n` +
+          `5. Save your profile.\n\n` +
+          `Once done, run this command again.`
+        )
+        .setFooter({ text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes." });
+
       await interaction.reply({
-        content: `**THE ALTER "${canonicalFandomUsername}" HATH NOT REVEALED ONE'S DISCORD HANDLE ON THE PROFILE!**\nMake sure thy Discord handle is set on thy Fandom user profile.`,
+        embeds: [tutorialEmbed],
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -290,8 +306,25 @@ export async function execute(
       fandomDiscordHandle.toLowerCase() !==
       discordUserIdentifierToCompare.toLowerCase()
     ) {
+      const profileUrl = `https://alter-ego.fandom.com/wiki/User:${encodeURIComponent(canonicalFandomUsername)}`;
+      const tutorialEmbed = new EmbedBuilder()
+        .setColor("#FFA500")
+        .setTitle("❓ DISCORD HANDLE MISMATCH")
+        .setDescription(
+          `**A mismatch in the Dirac sea!**\n\n` +
+          `The Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Didst thou input the correct username?\n\n` +
+          `To fix this:\n` +
+          `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
+          `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
+          `3. Find the **"Discord"** field.\n` +
+          `4. Enter your correct Discord username (\`${interaction.user.username}\`).\n` +
+          `5. Save your profile.\n\n` +
+          `Once done, run this command again.`
+        )
+        .setFooter({ text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes." });
+
       await interaction.reply({
-        content: `**A MISMATCH IN THE DIRAC SEA!**\nThe Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Update thy Fandom profile, then try again.`,
+        embeds: [tutorialEmbed],
         flags: MessageFlags.Ephemeral,
       });
       return;
