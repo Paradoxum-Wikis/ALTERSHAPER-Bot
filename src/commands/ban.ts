@@ -35,7 +35,7 @@ export async function execute(
 
   if (
     typeof targetUserRaw === "string" &&
-    ["furries", "furry"].includes(targetUserRaw.toLowerCase())
+    ["t7ru", "380694434980954114"].includes(targetUserRaw.toLowerCase())
   ) {
     const embed = new EmbedBuilder()
       .setColor("#FFC0CB")
@@ -46,7 +46,7 @@ export async function execute(
       .setFooter({ text: "We have zero tolerance for furries." })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [embed] });
     return;
   }
 
