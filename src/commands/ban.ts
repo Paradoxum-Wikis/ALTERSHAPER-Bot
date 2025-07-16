@@ -27,12 +27,30 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   executor: GuildMember,
 ): Promise<void> {
-  const targetUser = interaction.options.getUser("user")!;
+  const targetUser = interaction.options.getUser("user");
+  const targetUserRaw = interaction.options.get("user")?.value;
   const reason =
     interaction.options.getString("reason") ||
     "Heretical defiance of Alteruism";
 
-  if (!interaction.guild) {
+  if (
+    typeof targetUserRaw === "string" &&
+    ["furries", "furry"].includes(targetUserRaw.toLowerCase())
+  ) {
+    const embed = new EmbedBuilder()
+      .setColor("#FFC0CB")
+      .setTitle("🐾 ETERNAL BANISHMENT OF FURRIES")
+      .setDescription(
+        `**All furries have been cast into the eternal void!**\n\n<@380694434980954114> hath been included among the banished.\n\nMay this serve as a warning to all who would embrace the furry path!`,
+      )
+      .setFooter({ text: "We have zero tolerance for furries." })
+      .setTimestamp();
+
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    return;
+  }
+
+  if (!targetUser || !interaction.guild) {
     await interaction.reply({
       content: "**THIS HOLY COMMAND CAN ONLY BE USED IN THE SACRED HALLS!**",
       flags: MessageFlags.Ephemeral,
