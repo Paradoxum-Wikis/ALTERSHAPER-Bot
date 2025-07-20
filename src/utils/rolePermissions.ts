@@ -33,6 +33,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   sins: PermissionLevel.MODERATOR,
   oracle: PermissionLevel.BASIC,
   tdstrivia: PermissionLevel.BASIC,
+  aura: PermissionLevel.BASIC,
 };
 
 // permission levels

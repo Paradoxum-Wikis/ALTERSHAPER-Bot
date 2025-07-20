@@ -17,6 +17,7 @@ import * as synctop5 from "../commands/synctop5.js";
 import * as slowmode from "../commands/slowmode.js";
 import * as oracle from "../commands/oracle.js";
 import * as tdstrivia from "../commands/tdstrivia.js";
+import * as aura from "../commands/aura.js";
 
 export interface Command {
   data: any;
@@ -45,6 +46,7 @@ export function loadCommands(): Collection<string, Command> {
     slowmode,
     oracle,
     tdstrivia,
+    aura,
   ];
 
   for (const command of commandModules) {

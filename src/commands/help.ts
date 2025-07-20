@@ -74,6 +74,11 @@ const commands: CommandInfo[] = [
   },
   // Basic
   {
+    name: "/aura [@user]",
+    value: "Calculate thy aura based on one's display name",
+    category: "basic",
+  },
+  {
     name: "/avatar [@user]",
     value: "Behold the divine visage of a soul",
     category: "basic",
