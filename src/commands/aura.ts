@@ -48,7 +48,7 @@ const flavorSet2 = [
   "Please go, you're making the room uncomfortable.",
   "Your aura is so weak, even the Normals avoid you.",
   "Barely a vibe, as if you fell down a 4 person tall staircase.",
-  "You're like a level 0 Sniper on Wave 40—absolutely useless and proud of it.",
+  "You're like a level 5 Pyromancer on Wave 40—absolutely useless and proud of it.",
   "You've got presence. Not loud, but respected.",
   "Nice aura, Ego would probably approve.",
   "Radiant energy, the alters are envious.",
