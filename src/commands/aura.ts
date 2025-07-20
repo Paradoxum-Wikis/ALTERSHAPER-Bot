@@ -21,7 +21,7 @@ const flavorSet1 = [
   "A vibrant aura, in harmony with the egoistic tides.",
   "Strong aura, like a maxxed Minigunner under DJ buff.",
   "You light up the room. Everyone wants you on their team.",
-  "A near divine presence, bending the fabric of reality.",
+  "A divinelike presence, bending the fabric of reality.",
   "A legendary aura, echoing through the cosmos eternally.",
 ];
 
@@ -40,17 +40,33 @@ const flavorSet2 = [
 
 const flavorSets = [flavorSet1, flavorSet2];
 
+const auraLevelNames = [
+  "Vile", // 0
+  "Invisible", // 1
+  "Weak", // 2
+  "Frail", // 3
+  "Mid", // 4
+  "Noticed", // 5
+  "Vibrant", // 6
+  "Strong", // 7
+  "Radiant", // 8
+  "Legendary", // 9
+  "Mythical", // 10
+];
+
 export const data = new SlashCommandBuilder()
   .setName("aura")
   .setDescription("Calculate your aura based on your display name")
-  .addUserOption(option =>
+  .addUserOption((option) =>
     option
       .setName("user")
       .setDescription("Ping a user to read their aura")
-      .setRequired(false)
+      .setRequired(false),
   );
 
-export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
   const targetUser = interaction.options.getUser("user") || interaction.user;
   let displayName: string;
 
@@ -73,9 +89,21 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const chosenSet = flavorSets[Math.floor(Math.random() * flavorSets.length)];
     const hash = hashString(displayName);
     percentage = hash % 101;
-    level = Math.ceil(percentage / 10) || 1;
-    flavorText = chosenSet[level - 1];
+
+    if (percentage <= 3) {
+      level = 0;
+    } else if (percentage <= 9) {
+      level = 1;
+    } else {
+      level = Math.ceil((percentage - 9) / 10) + 1;
+      if (level > 10) level = 10;
+    }
+
+    flavorText = chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
   }
+
+  const levelName =
+    auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
 
   const embed = new EmbedBuilder()
     .setColor(level === 0 ? "#2F2F2F" : "#800080")
@@ -83,8 +111,8 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     .setDescription(`The mystical aura of **${displayName}** has been divined!`)
     .addFields(
       { name: "Aura Strength", value: `${percentage}%`, inline: true },
-      { name: "Aura Level", value: level === 0 ? "Vile" : String(level), inline: true },
-      { name: "Verdict", value: flavorText, inline: false }
+      { name: "Aura Level", value: `${level} (${levelName})`, inline: true },
+      { name: "Verdict", value: flavorText, inline: false },
     )
     .setFooter({ text: "Aura levels may vary based on cosmic vibrations." })
     .setTimestamp();
