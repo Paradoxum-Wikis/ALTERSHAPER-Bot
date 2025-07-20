@@ -130,13 +130,13 @@ export async function execute(
     auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
 
   const embed = new EmbedBuilder()
-    .setColor(level === 0 ? "#2F2F2F" : "#800080")
+    .setColor(level === 0 ? "#2F2F2F" : level === 11 ? "#ad32ffff" : "#800080")
     .setTitle("🔮 Aura Reading")
     .setDescription(`The mystical aura of **${displayName}** has been divined!`)
     .addFields(
       { name: "Aura Strength", value: `${percentage}%`, inline: true },
       { name: "Aura Level", value: `${level} (${levelName})`, inline: true },
-      { name: "Verdict", value: flavorText, inline: false },
+      { name: "Verdict:", value: flavorText, inline: false },
     )
     .setFooter({ text: "Aura levels may vary based on cosmic vibrations." })
     .setTimestamp();
