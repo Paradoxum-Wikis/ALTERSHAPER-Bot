@@ -299,8 +299,7 @@ export async function execute(
     if (fandomDataStatus !== "Active") {
       embed.addFields({
         name: "⚠️ WARNING",
-        value:
-          "The linked Fandom account could not be found.",
+        value: "The linked Fandom account could not be found.",
       });
     }
 

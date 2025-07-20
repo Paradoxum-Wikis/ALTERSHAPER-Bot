@@ -193,7 +193,7 @@ export async function execute(
             break;
           case "previous":
             currentPage = Math.max(0, currentPage - 1);
-          break;
+            break;
           case "next":
             currentPage = Math.min(totalPages - 1, currentPage + 1);
             break;

@@ -119,32 +119,35 @@ const categories = [
   {
     name: "🥀 ALTERMINISTRATOR",
     description: "**Divine powers reserved for the highest authority**",
-    commands: commands.filter(cmd => cmd.category === "admin"),
+    commands: commands.filter((cmd) => cmd.category === "admin"),
   },
   {
     name: "⚖️ MODERATOR",
-    description: "**Sacred instruments for maintaining order and righteousness**",
-    commands: commands.filter(cmd => cmd.category === "moderator"),
+    description:
+      "**Sacred instruments for maintaining order and righteousness**",
+    commands: commands.filter((cmd) => cmd.category === "moderator"),
   },
   {
     name: "📚 BASIC",
     description: "**Available to all faithful souls in the sacred halls**",
-    commands: commands.filter(cmd => cmd.category === "basic"),
+    commands: commands.filter((cmd) => cmd.category === "basic"),
   },
 ];
 
 function createEmbed(categoryIndex: number): EmbedBuilder {
   const category = categories[categoryIndex];
-  
+
   const embed = new EmbedBuilder()
     .setColor("#00CED1")
     .setTitle("📜 DIVINE INSTRUMENTS OF THE ALTERSHAPER")
     .setDescription(
-      `**These be the sacred instruments!**\n\n*"I am the hand of judgement, and upon the faithless shall I deliver righteous correction."*\n\n${category.description}\n\n**Page ${categoryIndex + 1} of ${categories.length}**`
+      `**These be the sacred instruments!**\n\n*"I am the hand of judgement, and upon the faithless shall I deliver righteous correction."*\n\n${category.description}\n\n**Page ${categoryIndex + 1} of ${categories.length}**`,
     )
     .addFields({
       name: category.name,
-      value: category.commands.map(cmd => `**${cmd.name}**\n${cmd.value}`).join('\n\n'),
+      value: category.commands
+        .map((cmd) => `**${cmd.name}**\n${cmd.value}`)
+        .join("\n\n"),
       inline: false,
     })
     .setFooter({ text: "ALTERSHAPER - Divine Enforcer of Alteruism" })
@@ -153,7 +156,10 @@ function createEmbed(categoryIndex: number): EmbedBuilder {
   return embed;
 }
 
-function createButtons(currentPage: number, totalPages: number): ActionRowBuilder<ButtonBuilder> {
+function createButtons(
+  currentPage: number,
+  totalPages: number,
+): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId("first")

@@ -133,9 +133,7 @@ export class TopContributorsManager {
   ): Promise<{ isTop5: boolean; rank?: number }> {
     const contributors = await this.fetchTopContributors();
 
-    const contributor = contributors.find(
-      (c) => c.userName === fandomUsername,
-    );
+    const contributor = contributors.find((c) => c.userName === fandomUsername);
 
     if (!contributor) {
       return { isTop5: false };
@@ -231,9 +229,7 @@ export class TopContributorsManager {
           .catch(() => null);
         if (!member) continue;
 
-        const shouldHaveRole = top5Usernames.includes(
-          link.fandomUsername,
-        );
+        const shouldHaveRole = top5Usernames.includes(link.fandomUsername);
         const hasRole = member.roles.cache.has(TOP_CONTRIBUTORS_ROLE_ID);
 
         if (shouldHaveRole && !hasRole) {

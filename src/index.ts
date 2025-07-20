@@ -92,7 +92,9 @@ class AltershaperBot {
     if (!member) return;
 
     try {
-      if (!RolePermissions.hasCommandPermission(member, interaction.commandName)) {
+      if (
+        !RolePermissions.hasCommandPermission(member, interaction.commandName)
+      ) {
         const errorMessage = RolePermissions.getPermissionErrorMessage(
           interaction.commandName,
         );
@@ -103,7 +105,9 @@ class AltershaperBot {
         return;
       }
 
-      if (!RolePermissions.canUseCommandInChannel(member, interaction.channelId!)) {
+      if (
+        !RolePermissions.canUseCommandInChannel(member, interaction.channelId!)
+      ) {
         await interaction.reply({
           content: RolePermissions.getChannelErrorMessage(),
           flags: MessageFlags.Ephemeral,

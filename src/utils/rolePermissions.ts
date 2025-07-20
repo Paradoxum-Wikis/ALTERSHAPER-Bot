@@ -83,7 +83,10 @@ export class RolePermissions {
       case PermissionLevel.BASIC:
         return true;
       case PermissionLevel.MODERATOR:
-        return userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN;
+        return (
+          userLevel === PermissionLevel.MODERATOR ||
+          userLevel === PermissionLevel.ADMIN
+        );
       case PermissionLevel.ADMIN:
         return userLevel === PermissionLevel.ADMIN;
       default:
@@ -116,12 +119,12 @@ export class RolePermissions {
     channelId: string,
   ): boolean {
     //const userLevel = this.getUserPermissionLevel(member);
-    
+
     // mods and admins can use commands anywhere
     //if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
-      return true;
+    return true;
     //}
-    
+
     // Basic can only use commands in the designated channel
     //return channelId === COMMANDS_CHANNEL_ID;
   }

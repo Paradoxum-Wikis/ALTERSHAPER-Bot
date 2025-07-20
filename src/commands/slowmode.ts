@@ -59,7 +59,7 @@ export async function execute(
     await ModerationLogger.addEntry({
       type: "slowmode" as any,
       userId: "N/A",
-      userTag: "N/A", 
+      userTag: "N/A",
       moderatorId: executor.id,
       moderatorTag: executor.user.tag,
       reason: `${seconds === 0 ? "Disabled" : "Set"} slowmode in #${channel.name}${seconds > 0 ? ` (${seconds}s)` : ""}`,
@@ -88,15 +88,19 @@ export async function execute(
         },
         {
           name: seconds === 0 ? "STATUS" : "RESTRAINT DURATION",
-          value: seconds === 0 ? "Slowmode disabled" : `${seconds} seconds between messages`,
+          value:
+            seconds === 0
+              ? "Slowmode disabled"
+              : `${seconds} seconds between messages`,
           inline: true,
         },
         { name: "REASON FOR RESTRAINT", value: reason, inline: false },
         {
           name: "DIVINE WISDOM",
-          value: seconds === 0 
-            ? "The faithful may once again speak freely in the sacred halls"
-            : "Patience brings wisdom, and wisdom brings understanding",
+          value:
+            seconds === 0
+              ? "The faithful may once again speak freely in the sacred halls"
+              : "Patience brings wisdom, and wisdom brings understanding",
           inline: false,
         },
       )
@@ -106,7 +110,8 @@ export async function execute(
   } catch (error) {
     console.error("Error setting slowmode:", error);
     await interaction.reply({
-      content: "**THE DIVINE POWERS HAVE BEEN THWARTED! The restraint could not be imposed!**",
+      content:
+        "**THE DIVINE POWERS HAVE BEEN THWARTED! The restraint could not be imposed!**",
       flags: MessageFlags.Ephemeral,
     });
   }

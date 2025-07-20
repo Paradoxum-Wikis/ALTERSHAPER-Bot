@@ -1,4 +1,8 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+  EmbedBuilder,
+} from "discord.js";
 
 const responses = [
   "The divine winds favor thee.",
@@ -13,28 +17,33 @@ const responses = [
   "Signs point to divine approval.",
   "The mists of fate cloud the answer. Try again.",
   "The oracles are silent. Ask again later.",
-  "The Oracle withholds judgment for now.",
+  "The oracle withholds judgment for now.",
   "The future is veiled. Cannot predict now.",
   "Focus thy alter ego and ask once more.",
   "Do not count on it.",
   "The sacred decree is no.",
   "The spirits say nay.",
   "The omens are not favorable.",
-  "The Oracle is doubtful of thy request."
+  "The oracle is doubtful of thy request.",
 ];
 
 export const data = new SlashCommandBuilder()
   .setName("oracle")
   .setDescription("Consult the oracles for divine wisdom")
-  .addStringOption(option =>
-    option.setName("question")
+  .addStringOption((option) =>
+    option
+      .setName("question")
       .setDescription("The question to ask the oracles")
-      .setRequired(true)
+      .setRequired(true),
   );
 
-export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
   const questionRaw = interaction.options.getString("question");
-  const question = questionRaw ? questionRaw.slice(0, 1024) : "No question provided.";
+  const question = questionRaw
+    ? questionRaw.slice(0, 1024)
+    : "No question provided.";
   const response = responses[Math.floor(Math.random() * responses.length)];
 
   const embed = new EmbedBuilder()
@@ -43,7 +52,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     .setDescription("**Seek the wisdom of the oracles!**")
     .addFields(
       { name: "Thy Query:", value: `"${question}"`, inline: false },
-      { name: "The Oracle's Decree:", value: `**${response}**`, inline: false }
+      { name: "The Oracle's Decree:", value: `**${response}**`, inline: false },
     )
     .setFooter({ text: "Their words are truth." })
     .setTimestamp();

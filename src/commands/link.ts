@@ -282,15 +282,17 @@ export async function execute(
         .setTitle("❓ HOW TO LINK YOUR FANDOM ACCOUNT")
         .setDescription(
           `**The alter "${canonicalFandomUsername}" hath not revealed one's Discord handle on the profile!**\n\n` +
-          `To link your Discord, follow these steps:\n\n` +
-          `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
-          `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
-          `3. Find the **"Discord"** field.\n` +
-          `4. Enter your Discord username (e.g. \`${interaction.user.username}\`).\n` +
-          `5. Save your profile.\n\n` +
-          `Once done, run this command again.`
+            `To link your Discord, follow these steps:\n\n` +
+            `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
+            `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
+            `3. Find the **"Discord"** field.\n` +
+            `4. Enter your Discord username (e.g. \`${interaction.user.username}\`).\n` +
+            `5. Save your profile.\n\n` +
+            `Once done, run this command again.`,
         )
-        .setFooter({ text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes." });
+        .setFooter({
+          text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes.",
+        });
 
       await interaction.reply({
         embeds: [tutorialEmbed],
@@ -312,16 +314,18 @@ export async function execute(
         .setTitle("❓ DISCORD HANDLE MISMATCH")
         .setDescription(
           `**A mismatch in the Dirac sea!**\n\n` +
-          `The Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Didst thou input the correct username?\n\n` +
-          `To fix this:\n` +
-          `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
-          `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
-          `3. Find the **"Discord"** field.\n` +
-          `4. Enter your correct Discord username (\`${interaction.user.username}\`).\n` +
-          `5. Save your profile.\n\n` +
-          `Once done, run this command again.`
+            `The Discord handle on Fandom ("${fandomDiscordHandle}") doth not align with thy current Discord username ("${interaction.user.username}"). Didst thou input the correct username?\n\n` +
+            `To fix this:\n` +
+            `1. Visit your Fandom profile: [Edit Profile](${profileUrl})\n` +
+            `2. Click the **"Edit profile"** button on the top right of your user page.\n` +
+            `3. Find the **"Discord"** field.\n` +
+            `4. Enter your correct Discord username (\`${interaction.user.username}\`).\n` +
+            `5. Save your profile.\n\n` +
+            `Once done, run this command again.`,
         )
-        .setFooter({ text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes." });
+        .setFooter({
+          text: "If you have set your Discord and still see this, double-check for typos or try again in a few minutes.",
+        });
 
       await interaction.reply({
         embeds: [tutorialEmbed],
