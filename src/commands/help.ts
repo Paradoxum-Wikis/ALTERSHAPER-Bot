@@ -79,6 +79,11 @@ const commands: CommandInfo[] = [
     category: "basic",
   },
   {
+    name: "/oracle [question]",
+    value: "Consult the oracles for divine wisdom (8ball)",
+    category: "basic",
+  },
+  {
     name: "/info",
     value: "Behold the knowledge of the altershaper",
     category: "basic",
@@ -96,6 +101,11 @@ const commands: CommandInfo[] = [
   {
     name: "/synctop5",
     value: "Synchronize the top 5 contributors roles with the rankings",
+    category: "basic",
+  },
+  {
+    name: "/tdstrivia",
+    value: "Fetch a random trivia fact from the TDS Wiki",
     category: "basic",
   },
   {

@@ -31,6 +31,8 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   checklink: PermissionLevel.BASIC,
   synctop5: PermissionLevel.BASIC,
   sins: PermissionLevel.MODERATOR,
+  oracle: PermissionLevel.BASIC,
+  tdstrivia: PermissionLevel.BASIC,
 };
 
 // permission levels
@@ -113,15 +115,15 @@ export class RolePermissions {
     member: GuildMember,
     channelId: string,
   ): boolean {
-    const userLevel = this.getUserPermissionLevel(member);
+    //const userLevel = this.getUserPermissionLevel(member);
     
     // mods and admins can use commands anywhere
-    if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
+    //if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
       return true;
-    }
+    //}
     
     // Basic can only use commands in the designated channel
-    return channelId === COMMANDS_CHANNEL_ID;
+    //return channelId === COMMANDS_CHANNEL_ID;
   }
 
   /**
