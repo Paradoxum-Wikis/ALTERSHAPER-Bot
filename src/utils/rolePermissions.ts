@@ -21,7 +21,6 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   warn: PermissionLevel.MODERATOR,
   clear: PermissionLevel.MODERATOR,
   archives: PermissionLevel.MODERATOR,
-  sins: PermissionLevel.MODERATOR,
   slowmode: PermissionLevel.MODERATOR,
 
   // Basic
@@ -30,7 +29,8 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   avatar: PermissionLevel.BASIC,
   link: PermissionLevel.BASIC,
   checklink: PermissionLevel.BASIC,
-    synctop5: PermissionLevel.BASIC,
+  synctop5: PermissionLevel.BASIC,
+  sins: PermissionLevel.MODERATOR,
 };
 
 // permission levels
