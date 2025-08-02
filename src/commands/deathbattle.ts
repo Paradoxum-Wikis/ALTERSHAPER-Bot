@@ -329,12 +329,17 @@ async function simulateBattleStep(
         const divineHeal = Math.floor(attacker.maxHp * 0.3);
         attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
         attacker.defense += 5;
-        narration = `⭐ **${attacker.name}** receives divine intervention, healing ${divineHeal} HP and gaining divine protection!`;
+        narration = `⭐ **${attacker.name}** receives the labyrinth's divine intervention, healing ${divineHeal} HP and gaining divine protection!`;
         break;
       case "Great Will":
         const missingHp = attacker.maxHp - attacker.hp;
         damage = Math.floor(attacker.attack + missingHp * 0.5);
         narration = `👑 **${attacker.name}** channels their great will, converting their wounds into raw power!`;
+        break;
+      case "Toxic Fumes":
+        attacker.defense += 5;
+        attacker.speed += 5;
+        narration = `☣️ **${attacker.name}** injects themself with Toxic Gunner's fumes, enhancing their reflexes and durability! (+5 DEF, +5 SPD)`;
         break;
     }
   } else {
@@ -353,7 +358,7 @@ async function simulateBattleStep(
         Math.floor(Math.random() * battleNarrations.dodge.length)
       ]
         .replace("{defender}", "")
-        .replace("{attacker}", `**${attacker.name}**'s`)}`;
+        .replace("{attacker}", `**${attacker.name}**`)}`;
     } else if (defenseRoll < 0.25 && canBlock) {
       damage = Math.max(1, damage - defender.defense);
       action = "block";
@@ -361,7 +366,7 @@ async function simulateBattleStep(
         Math.floor(Math.random() * battleNarrations.block.length)
       ]
         .replace("{defender}", "")
-        .replace("{attacker}", `**${attacker.name}**'s`)}`;
+        .replace("{attacker}", `**${attacker.name}**`)}`;
     } else {
       if (abilityUsed === "Relic of Exo") {
         damage = Math.max(1, damage);
@@ -470,6 +475,7 @@ function generateFighter(user: User, displayName: string): Fighter {
     "Airstrike",
     "Divine Intervention",
     "Great Will",
+    "Toxic Fumes",
   ];
 
   let seed = Math.abs(percentage) + 1000;
