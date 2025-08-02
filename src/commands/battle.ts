@@ -260,8 +260,9 @@ async function simulateBattleStep(
         narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense!`;
         break;
       case "Shadow Clone":
+        attacker.attack += 1;
         damage = Math.floor(attacker.attack * 0.8);
-        narration = `👥 **${attacker.name}** creates shadow clones, striking from multiple angles!`;
+        narration = `👥 **${attacker.name}** creates shadow clones, striking from multiple angles while empowering themself with the shadows! (+1 ATK)`;
         break;
       case "Healing Light":
         const heal = Math.floor(attacker.maxHp * 0.3);
@@ -278,8 +279,10 @@ async function simulateBattleStep(
         narration = `⏰ **${attacker.name}** manipulates time, increasing their speed!`;
         break;
       case "Soul Strike":
+        attacker.speed += 1;
+        defender.speed = Math.max(1, defender.speed - 1);
         damage = Math.floor(attacker.attack * 1.3);
-        narration = `👻 **${attacker.name}** strikes directly at **${defender.name}**'s soul!`;
+        narration = `👻 **${attacker.name}** strikes directly at **${defender.name}**'s soul, stealing their energy! (+1 SPD, -1 SPD to enemy)`;
         break;
       case "Phoenix Rising":
         if (attacker.hp < attacker.maxHp * 0.3) {
@@ -331,8 +334,9 @@ async function simulateBattleStep(
         narration = `📯 **${attacker.name}** sounds the call to arms, a platoon of soldiers unleashed a flurry of ${hits} bullets!`;
         break;
       case "Airstrike":
-        damage = Math.floor(attacker.attack * 1.6);
-        narration = `✈️ **${attacker.name}** calls in an airstrike from above, raining destruction!`;
+        const airstrikes = Math.floor(Math.random() * 5) + 1;
+        damage = Math.floor(attacker.attack * (1.7 / 5)) * airstrikes;
+        narration = `✈️ **${attacker.name}** calls in an airstrike from above, ${airstrikes} bomber${airstrikes > 1 ? 's' : ''} raining destruction!`;
         break;
       case "Divine Intervention":
         const divineHeal = Math.floor(attacker.maxHp * 0.25);
