@@ -18,8 +18,8 @@ import * as slowmode from "../commands/slowmode.js";
 import * as oracle from "../commands/oracle.js";
 import * as tdstrivia from "../commands/tdstrivia.js";
 import * as aura from "../commands/aura.js";
-import * as deathbattle from "../commands/deathbattle.js";
-import * as battleprofile from "../commands/battleprofile.js";
+import * as battle from "../commands/battle.js";
+import * as battlestats from "../commands/battlestats.js";
 
 export interface Command {
   data: any;
@@ -49,8 +49,8 @@ export function loadCommands(): Collection<string, Command> {
     oracle,
     tdstrivia,
     aura,
-    deathbattle,
-    battleprofile,
+    battle,
+    battlestats,
   ];
 
   for (const command of commandModules) {

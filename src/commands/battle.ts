@@ -13,7 +13,7 @@ import {
 import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import { generateFighter, Fighter } from "../utils/fighterGenerator.js";
-import { BattleStatsManager } from "../utils/battleStats.js";
+import { BattleStatsManager } from "../utils/battleStatsManager.js";
 
 let isBattleActive = false;
 let currentBattleUsers: Set<string> = new Set();
