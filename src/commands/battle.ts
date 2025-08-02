@@ -361,19 +361,31 @@ async function simulateBattleStep(
     const isCrit = critRoll < attacker.critChance;
     damage = isCrit ? Math.floor(baseDamage * 1.8) : baseDamage;
 
-    const defenseRoll = Math.random();
-    const canBlock =
-      abilityUsed !== "Airstrike" && abilityUsed !== "Great Will";
+    const speedDifference = Math.max(0, defender.speed - attacker.speed);
+    const baseDodgeChance = 0.15;
+    const speedDodgeBonus = speedDifference * 0.01;
+    const totalDodgeChance = baseDodgeChance + speedDodgeBonus;
 
-    if (defenseRoll < 0.15) {
+    const defenseRoll = Math.random();
+    const canBlock = abilityUsed !== "Airstrike" && abilityUsed !== "Great Will";
+
+    if (defenseRoll < totalDodgeChance) {
       damage = 0;
       action = "dodge";
-      narration = `💨 **${defender.name}** ${battleNarrations.dodge[
-        Math.floor(Math.random() * battleNarrations.dodge.length)
-      ]
-        .replace("{defender}", "")
-        .replace("{attacker}", `**${attacker.name}**`)}`;
-    } else if (defenseRoll < 0.3 && canBlock) {
+      const dodgeMessage =
+        speedDifference > 0
+          ? `💨 **${defender.name}** ${battleNarrations.dodge[
+              Math.floor(Math.random() * battleNarrations.dodge.length)
+            ]
+              .replace("{defender}", "")
+              .replace("{attacker}", `**${attacker.name}**`)} *(+${speedDifference}% dodge from speed)*`
+          : `💨 **${defender.name}** ${battleNarrations.dodge[
+              Math.floor(Math.random() * battleNarrations.dodge.length)
+            ]
+              .replace("{defender}", "")
+              .replace("{attacker}", `**${attacker.name}**`)}`;
+      narration = dodgeMessage;
+    } else if (defenseRoll < totalDodgeChance + 0.15 && canBlock) {
       damage = Math.max(1, damage - defender.defense);
       action = "block";
       narration = `🛡️ **${defender.name}** ${battleNarrations.block[
@@ -382,11 +394,7 @@ async function simulateBattleStep(
         .replace("{defender}", "")
         .replace("{attacker}", `**${attacker.name}**`)}`;
     } else {
-      if (abilityUsed === "Relic of Exo") {
-        damage = Math.max(1, damage);
-      } else {
-        damage = Math.max(1, damage - Math.floor(defender.defense / 2));
-      }
+      damage = Math.max(1, damage - Math.floor(defender.defense / 2));
 
       if (isCrit) {
         narration = `💥 ${battleNarrations.criticalHit[
@@ -413,7 +421,7 @@ async function simulateBattleStep(
     }
 
     defender.hp = Math.max(0, defender.hp - damage);
-    if (!narration.includes("HP")) {
+    if (!narration.includes("HP") && !narration.includes("dmg")) {
       narration += ` **(${damage} dmg)**`;
     }
   }
