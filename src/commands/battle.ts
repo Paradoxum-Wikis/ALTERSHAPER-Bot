@@ -336,7 +336,7 @@ async function simulateBattleStep(
       case "Airstrike":
         const airstrikes = Math.floor(Math.random() * 5) + 1;
         damage = Math.floor(attacker.attack * (1.7 / 5)) * airstrikes;
-        narration = `✈️ **${attacker.name}** calls in an airstrike from above, ${airstrikes} bomber${airstrikes > 1 ? 's' : ''} raining destruction!`;
+        narration = `✈️ **${attacker.name}** calls in an airstrike from above, ${airstrikes} bomber${airstrikes > 1 ? "s" : ""} raining destruction!`;
         break;
       case "Divine Intervention":
         const divineHeal = Math.floor(attacker.maxHp * 0.25);
@@ -411,7 +411,7 @@ async function simulateBattleStep(
         damage = Math.max(1, damage - Math.floor(defender.defense / 2));
       }
     }
-    
+
     defender.hp = Math.max(0, defender.hp - damage);
     if (!narration.includes("HP")) {
       narration += ` **(${damage} dmg)**`;
@@ -456,7 +456,7 @@ async function handleConsentPhase(
         `You have **15 seconds** to respond.`,
     )
     .setFooter({
-      text: "Glory awaits in the arena of Alteruism!"
+      text: "Glory awaits in the arena of Alteruism!",
     });
 
   const acceptButton = new ButtonBuilder()
@@ -824,16 +824,20 @@ export async function execute(
       .setTitle(`🏆 THE ${isRanked ? "RANKED " : ""}DEATHBATTLE HAS CONCLUDED`)
       .setDescription(
         `**${winner.name}** emerges victorious after ${turn} turns!\n\n` +
-         (turn >= 50 ? "**The heavens are satisfied. The battle has been forcefully stopped!**\n\n" : "") +
+          (turn >= 50
+            ? "**The heavens are satisfied. The battle has been forcefully stopped!**\n\n"
+            : "") +
           `**Final Results:**\n` +
           `🏆 **Victor:** ${winner.name} (${winner.hp}/${winner.maxHp} HP)\n` +
           `💀 **Defeated:** ${loser.name} (0/${loser.maxHp} HP)\n\n` +
           `**Battle Conclusion:**\n` +
           battleLog.slice(-3).join("\n") +
           "\n\n" +
-          `**Updated ${isRanked ? "Ranked " : ""}Battle Records:**\n` +
-          `🏆 **${winner.name}:** ${isRanked ? winnerStats?.rankedWins || 1 : winnerStats?.wins || 1}W-${isRanked ? winnerStats?.rankedLosses || 0 : winnerStats?.losses || 0}L (${isRanked ? winnerStats?.rankedWinRate || 100 : winnerStats?.winRate || 100}% WR)\n` +
-          `💀 **${loser.name}:** ${isRanked ? loserStats?.rankedWins || 0 : loserStats?.wins || 0}W-${isRanked ? loserStats?.rankedLosses || 1 : loserStats?.losses || 1}L (${isRanked ? loserStats?.rankedWinRate || 0 : loserStats?.winRate || 0}% WR)\n\n` +
+          (isRanked
+            ? `**Updated Ranked Battle Records:**\n` +
+              `🏆 **${winner.name}:** ${winnerStats?.rankedWins || 1}W-${winnerStats?.rankedLosses || 0}L (${winnerStats?.rankedWinRate || 100}% WR)\n` +
+              `💀 **${loser.name}:** ${loserStats?.rankedWins || 0}W-${loserStats?.rankedLosses || 1}L (${loserStats?.rankedWinRate || 0}% WR)\n\n`
+            : "") +
           `*The arena falls silent as ${winner.name} stands triumphant...*`,
       )
       .setImage("attachment://deathbattle-final.png")
