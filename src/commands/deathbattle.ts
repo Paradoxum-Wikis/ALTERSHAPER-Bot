@@ -130,7 +130,7 @@ async function createBattleImage(
 
   try {
     const background = await loadImage(
-      path.join(process.cwd(), "src", "deathbattle.png"),
+      path.join(process.cwd(), "dist", "deathbattle.png"),
     );
     ctx.drawImage(background, 0, 0, 1920, 1080);
 
