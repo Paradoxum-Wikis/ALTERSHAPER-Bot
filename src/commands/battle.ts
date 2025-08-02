@@ -261,7 +261,7 @@ async function simulateBattleStep(
         break;
       case "Shadow Clone":
         attacker.attack += 1;
-        damage = Math.floor(attacker.attack * 0.8);
+        damage = Math.floor(attacker.attack * 1.2);
         narration = `👥 **${attacker.name}** creates shadow clones, striking from multiple angles while empowering themself with the shadows! (+1 ATK)`;
         break;
       case "Healing Light":

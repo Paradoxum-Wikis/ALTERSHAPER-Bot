@@ -241,7 +241,7 @@ export async function execute(
         for (const battle of history) {
           const isWinner = battle.winnerId === targetUser.id;
           const opponent = isWinner ? battle.loserTag : battle.winnerTag;
-          const result = isWinner ? "🏆 **WON**" : "💀 **LOST**";
+          const result = isWinner ? "🔥 **WON**" : "💀 **LOST**";
           const date = `<t:${Math.floor(new Date(battle.battleDate).getTime() / 1000)}:d>`;
           const battleType = battle.isRanked ? "🏆" : "⚔️";
 
