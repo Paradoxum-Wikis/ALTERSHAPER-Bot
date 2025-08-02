@@ -427,11 +427,8 @@ async function handleConsentPhase(
   interaction: ChatInputCommandInteraction,
   fighter1User: User,
   fighter2User: User,
-  isRanked: boolean,
 ): Promise<boolean> {
-  console.log(
-    `[CONSENT] Starting consent phase for ranked battle: ${isRanked}`,
-  );
+  console.log(`[CONSENT] Starting consent phase for ranked battle`);
   console.log(`[CONSENT] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`);
   console.log(`[CONSENT] Fighter 2: ${fighter2User.tag} (${fighter2User.id})`);
 
@@ -440,15 +437,13 @@ async function handleConsentPhase(
     .setTitle("⚔️ BATTLE CONSENT REQUIRED")
     .setDescription(
       `**${fighter1User} and ${fighter2User}**\n\n` +
-        `A ${isRanked ? "**RANKED**" : "normal"} deathbattle has been proposed!\n\n` +
-        `${isRanked ? "🏆 **This is a RANKED battle - results will affect your competitive rating!**\n\n" : ""}` +
+        `A **RANKED** deathbattle has been proposed!\n\n` +
+        `🏆 **This is a RANKED battle - results will affect your competitive rating!**\n\n` +
         `Both fighters must consent to engage in combat.\n` +
         `You have **15 seconds** to respond.`,
     )
     .setFooter({
-      text: isRanked
-        ? "Ranked battles require both fighters to agree"
-        : "Casual battle consent required",
+      text: "Glory awaits in the arena of Alteruism!"
     });
 
   const acceptButton = new ButtonBuilder()
@@ -509,7 +504,7 @@ async function handleConsentPhase(
           );
           console.log(`[CONSENT] Accepted users: ${Array.from(acceptedUsers)}`);
           await buttonInteraction.reply({
-            content: `**${buttonInteraction.user.tag} has accepted the battle challenge!**`,
+            content: `**You have accepted the battle challenge!**`,
             flags: MessageFlags.Ephemeral,
           });
         } else if (buttonInteraction.customId === "decline_battle") {
@@ -517,7 +512,7 @@ async function handleConsentPhase(
             `[CONSENT] User ${buttonInteraction.user.tag} declined the battle`,
           );
           await buttonInteraction.reply({
-            content: `**${buttonInteraction.user.tag} has declined the battle challenge!**`,
+            content: `**You have declined the battle challenge!**`,
             flags: MessageFlags.Ephemeral,
           });
 
@@ -644,7 +639,6 @@ export async function execute(
         interaction,
         fighter1User,
         fighter2User,
-        isRanked,
       );
 
       console.log(`[DEATHBATTLE] Consent phase result: ${consentGiven}`);
@@ -817,7 +811,6 @@ export async function execute(
       .setTitle(`🏆 THE ${isRanked ? "RANKED " : ""}DEATHBATTLE HAS CONCLUDED`)
       .setDescription(
         `**${winner.name}** emerges victorious after ${turn} turns!\n\n` +
-          `${isRanked ? "🏆 **RANKED VICTORY** - Competitive ratings updated!\n\n" : ""}` +
           `**Final Results:**\n` +
           `🏆 **Victor:** ${winner.name} (${winner.hp}/${winner.maxHp} HP)\n` +
           `💀 **Defeated:** ${loser.name} (0/${loser.maxHp} HP)\n\n` +
