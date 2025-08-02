@@ -282,7 +282,7 @@ async function simulateBattleStep(
         attacker.speed += 1;
         defender.speed = Math.max(1, defender.speed - 1);
         damage = Math.floor(attacker.attack * 1.3);
-        narration = `👻 **${attacker.name}** strikes directly at **${defender.name}**'s soul, stealing their energy! (+1 SPD, -1 SPD to enemy)`;
+        narration = `👻 **${attacker.name}** strikes directly at **${defender.name}**'s soul, stealing their energy while breaking through defenses! (+1 SPD, -1 SPD to enemy)`;
         break;
       case "Phoenix Rising":
         if (attacker.hp < attacker.maxHp * 0.3) {
@@ -296,7 +296,7 @@ async function simulateBattleStep(
         break;
       case "Relic of Exo":
         damage = Math.floor(attacker.attack * 1.4);
-        narration = `🏺 **${attacker.name}** unleashes the power of the Relic of Exo, bypassing all defenses!`;
+        narration = `🏺 **${attacker.name}** unleashes the power of the Relic of Exo, partially bypassing defenses!`;
         break;
       case "Ego's Blessing":
         attacker.attack += 2;
@@ -363,7 +363,7 @@ async function simulateBattleStep(
 
     const defenseRoll = Math.random();
     const canBlock =
-      abilityUsed !== "Airstrike" && abilityUsed !== "Relic of Exo";
+      abilityUsed !== "Airstrike" && abilityUsed !== "Great Will";
 
     if (defenseRoll < 0.15) {
       damage = 0;
@@ -373,7 +373,7 @@ async function simulateBattleStep(
       ]
         .replace("{defender}", "")
         .replace("{attacker}", `**${attacker.name}**`)}`;
-    } else if (defenseRoll < 0.25 && canBlock) {
+    } else if (defenseRoll < 0.3 && canBlock) {
       damage = Math.max(1, damage - defender.defense);
       action = "block";
       narration = `🛡️ **${defender.name}** ${battleNarrations.block[
@@ -403,6 +403,15 @@ async function simulateBattleStep(
   }
 
   if (damage > 0) {
+    if (useAbility) {
+      if (abilityUsed === "Relic of Exo" || abilityUsed === "Soul Strike") {
+        const effectiveDefense = Math.floor(defender.defense * 0.7);
+        damage = Math.max(1, damage - effectiveDefense);
+      } else {
+        damage = Math.max(1, damage - Math.floor(defender.defense / 2));
+      }
+    }
+    
     defender.hp = Math.max(0, defender.hp - damage);
     if (!narration.includes("HP")) {
       narration += ` **(${damage} dmg)**`;
@@ -733,7 +742,7 @@ export async function execute(
 
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    while (fighter1.hp > 0 && fighter2.hp > 0 && turn < 25) {
+    while (fighter1.hp > 0 && fighter2.hp > 0 && turn < 50) {
       const stepResult = await simulateBattleStep(
         fighter1,
         fighter2,
@@ -815,6 +824,7 @@ export async function execute(
       .setTitle(`🏆 THE ${isRanked ? "RANKED " : ""}DEATHBATTLE HAS CONCLUDED`)
       .setDescription(
         `**${winner.name}** emerges victorious after ${turn} turns!\n\n` +
+         (turn >= 50 ? "**The heavens are satisfied. The battle has been forcefully stopped!**\n\n" : "") +
           `**Final Results:**\n` +
           `🏆 **Victor:** ${winner.name} (${winner.hp}/${winner.maxHp} HP)\n` +
           `💀 **Defeated:** ${loser.name} (0/${loser.maxHp} HP)\n\n` +
