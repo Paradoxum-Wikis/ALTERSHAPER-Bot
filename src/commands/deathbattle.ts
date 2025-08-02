@@ -250,7 +250,7 @@ async function simulateBattleStep(
         narration = `👥 **${attacker.name}** creates shadow clones, striking from multiple angles!`;
         break;
       case "Healing Light":
-        const heal = Math.floor(attacker.maxHp * 0.2);
+        const heal = Math.floor(attacker.maxHp * 0.25);
         attacker.hp = Math.min(attacker.hp + heal, attacker.maxHp);
         narration = `✨ **${attacker.name}** bathes in the gracious healing light, restoring ${heal} HP!`;
         break;
@@ -290,7 +290,8 @@ async function simulateBattleStep(
       case "Cleansing":
         const cleanseHeal = Math.floor(attacker.maxHp * 0.15);
         attacker.hp = Math.min(attacker.hp + cleanseHeal, attacker.maxHp);
-        narration = `🌿 **${attacker.name}** cleanses their body and soul, healing ${cleanseHeal} HP and purifying debuffs!`;
+        attacker.speed += 5;
+        narration = `🌿 **${attacker.name}** cleanses their body and soul, healing ${cleanseHeal} HP, and gaining swift energy! (+5 SPD)`;
         break;
       case "Raise the Dead":
         if (attacker.hp < attacker.maxHp * 0.25) {
