@@ -84,6 +84,11 @@ const commands: CommandInfo[] = [
     category: "basic",
   },
   {
+    name: "/deathbattle @fighter1 @fighter2",
+    value: "Witness an epic clash between two souls in divine combat",
+    category: "basic",
+  },
+  {
     name: "/oracle [question]",
     value: "Consult the oracles for divine wisdom (8ball)",
     category: "basic",
