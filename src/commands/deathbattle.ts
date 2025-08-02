@@ -250,7 +250,7 @@ async function simulateBattleStep(
         narration = `👥 **${attacker.name}** creates shadow clones, striking from multiple angles!`;
         break;
       case "Healing Light":
-        const heal = Math.floor(attacker.maxHp * 0.25);
+        const heal = Math.floor(attacker.maxHp * 0.3);
         attacker.hp = Math.min(attacker.hp + heal, attacker.maxHp);
         narration = `✨ **${attacker.name}** bathes in the gracious healing light, restoring ${heal} HP!`;
         break;
@@ -321,7 +321,7 @@ async function simulateBattleStep(
         narration = `✈️ **${attacker.name}** calls in an airstrike from above, raining destruction!`;
         break;
       case "Divine Intervention":
-        const divineHeal = Math.floor(attacker.maxHp * 0.2);
+        const divineHeal = Math.floor(attacker.maxHp * 0.25);
         attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
         attacker.defense += 5;
         narration = `⭐ **${attacker.name}** receives the labyrinth's divine intervention, healing ${divineHeal} HP and gaining divine protection!`;
