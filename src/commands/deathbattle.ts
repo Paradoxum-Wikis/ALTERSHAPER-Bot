@@ -130,7 +130,7 @@ async function createBattleImage(
 
   try {
     const background = await loadImage(
-      path.join(process.cwd(), "dist", "deathbattle.png"),
+      path.join(__dirname, "..", "deathbattle.png")
     );
     ctx.drawImage(background, 0, 0, 1920, 1080);
 
@@ -394,19 +394,39 @@ function generateFighter(user: User, displayName: string): Fighter {
     return hash;
   }
 
-  const hash = hashString(displayName);
-  let seed = hash;
-
-  const random = (min: number, max: number) => {
-    seed = (seed * 9301 + 49297) % 233280;
-    return min + (seed / 233280) * (max - min);
+  const nameToLevel: { [key: string]: number } = {
+    toru: 0,
+    toru1: 1,
+    toru2: 2,
+    toru3: 3,
+    toru4: 4,
+    toru5: 5,
+    toru6: 6,
+    toru7: 7,
+    toru8: 8,
+    toru9: 9,
+    toru10: 10,
+    toru11: 11,
   };
 
-  const baseHp = Math.floor(random(80, 120));
-  const baseAttack = Math.floor(random(15, 25));
-  const baseDefense = Math.floor(random(5, 15));
-  const baseSpeed = Math.floor(random(10, 20));
-  const critChance = random(0.1, 0.3);
+  let percentage: number;
+
+  if (displayName in nameToLevel) {
+    const level = nameToLevel[displayName];
+    percentage = level === 0 ? -100 : level === 11 ? 100 : (level - 1) * 10 + 9;
+  } else {
+    const hash = hashString(displayName);
+    percentage = hash % 101;
+  }
+
+  const auraMultiplier = Math.max(0, (percentage + 100) / 200);
+
+  // Base stats + aura bonus
+  const baseHp = Math.floor(80 + auraMultiplier * 40); // 80-120 HP
+  const baseAttack = Math.floor(15 + auraMultiplier * 10); // 15-25 ATK
+  const baseDefense = Math.floor(5 + auraMultiplier * 10); // 5-15 DEF
+  const baseSpeed = Math.floor(10 + auraMultiplier * 10); // 10-20 SPD
+  const critChance = 0.1 + auraMultiplier * 0.2; // 0.1-0.3 crit chance
 
   const abilities = [
     "Alter Ego Burst",
@@ -429,10 +449,16 @@ function generateFighter(user: User, displayName: string): Fighter {
     "Great Will",
   ];
 
+  let seed = Math.abs(percentage) + 1000;
+  const random = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+
   const selectedAbilities = [];
   const abilityPool = [...abilities];
   for (let i = 0; i < 2; i++) {
-    const index = Math.floor(random(0, abilityPool.length));
+    const index = Math.floor(random() * abilityPool.length);
     selectedAbilities.push(abilityPool.splice(index, 1)[0]);
   }
 
@@ -592,7 +618,7 @@ export async function execute(
       )
       .setImage("attachment://deathbattle-final.png")
       .setFooter({
-        text: `Battle lasted ${turn} turns | The heavens remembers this epic clash`,
+        text: `Battle lasted ${turn} turns | The heavens shall remember this epic clash`,
       })
       .setTimestamp();
 
