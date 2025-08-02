@@ -128,16 +128,34 @@ async function createBattleImage(
   const canvas = createCanvas(1920, 1080);
   const ctx = canvas.getContext("2d");
 
+  const possiblePaths = [
+    path.join(process.cwd(), "src", "deathbattle.png"),
+    path.join(process.cwd(), "dist", "deathbattle.png"),
+    path.join(process.cwd(), "altershaper-bot", "dist", "deathbattle.png"),
+  ];
+
+  let background: any = null;
+
+  for (const imagePath of possiblePaths) {
+    try {
+      background = await loadImage(imagePath);
+      break;
+    } catch (error) {
+      continue;
+    }
+  }
+
   try {
-    const backgroundPath = path.join(process.cwd(), "dist", "deathbattle.png");
-    console.log("Attempting to load background image from:", backgroundPath);
-    console.log("Current working directory:", process.cwd());
-    console.log("__dirname:", __dirname);
-    
-    const background = await loadImage(backgroundPath);
-    console.log("Successfully loaded background image!");
-    
-    ctx.drawImage(background, 0, 0, 1920, 1080);
+    if (background) {
+      ctx.drawImage(background, 0, 0, 1920, 1080);
+    } else {
+      ctx.fillStyle = "#2F3136";
+      ctx.fillRect(0, 0, 1920, 1080);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 66px Verdana";
+      ctx.textAlign = "center";
+      ctx.fillText("DEATHBATTLE", 960, 540);
+    }
 
     const avatar1 = await loadImage(
       fighter1.displayAvatarURL({ extension: "png", size: 512 }),
