@@ -3,7 +3,11 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
 } from "discord.js";
-import { generateFighter, calculateAuraPercentage, calculateAuraLevel } from "../utils/fighterGenerator.js";
+import {
+  generateFighter,
+  calculateAuraPercentage,
+  calculateAuraLevel,
+} from "../utils/fighterGenerator.js";
 
 // prettier-ignore
 const auraLevelNames = [
@@ -55,7 +59,9 @@ const flavorSets = [flavorSet1, flavorSet2];
 
 export const data = new SlashCommandBuilder()
   .setName("aura")
-  .setDescription("Calculate aura and fighter stats based on one's display name")
+  .setDescription(
+    "Calculate aura and fighter stats based on one's display name",
+  )
   .addUserOption((option) =>
     option
       .setName("user")
@@ -81,29 +87,34 @@ export async function execute(
   const fighter = generateFighter(targetUser, displayName);
 
   const chosenSet = flavorSets[Math.floor(Math.random() * flavorSets.length)];
-  const flavorText = chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
+  const flavorText =
+    chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
 
-  const levelName = auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
+  const levelName =
+    auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
 
   const embed = new EmbedBuilder()
-    .setColor(level === 0 ? "#2F2F2F" : level === 11 ? "#ad32ffff" : "#800080")
+    .setColor(level === 0 ? "#2F2F2F" : level === 11 ? "#ad32ff" : "#800080")
     .setTitle("🔮 Aura Reading")
     .setDescription(`The mystical aura of **${displayName}** has been divined!`)
     .addFields(
       { name: "🌟 Aura Strength", value: `${percentage}%`, inline: true },
       { name: "📊 Aura Level", value: `${level} (${levelName})`, inline: true },
       { name: "⚔️ Fighter Class", value: getFighterClass(level), inline: true },
-      { name: "💪 Combat Statistics", value: 
-        `**HP:** ${fighter.hp}\n` +
-        `**ATK:** ${fighter.attack}\n` +
-        `**DEF:** ${fighter.defense}\n` +
-        `**SPD:** ${fighter.speed}\n` +
-        `**CRIT:** ${Math.round(fighter.critChance * 100)}%`, 
-        inline: true 
+      {
+        name: "💪 Combat Statistics",
+        value:
+          `**HP:** ${fighter.hp}\n` +
+          `**ATK:** ${fighter.attack}\n` +
+          `**DEF:** ${fighter.defense}\n` +
+          `**SPD:** ${fighter.speed}\n` +
+          `**CRIT:** ${Math.round(fighter.critChance * 100)}%`,
+        inline: true,
       },
-      { name: "🎯 Special Abilities", value: 
-        `• ${fighter.abilities[0]}\n• ${fighter.abilities[1]}`, 
-        inline: true 
+      {
+        name: "🎯 Special Abilities",
+        value: `• ${fighter.abilities[0]}\n• ${fighter.abilities[1]}`,
+        inline: true,
       },
       { name: "📝 Verdict", value: flavorText, inline: false },
     )

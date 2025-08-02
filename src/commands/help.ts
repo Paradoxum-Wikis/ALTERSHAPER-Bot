@@ -75,7 +75,8 @@ const commands: CommandInfo[] = [
   // Basic
   {
     name: "/aura [@user]",
-    value: "Calculate thy aura and view fighter profile based on one's display name",
+    value:
+      "Calculate thy aura and view fighter profile based on one's display name",
     category: "basic",
   },
   {
@@ -84,8 +85,9 @@ const commands: CommandInfo[] = [
     category: "basic",
   },
   {
-    name: "/deathbattle @fighter1 @fighter2",
-    value: "Witness an epic clash between two souls in divine combat",
+    name: "/battle @fighter1 @fighter2 [ranked:yes/no]",
+    value:
+      "Witness an epic clash between two souls in divine combat (ranked requires consent)",
     category: "basic",
   },
   {

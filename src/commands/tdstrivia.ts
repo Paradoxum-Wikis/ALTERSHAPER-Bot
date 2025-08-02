@@ -2,6 +2,7 @@ import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
   EmbedBuilder,
+  MessageFlags,
 } from "discord.js";
 
 function cleanWikitext(text: string): string {
@@ -49,7 +50,7 @@ export async function execute(
     await interaction.reply({
       content:
         "The fetching of trivia hath failed. Prithee, attempt once more anon.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

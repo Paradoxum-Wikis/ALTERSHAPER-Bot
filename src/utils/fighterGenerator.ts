@@ -60,17 +60,17 @@ export function calculateAuraLevel(percentage: number): number {
 
 export function generateFighter(user: User, displayName: string): Fighter {
   const percentage = calculateAuraPercentage(displayName);
-  
+
   // Convert percentage to stats (higher aura = better stats)
   // Scale percentage from -100 to 100 range to 0-1 multiplier
   const auraMultiplier = Math.max(0, (percentage + 100) / 200);
-  
+
   // Base stats + aura bonus
-  const baseHp = Math.floor(80 + (auraMultiplier * 40)); // 80-120 HP
-  const baseAttack = Math.floor(15 + (auraMultiplier * 10)); // 15-25 ATK
-  const baseDefense = Math.floor(5 + (auraMultiplier * 10)); // 5-15 DEF
-  const baseSpeed = Math.floor(10 + (auraMultiplier * 10)); // 10-20 SPD
-  const critChance = 0.1 + (auraMultiplier * 0.2); // 0.1-0.3 crit chance
+  const baseHp = Math.floor(80 + auraMultiplier * 40); // 80-120 HP
+  const baseAttack = Math.floor(15 + auraMultiplier * 10); // 15-25 ATK
+  const baseDefense = Math.floor(5 + auraMultiplier * 10); // 5-15 DEF
+  const baseSpeed = Math.floor(10 + auraMultiplier * 10); // 10-20 SPD
+  const critChance = 0.1 + auraMultiplier * 0.2; // 0.1-0.3 crit chance
 
   const abilities = [
     "Alter Ego Burst",
@@ -81,7 +81,7 @@ export function generateFighter(user: User, displayName: string): Fighter {
     "Time Slow",
     "Soul Strike",
     "Phoenix Rising",
-    "Relic of Exodus",
+    "Relic of Exo",
     "Ego's Blessing",
     "Cleansing",
     "Raise the Dead",

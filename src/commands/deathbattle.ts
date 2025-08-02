@@ -5,17 +5,21 @@ import {
   AttachmentBuilder,
   User,
   MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
 } from "discord.js";
 import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import { generateFighter, Fighter } from "../utils/fighterGenerator.js";
+import { BattleStatsManager } from "../utils/battleStats.js";
 
-// Global battle state management
 let isBattleActive = false;
 let currentBattleUsers: Set<string> = new Set();
 
 export const data = new SlashCommandBuilder()
-  .setName("deathbattle")
+  .setName("battle")
   .setDescription("Witness an epic clash between two souls in divine combat!")
   .addUserOption((option) =>
     option
@@ -28,6 +32,15 @@ export const data = new SlashCommandBuilder()
       .setName("fighter2")
       .setDescription("The second warrior to challenge fate")
       .setRequired(true),
+  )
+  .addStringOption((option) =>
+    option
+      .setName("ranked")
+      .setDescription(
+        "Start a ranked battle (requires consent from both fighters)",
+      )
+      .addChoices({ name: "Yes", value: "yes" }, { name: "No", value: "no" })
+      .setRequired(false),
   );
 
 interface BattleEvent {
@@ -96,6 +109,7 @@ const battleNarrations = {
     "{winner} emerges as the ultimate warrior!",
     "{winner} claims the title of champion!",
     "{winner} has prevailed!",
+    "The heavens shall remember {winner}'s victory!",
   ],
 };
 
@@ -339,7 +353,8 @@ async function simulateBattleStep(
     }
   } else {
     const baseDamage = attacker.attack;
-    const isCrit = Math.random() < attacker.critChance;
+    const critRoll = Math.random();
+    const isCrit = critRoll < attacker.critChance;
     damage = isCrit ? Math.floor(baseDamage * 1.8) : baseDamage;
 
     const defenseRoll = Math.random();
@@ -385,7 +400,7 @@ async function simulateBattleStep(
 
   if (damage > 0) {
     defender.hp = Math.max(0, defender.hp - damage);
-    if (damage > 0 && !narration.includes("HP")) {
+    if (!narration.includes("HP")) {
       narration += ` **(${damage} dmg)**`;
     }
   }
@@ -395,7 +410,7 @@ async function simulateBattleStep(
     defender: defender.name,
     action,
     damage,
-    isCrit: action === "attack" && Math.random() < attacker.critChance,
+    isCrit: false,
     abilityUsed,
     narration,
     fighter1Hp: fighter1.hp,
@@ -408,13 +423,166 @@ async function simulateBattleStep(
   };
 }
 
+async function handleConsentPhase(
+  interaction: ChatInputCommandInteraction,
+  fighter1User: User,
+  fighter2User: User,
+  isRanked: boolean,
+): Promise<boolean> {
+  console.log(
+    `[CONSENT] Starting consent phase for ranked battle: ${isRanked}`,
+  );
+  console.log(`[CONSENT] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`);
+  console.log(`[CONSENT] Fighter 2: ${fighter2User.tag} (${fighter2User.id})`);
+
+  const consentEmbed = new EmbedBuilder()
+    .setColor("#FF6B35")
+    .setTitle("⚔️ BATTLE CONSENT REQUIRED")
+    .setDescription(
+      `**${fighter1User} and ${fighter2User}**\n\n` +
+        `A ${isRanked ? "**RANKED**" : "normal"} deathbattle has been proposed!\n\n` +
+        `${isRanked ? "🏆 **This is a RANKED battle - results will affect your competitive rating!**\n\n" : ""}` +
+        `Both fighters must consent to engage in combat.\n` +
+        `You have **15 seconds** to respond.`,
+    )
+    .setFooter({
+      text: isRanked
+        ? "Ranked battles require both fighters to agree"
+        : "Casual battle consent required",
+    });
+
+  const acceptButton = new ButtonBuilder()
+    .setCustomId("accept_battle")
+    .setLabel("⚔️ Accept Battle")
+    .setStyle(ButtonStyle.Success);
+
+  const declineButton = new ButtonBuilder()
+    .setCustomId("decline_battle")
+    .setLabel("❌ Decline Battle")
+    .setStyle(ButtonStyle.Secondary);
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    acceptButton,
+    declineButton,
+  );
+
+  console.log(`[CONSENT] Sending consent embed with buttons`);
+  await interaction.editReply({
+    content: `${fighter1User} ${fighter2User}`,
+    embeds: [consentEmbed],
+    components: [row],
+  });
+
+  const acceptedUsers = new Set<string>();
+
+  try {
+    console.log(`[CONSENT] Creating message component collector`);
+    const collector = interaction.channel!.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: 15000,
+    });
+
+    return new Promise((resolve) => {
+      collector.on("collect", async (buttonInteraction) => {
+        const userId = buttonInteraction.user.id;
+        console.log(
+          `[CONSENT] Button interaction from user: ${buttonInteraction.user.tag} (${userId})`,
+        );
+        console.log(`[CONSENT] Button ID: ${buttonInteraction.customId}`);
+
+        if (userId !== fighter1User.id && userId !== fighter2User.id) {
+          console.log(
+            `[CONSENT] Unauthorized user ${buttonInteraction.user.tag} tried to respond`,
+          );
+          await buttonInteraction.reply({
+            content:
+              "**Only the challenged fighters may respond to this battle!**",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (buttonInteraction.customId === "accept_battle") {
+          acceptedUsers.add(userId);
+          console.log(
+            `[CONSENT] User ${buttonInteraction.user.tag} accepted the battle`,
+          );
+          console.log(`[CONSENT] Accepted users: ${Array.from(acceptedUsers)}`);
+          await buttonInteraction.reply({
+            content: `**${buttonInteraction.user.tag} has accepted the battle challenge!**`,
+            flags: MessageFlags.Ephemeral,
+          });
+        } else if (buttonInteraction.customId === "decline_battle") {
+          console.log(
+            `[CONSENT] User ${buttonInteraction.user.tag} declined the battle`,
+          );
+          await buttonInteraction.reply({
+            content: `**${buttonInteraction.user.tag} has declined the battle challenge!**`,
+            flags: MessageFlags.Ephemeral,
+          });
+
+          console.log(`[CONSENT] Battle declined, stopping collector`);
+          collector.stop("declined");
+          resolve(false);
+          return;
+        }
+
+        const bothAccepted =
+          acceptedUsers.has(fighter1User.id) &&
+          acceptedUsers.has(fighter2User.id);
+        console.log(`[CONSENT] Both users accepted check: ${bothAccepted}`);
+        console.log(
+          `[CONSENT] Fighter1 accepted: ${acceptedUsers.has(fighter1User.id)}`,
+        );
+        console.log(
+          `[CONSENT] Fighter2 accepted: ${acceptedUsers.has(fighter2User.id)}`,
+        );
+
+        if (bothAccepted) {
+          console.log(`[CONSENT] Both users accepted, proceeding with battle`);
+          collector.stop("accepted");
+          resolve(true);
+        }
+      });
+
+      collector.on("end", (collected, reason) => {
+        console.log(`[CONSENT] Collector ended with reason: ${reason}`);
+        console.log(`[CONSENT] Collected ${collected.size} interactions`);
+        if (reason === "time") {
+          console.log(`[CONSENT] Consent timed out`);
+          resolve(false);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("[CONSENT] Error in consent phase:", error);
+    return false;
+  }
+}
+
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
   const fighter1User = interaction.options.getUser("fighter1")!;
   const fighter2User = interaction.options.getUser("fighter2")!;
+  const rankedOption = interaction.options.getString("ranked") || "no";
+  const isRanked = rankedOption === "yes";
+
+  console.log(`[DEATHBATTLE] Starting deathbattle command`);
+  console.log(
+    `[DEATHBATTLE] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`,
+  );
+  console.log(
+    `[DEATHBATTLE] Fighter 2: ${fighter2User.tag} (${fighter2User.id})`,
+  );
+  console.log(`[DEATHBATTLE] Ranked option: ${rankedOption}`);
+  console.log(`[DEATHBATTLE] Is ranked: ${isRanked}`);
+  console.log(
+    `[DEATHBATTLE] Command user: ${interaction.user.tag} (${interaction.user.id})`,
+  );
 
   if (fighter1User.id === fighter2User.id) {
+    console.log(`[DEATHBATTLE] Same user selected for both fighters`);
     await interaction.reply({
       content:
         "**A soul cannot battle against itself! Choose two different warriors!**",
@@ -423,17 +591,35 @@ export async function execute(
     return;
   }
 
-  // checks
-  if (isBattleActive) {
+  if (
+    isRanked &&
+    interaction.user.id !== fighter1User.id &&
+    interaction.user.id !== fighter2User.id
+  ) {
+    console.log(`[DEATHBATTLE] Ranked battle initiated by non-participant`);
     await interaction.reply({
       content:
-        "**THE ARENA IS OCCUPIED! Another grand battle is already taking place. Wait for the current clash to conclude before summoning new warriors to the heavens!**",
+        "**For RANKED battles, you must be one of the fighters! You can only challenge others or accept challenges in ranked mode.**",
       flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
-  if (currentBattleUsers.has(fighter1User.id) || currentBattleUsers.has(fighter2User.id)) {
+  if (isBattleActive) {
+    console.log(`[DEATHBATTLE] Battle already active, rejecting new battle`);
+    await interaction.reply({
+      content:
+        "**THE ARENA IS OCCUPIED! Another grand battle is already taking place. Wait for the current clash to conclude before summoning new warriors to the arena!**",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  if (
+    currentBattleUsers.has(fighter1User.id) ||
+    currentBattleUsers.has(fighter2User.id)
+  ) {
+    console.log(`[DEATHBATTLE] One of the fighters is already in battle`);
     await interaction.reply({
       content:
         "**ONE OF THE CHOSEN WARRIORS IS ALREADY ENGAGED IN COMBAT! Wait for their current battle to finish before challenging them again!**",
@@ -442,6 +628,7 @@ export async function execute(
     return;
   }
 
+  console.log(`[DEATHBATTLE] Locking battle system`);
   isBattleActive = true;
   currentBattleUsers.add(fighter1User.id);
   currentBattleUsers.add(fighter2User.id);
@@ -449,6 +636,45 @@ export async function execute(
   await interaction.deferReply();
 
   try {
+    if (isRanked) {
+      console.log(
+        `[DEATHBATTLE] This is a ranked battle, starting consent phase`,
+      );
+      const consentGiven = await handleConsentPhase(
+        interaction,
+        fighter1User,
+        fighter2User,
+        isRanked,
+      );
+
+      console.log(`[DEATHBATTLE] Consent phase result: ${consentGiven}`);
+
+      if (!consentGiven) {
+        console.log(`[DEATHBATTLE] Consent not given, cancelling battle`);
+        const cancelEmbed = new EmbedBuilder()
+          .setColor("#8B0000")
+          .setTitle("⚔️ RANKED BATTLE CANCELLED")
+          .setDescription(
+            `The **RANKED** battle has been cancelled.\n\n` +
+              `*The warriors have chosen not to engage in competitive combat at this time.*`,
+          )
+          .setFooter({ text: "🔓 Arena is now available for new battles" });
+
+        await interaction.editReply({
+          content: "",
+          embeds: [cancelEmbed],
+          components: [],
+        });
+        return;
+      }
+    } else {
+      console.log(
+        `[DEATHBATTLE] This is a casual battle, skipping consent phase`,
+      );
+    }
+
+    console.log(`[DEATHBATTLE] Proceeding with battle setup`);
+
     let fighter1DisplayName: string;
     let fighter2DisplayName: string;
 
@@ -481,10 +707,13 @@ export async function execute(
     let battleLog: string[] = [];
 
     const setupEmbed = new EmbedBuilder()
-      .setColor("#2E2B5F")
-      .setTitle("⚔️ THE HEAVENS HAVE DECLARED A DEATHBATTLE!")
+      .setColor(isRanked ? "#FF6B35" : "#2E2B5F")
+      .setTitle(
+        `⚔️ THE HEAVENS HAVE DECLARED A ${isRanked ? "RANKED " : ""}DEATHBATTLE!`,
+      )
       .setDescription(
         `**Two warriors enter the sacred arena of combat!**\n\n` +
+          `${isRanked ? "🏆 **RANKED BATTLE** - Results will affect competitive ratings!\n\n" : ""}` +
           `**${fighter1.name}** vs **${fighter2.name}**\n\n` +
           `🏃 **${fighters[0].name}** moves first with superior speed!\n\n` +
           `**Fighter Stats:**\n` +
@@ -493,9 +722,16 @@ export async function execute(
           `⚔️ **Battle begins in 3 seconds...**`,
       )
       .setImage("attachment://deathbattle.png")
-      .setFooter({ text: "🔒 Arena locked - No other battles can start until this concludes" });
+      .setFooter({
+        text: `🔒 Arena locked - ${isRanked ? "RANKED " : ""}Battle in progress...`,
+      });
 
-    await interaction.editReply({ embeds: [setupEmbed], files: [attachment] });
+    await interaction.editReply({
+      content: "",
+      embeds: [setupEmbed],
+      files: [attachment],
+      components: [],
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -512,8 +748,8 @@ export async function execute(
       turn++;
 
       const progressEmbed = new EmbedBuilder()
-        .setColor("#35C2FF")
-        .setTitle("⚔️ BATTLE IN PROGRESS")
+        .setColor(isRanked ? "#FF6B35" : "#35C2FF")
+        .setTitle(`⚔️ ${isRanked ? "RANKED " : ""}BATTLE IN PROGRESS`)
         .setDescription(
           `**Turn ${turn}** - The battle rages on!\n\n` +
             `**Current HP:**\n` +
@@ -525,7 +761,9 @@ export async function execute(
             battleLog.slice(-5).join("\n"),
         )
         .setImage("attachment://deathbattle.png")
-        .setFooter({ text: "🔒 Arena locked - Battle in progress..." });
+        .setFooter({
+          text: `🔒 Arena locked - ${isRanked ? "RANKED " : ""}Battle in progress...`,
+        });
 
       await interaction.editReply({ embeds: [progressEmbed] });
 
@@ -549,6 +787,17 @@ export async function execute(
     ].replace("{winner}", `**${winner.name}**`);
     battleLog.push(`🏆 ${victoryNarration}`);
 
+    await BattleStatsManager.recordBattle(
+      winner.user.id,
+      winner.user.tag,
+      loser.user.id,
+      loser.user.tag,
+      turn,
+      winner.hp,
+      winner.maxHp,
+      isRanked,
+    );
+
     const finalImageBuffer = await createBattleImage(
       fighter1User,
       fighter2User,
@@ -560,37 +809,45 @@ export async function execute(
       name: "deathbattle-final.png",
     });
 
+    const winnerStats = await BattleStatsManager.getUserStats(winner.user.id);
+    const loserStats = await BattleStatsManager.getUserStats(loser.user.id);
+
     const finalEmbed = new EmbedBuilder()
       .setColor("#FFD700")
-      .setTitle("🏆 THE DEATHBATTLE HAS CONCLUDED")
+      .setTitle(`🏆 THE ${isRanked ? "RANKED " : ""}DEATHBATTLE HAS CONCLUDED`)
       .setDescription(
         `**${winner.name}** emerges victorious after ${turn} turns!\n\n` +
+          `${isRanked ? "🏆 **RANKED VICTORY** - Competitive ratings updated!\n\n" : ""}` +
           `**Final Results:**\n` +
           `🏆 **Victor:** ${winner.name} (${winner.hp}/${winner.maxHp} HP)\n` +
           `💀 **Defeated:** ${loser.name} (0/${loser.maxHp} HP)\n\n` +
           `**Battle Conclusion:**\n` +
           battleLog.slice(-3).join("\n") +
           "\n\n" +
+          `**Updated ${isRanked ? "Ranked " : ""}Battle Records:**\n` +
+          `🏆 **${winner.name}:** ${isRanked ? winnerStats?.rankedWins || 1 : winnerStats?.wins || 1}W-${isRanked ? winnerStats?.rankedLosses || 0 : winnerStats?.losses || 0}L (${isRanked ? winnerStats?.rankedWinRate || 100 : winnerStats?.winRate || 100}% WR)\n` +
+          `💀 **${loser.name}:** ${isRanked ? loserStats?.rankedWins || 0 : loserStats?.wins || 0}W-${isRanked ? loserStats?.rankedLosses || 1 : loserStats?.losses || 1}L (${isRanked ? loserStats?.rankedWinRate || 0 : loserStats?.winRate || 0}% WR)\n\n` +
           `*The arena falls silent as ${winner.name} stands triumphant...*`,
       )
       .setImage("attachment://deathbattle-final.png")
       .setFooter({
-        text: `Battle lasted ${turn} turns | The heavens shall remember this epic clash`,
+        text: `${isRanked ? "Ranked " : ""}Battle lasted ${turn} turns | 🔓 Arena is now available for new battles`,
       })
       .setTimestamp();
 
     await interaction.editReply({
       embeds: [finalEmbed],
       files: [finalAttachment],
+      components: [],
     });
-
   } catch (error) {
+    console.error("Deathbattle error:", error);
     await interaction.editReply({
       content:
         "**THE DIVINE POWERS HAVE FAILED TO MANIFEST THE BATTLE! The arena remains empty.**",
+      components: [],
     });
   } finally {
-    // Always unlock the battle system even if error
     isBattleActive = false;
     currentBattleUsers.clear();
   }

@@ -19,6 +19,7 @@ import * as oracle from "../commands/oracle.js";
 import * as tdstrivia from "../commands/tdstrivia.js";
 import * as aura from "../commands/aura.js";
 import * as deathbattle from "../commands/deathbattle.js";
+import * as battleprofile from "../commands/battleprofile.js";
 
 export interface Command {
   data: any;
@@ -49,6 +50,7 @@ export function loadCommands(): Collection<string, Command> {
     tdstrivia,
     aura,
     deathbattle,
+    battleprofile,
   ];
 
   for (const command of commandModules) {
