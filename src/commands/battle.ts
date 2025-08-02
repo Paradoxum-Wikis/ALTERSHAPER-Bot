@@ -256,7 +256,7 @@ async function simulateBattleStep(
         narration = `💥 **${attacker.name}** channels their alter ego for a devastating burst attack!`;
         break;
       case "Ego Shield":
-        attacker.defense += 3;
+        attacker.defense += 4;
         narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense!`;
         break;
       case "Shadow Clone":
@@ -269,12 +269,12 @@ async function simulateBattleStep(
         narration = `✨ **${attacker.name}** bathes in the gracious healing light, restoring ${heal} HP!`;
         break;
       case "Berserker Rage":
-        attacker.attack += 3;
+        attacker.attack += 5;
         attacker.defense = Math.max(1, attacker.defense - 2);
         narration = `😡 **${attacker.name}** enters a berserker rage! (+3 ATK, -2 DEF)`;
         break;
       case "Time Slow":
-        attacker.speed += 3;
+        attacker.speed += 5;
         narration = `⏰ **${attacker.name}** manipulates time, increasing their speed!`;
         break;
       case "Soul Strike":
@@ -346,8 +346,8 @@ async function simulateBattleStep(
         narration = `👑 **${attacker.name}** channels their great will, converting their wounds into raw power!`;
         break;
       case "Toxic Fumes":
-        attacker.defense += 5;
-        attacker.speed += 5;
+        attacker.defense += 3;
+        attacker.speed += 3;
         narration = `☣️ **${attacker.name}** injects themself with Toxic Gunner's fumes, enhancing their reflexes and durability! (+5 DEF, +5 SPD)`;
         break;
     }
