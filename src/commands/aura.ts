@@ -3,14 +3,7 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
 } from "discord.js";
-
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash + str.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
+import { generateFighter, calculateAuraPercentage, calculateAuraLevel } from "../utils/fighterGenerator.js";
 
 // prettier-ignore
 const auraLevelNames = [
@@ -62,7 +55,7 @@ const flavorSets = [flavorSet1, flavorSet2];
 
 export const data = new SlashCommandBuilder()
   .setName("aura")
-  .setDescription("Calculate your aura based on your display name")
+  .setDescription("Calculate aura and fighter stats based on one's display name")
   .addUserOption((option) =>
     option
       .setName("user")
@@ -83,63 +76,50 @@ export async function execute(
     displayName = targetUser.username;
   }
 
-  let percentage: number;
-  let level: number;
-  let flavorText: string;
+  const percentage = calculateAuraPercentage(displayName);
+  const level = calculateAuraLevel(percentage);
+  const fighter = generateFighter(targetUser, displayName);
 
-  const nameToLevel: { [key: string]: number } = {
-    toru: 0,
-    toru1: 1,
-    toru2: 2,
-    toru3: 3,
-    toru4: 4,
-    toru5: 5,
-    toru6: 6,
-    toru7: 7,
-    toru8: 8,
-    toru9: 9,
-    toru10: 10,
-    toru11: 11,
-  };
+  const chosenSet = flavorSets[Math.floor(Math.random() * flavorSets.length)];
+  const flavorText = chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
 
-  if (displayName in nameToLevel) {
-    level = nameToLevel[displayName];
-    percentage = level === 0 ? -100 : level === 11 ? 100 : (level - 1) * 10 + 9;
-    const chosenSet = flavorSets[Math.floor(Math.random() * flavorSets.length)];
-    flavorText = chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
-  } else {
-    const chosenSet = flavorSets[Math.floor(Math.random() * flavorSets.length)];
-    const hash = hashString(displayName);
-    percentage = hash % 101;
-
-    if (percentage <= 3) {
-      level = 0;
-    } else if (percentage <= 9) {
-      level = 1;
-    } else if (percentage === 100) {
-      level = 11;
-    } else {
-      level = Math.ceil((percentage - 9) / 10) + 1;
-      if (level > 10) level = 10;
-    }
-
-    flavorText = chosenSet[Math.max(0, Math.min(level, chosenSet.length - 1))];
-  }
-
-  const levelName =
-    auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
+  const levelName = auraLevelNames[Math.max(0, Math.min(level, auraLevelNames.length - 1))];
 
   const embed = new EmbedBuilder()
     .setColor(level === 0 ? "#2F2F2F" : level === 11 ? "#ad32ffff" : "#800080")
     .setTitle("🔮 Aura Reading")
     .setDescription(`The mystical aura of **${displayName}** has been divined!`)
     .addFields(
-      { name: "Aura Strength", value: `${percentage}%`, inline: true },
-      { name: "Aura Level", value: `${level} (${levelName})`, inline: true },
-      { name: "Verdict:", value: flavorText, inline: false },
+      { name: "🌟 Aura Strength", value: `${percentage}%`, inline: true },
+      { name: "📊 Aura Level", value: `${level} (${levelName})`, inline: true },
+      { name: "⚔️ Fighter Class", value: getFighterClass(level), inline: true },
+      { name: "💪 Combat Statistics", value: 
+        `**HP:** ${fighter.hp}\n` +
+        `**ATK:** ${fighter.attack}\n` +
+        `**DEF:** ${fighter.defense}\n` +
+        `**SPD:** ${fighter.speed}\n` +
+        `**CRIT:** ${Math.round(fighter.critChance * 100)}%`, 
+        inline: true 
+      },
+      { name: "🎯 Special Abilities", value: 
+        `• ${fighter.abilities[0]}\n• ${fighter.abilities[1]}`, 
+        inline: true 
+      },
+      { name: "📝 Verdict", value: flavorText, inline: false },
     )
+    .setThumbnail(targetUser.displayAvatarURL())
     .setFooter({ text: "Aura levels may vary based on cosmic vibrations." })
     .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });
+}
+
+function getFighterClass(level: number): string {
+  if (level === 0) return "Cursed Bum";
+  if (level <= 2) return "Recruit";
+  if (level <= 4) return "Hardened Fighter";
+  if (level <= 6) return "Decimator";
+  if (level <= 8) return "Egoistic Champion";
+  if (level <= 10) return "Living Weapon";
+  return "Ego's Chosen One";
 }
