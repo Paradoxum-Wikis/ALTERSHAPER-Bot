@@ -129,9 +129,14 @@ async function createBattleImage(
   const ctx = canvas.getContext("2d");
 
   try {
-    const background = await loadImage(
-      path.join(__dirname, "..", "deathbattle.png")
-    );
+    const backgroundPath = path.join(process.cwd(), "dist", "deathbattle.png");
+    console.log("Attempting to load background image from:", backgroundPath);
+    console.log("Current working directory:", process.cwd());
+    console.log("__dirname:", __dirname);
+    
+    const background = await loadImage(backgroundPath);
+    console.log("Successfully loaded background image!");
+    
     ctx.drawImage(background, 0, 0, 1920, 1080);
 
     const avatar1 = await loadImage(
