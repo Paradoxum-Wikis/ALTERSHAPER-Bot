@@ -10,6 +10,10 @@ import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import { generateFighter, Fighter } from "../utils/fighterGenerator.js";
 
+// Global battle state management
+let isBattleActive = false;
+let currentBattleUsers: Set<string> = new Set();
+
 export const data = new SlashCommandBuilder()
   .setName("deathbattle")
   .setDescription("Witness an epic clash between two souls in divine combat!")
@@ -58,7 +62,7 @@ const battleNarrations = {
     "{attacker} strikes with the fury of a thousand alters - **CRITICAL**!",
   ],
   dodge: [
-    "{defender} gracefully evades {attacker}'s assault",
+    "{defender} elegantly evades {attacker}'s assault",
     "{defender} phases through {attacker}'s attack like a phantom",
     "{defender} reads {attacker}'s movements and dodges perfectly",
     "{defender} vanishes from sight, avoiding {attacker}'s strike",
@@ -67,7 +71,8 @@ const battleNarrations = {
   ],
   block: [
     "{defender} raises their guard and blocks {attacker}'s attack",
-    "{defender} deflects {attacker}'s strike with divine protection",
+    "{defender} deflects {attacker}'s strike with great skill",
+    "{defender} fully resists {attacker}'s assault with a perfect block",
     "{defender} absorbs the impact with unwavering resolve",
     "{defender} withstands {attacker}'s attack like a man",
   ],
@@ -236,9 +241,9 @@ async function simulateBattleStep(
         damage = Math.floor(attacker.attack * 1.5);
         narration = `💥 **${attacker.name}** channels their alter ego for a devastating burst attack!`;
         break;
-      case "Divine Shield":
+      case "Ego Shield":
         attacker.defense += 3;
-        narration = `🛡️ **${attacker.name}** raises a divine shield, increasing their defense!`;
+        narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense!`;
         break;
       case "Shadow Clone":
         damage = Math.floor(attacker.attack * 0.8);
@@ -247,7 +252,7 @@ async function simulateBattleStep(
       case "Healing Light":
         const heal = Math.floor(attacker.maxHp * 0.2);
         attacker.hp = Math.min(attacker.hp + heal, attacker.maxHp);
-        narration = `✨ **${attacker.name}** bathes in healing light, restoring ${heal} HP!`;
+        narration = `✨ **${attacker.name}** bathes in the gracious healing light, restoring ${heal} HP!`;
         break;
       case "Berserker Rage":
         attacker.attack += 3;
@@ -315,7 +320,7 @@ async function simulateBattleStep(
         narration = `✈️ **${attacker.name}** calls in an airstrike from above, raining destruction!`;
         break;
       case "Divine Intervention":
-        const divineHeal = Math.floor(attacker.maxHp * 0.3);
+        const divineHeal = Math.floor(attacker.maxHp * 0.2);
         attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
         attacker.defense += 5;
         narration = `⭐ **${attacker.name}** receives the labyrinth's divine intervention, healing ${divineHeal} HP and gaining divine protection!`;
@@ -417,6 +422,29 @@ export async function execute(
     return;
   }
 
+  // checks
+  if (isBattleActive) {
+    await interaction.reply({
+      content:
+        "**THE ARENA IS OCCUPIED! Another grand battle is already taking place. Wait for the current clash to conclude before summoning new warriors to the heavens!**",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  if (currentBattleUsers.has(fighter1User.id) || currentBattleUsers.has(fighter2User.id)) {
+    await interaction.reply({
+      content:
+        "**ONE OF THE CHOSEN WARRIORS IS ALREADY ENGAGED IN COMBAT! Wait for their current battle to finish before challenging them again!**",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  isBattleActive = true;
+  currentBattleUsers.add(fighter1User.id);
+  currentBattleUsers.add(fighter2User.id);
+
   await interaction.deferReply();
 
   try {
@@ -463,7 +491,8 @@ export async function execute(
           `🔵 **${fighter2.name}**: ${fighter2.maxHp} HP | ${fighter2.attack} ATK | ${fighter2.defense} DEF | ${fighter2.speed} SPD\n\n` +
           `⚔️ **Battle begins in 3 seconds...**`,
       )
-      .setImage("attachment://deathbattle.png");
+      .setImage("attachment://deathbattle.png")
+      .setFooter({ text: "🔒 Arena locked - No other battles can start until this concludes" });
 
     await interaction.editReply({ embeds: [setupEmbed], files: [attachment] });
 
@@ -495,7 +524,7 @@ export async function execute(
             battleLog.slice(-5).join("\n"),
         )
         .setImage("attachment://deathbattle.png")
-        .setFooter({ text: "Battle continues..." });
+        .setFooter({ text: "🔒 Arena locked - Battle in progress..." });
 
       await interaction.editReply({ embeds: [progressEmbed] });
 
@@ -553,10 +582,15 @@ export async function execute(
       embeds: [finalEmbed],
       files: [finalAttachment],
     });
+
   } catch (error) {
     await interaction.editReply({
       content:
         "**THE DIVINE POWERS HAVE FAILED TO MANIFEST THE BATTLE! The arena remains empty.**",
     });
+  } finally {
+    // Always unlock the battle system even if error
+    isBattleActive = false;
+    currentBattleUsers.clear();
   }
 }
