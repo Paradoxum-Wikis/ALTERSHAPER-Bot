@@ -308,8 +308,8 @@ async function simulateBattleStep(
       case "Cleansing":
         const cleanseHeal = Math.floor(attacker.maxHp * 0.15);
         attacker.hp = Math.min(attacker.hp + cleanseHeal, attacker.maxHp);
-        attacker.speed += 5;
-        narration = `🌿 **${attacker.name}** cleanses their body and soul, healing ${cleanseHeal} HP, and gaining swift energy! (+5 SPD)`;
+        attacker.speed += 1;
+        narration = `🌿 **${attacker.name}** cleanses their body and soul, healing ${cleanseHeal} HP, and gaining swift energy! (+1 SPD)`;
         break;
       case "Raise the Dead":
         if (attacker.hp < attacker.maxHp * 0.25) {
@@ -360,7 +360,7 @@ async function simulateBattleStep(
         if (attacker.hp > freikugelCost) {
           damage = 35;
           attacker.hp -= freikugelCost;
-          narration = `🔫 **${attacker.name}** fires the accursed Freikugel, sacrificing ${freikugelCost} HP for demonic devastation!`;
+          narration = `🔫 **${attacker.name}** fires the accursed Freikugel, sacrificing ${freikugelCost} HP for demonic devastation! **(35 dmg)**`;
         } else {
           damage = Math.floor(attacker.attack * 1.1);
           narration = `🔫 **${attacker.name}** attempts to fire the Freikugel but lacks the life force, settling for a weaker shot!`;

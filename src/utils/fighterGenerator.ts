@@ -96,7 +96,7 @@ export function generateFighter(user: User, displayName: string): Fighter {
     "Bloodlust",
   ];
 
-  let seed = Math.abs(percentage) + 1000;
+  let seed = hashString(displayName) + 1000;
   const random = () => {
     seed = (seed * 9301 + 49297) % 233280;
     return seed / 233280;
