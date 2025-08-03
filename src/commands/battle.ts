@@ -291,7 +291,8 @@ async function simulateBattleStep(
           narration = `🔥 **${attacker.name}** rises like a phoenix, healing for ${heal} HP!`;
         } else {
           damage = Math.floor(attacker.attack * 1.2);
-          narration = `🔥 **${attacker.name}** strikes with phoenix fire!`;
+          attacker.defense += 1;
+          narration = `🔥 **${attacker.name}** strikes with phoenix fire, their flames hardening their resolve! (+1 DEF)`;
         }
         break;
       case "Relic of Exo":
