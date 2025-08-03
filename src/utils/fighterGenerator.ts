@@ -92,6 +92,8 @@ export function generateFighter(user: User, displayName: string): Fighter {
     "Divine Intervention",
     "Great Will",
     "Toxic Fumes",
+    "Freikugel",
+    "Bloodlust",
   ];
 
   let seed = Math.abs(percentage) + 1000;

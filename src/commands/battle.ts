@@ -286,7 +286,7 @@ async function simulateBattleStep(
         break;
       case "Phoenix Rising":
         if (attacker.hp < attacker.maxHp * 0.3) {
-          const heal = Math.floor(attacker.maxHp * 0.4);
+          const heal = Math.floor(attacker.maxHp * 0.15);
           attacker.hp = Math.min(attacker.hp + heal, attacker.maxHp);
           narration = `🔥 **${attacker.name}** rises like a phoenix, healing for ${heal} HP!`;
         } else {
@@ -329,13 +329,13 @@ async function simulateBattleStep(
         narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-3 SPD to enemy)`;
         break;
       case "Call to Arms":
-        const hits = 3;
-        damage = Math.floor(attacker.attack * 0.6) * hits;
-        narration = `📯 **${attacker.name}** sounds the call to arms, a platoon of soldiers unleashed a flurry of ${hits} bullets!`;
+        damage = Math.floor(attacker.attack * 1.3);
+        attacker.hp = Math.min(attacker.maxHp, attacker.hp + 15);
+        narration = `📯 **${attacker.name}** sounds the call to arms, a platoon of soldiers unleashes a flurry of bullets, while receiving medicine for 15 HP!`;
         break;
       case "Airstrike":
         const airstrikes = Math.floor(Math.random() * 5) + 1;
-        damage = Math.floor(attacker.attack * (1.7 / 5)) * airstrikes;
+        damage = Math.floor(attacker.attack * (1.8 / 5)) * airstrikes;
         narration = `✈️ **${attacker.name}** calls in an airstrike from above, ${airstrikes} bomber${airstrikes > 1 ? "s" : ""} raining destruction!`;
         break;
       case "Divine Intervention":
@@ -353,6 +353,23 @@ async function simulateBattleStep(
         attacker.defense += 3;
         attacker.speed += 3;
         narration = `☣️ **${attacker.name}** injects themself with Toxic Gunner's fumes, enhancing their reflexes and durability! (+5 DEF, +5 SPD)`;
+        break;
+      case "Freikugel":
+        const freikugelCost = Math.floor(attacker.maxHp * 0.1);
+        if (attacker.hp > freikugelCost) {
+          damage = 35;
+          attacker.hp -= freikugelCost;
+          narration = `🔫 **${attacker.name}** fires the accursed Freikugel, sacrificing ${freikugelCost} HP for demonic devastation!`;
+        } else {
+          damage = Math.floor(attacker.attack * 1.1);
+          narration = `🔫 **${attacker.name}** attempts to fire the Freikugel but lacks the life force, settling for a weaker shot!`;
+        }
+        break;
+      case "Bloodlust":
+        damage = Math.floor(attacker.attack * 0.8);
+        const drainAmount = Math.floor(damage * 0.9);
+        attacker.hp = Math.min(attacker.hp + drainAmount, attacker.maxHp);
+        narration = `🧛 **${attacker.name}** sucks **${defender.name}**'s blood, draining ${drainAmount} HP for themself!`;
         break;
     }
   } else {
