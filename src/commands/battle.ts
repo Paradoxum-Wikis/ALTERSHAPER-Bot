@@ -257,7 +257,7 @@ async function simulateBattleStep(
         break;
       case "Ego Shield":
         attacker.defense += 4;
-        narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense!`;
+        narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense! (+4 DEF)`;
         break;
       case "Shadow Clone":
         attacker.attack += 1;
@@ -272,11 +272,11 @@ async function simulateBattleStep(
       case "Berserker Rage":
         attacker.attack += 5;
         attacker.defense = Math.max(1, attacker.defense - 2);
-        narration = `😡 **${attacker.name}** enters a berserker rage! (+3 ATK, -2 DEF)`;
+        narration = `😡 **${attacker.name}** enters a berserker rage! (+5 ATK, -2 DEF)`;
         break;
       case "Time Slow":
         attacker.speed += 5;
-        narration = `⏰ **${attacker.name}** manipulates time, increasing their speed!`;
+        narration = `⏰ **${attacker.name}** manipulates time, increasing their speed! (+5 SPD)`;
         break;
       case "Soul Strike":
         attacker.speed += 1;
