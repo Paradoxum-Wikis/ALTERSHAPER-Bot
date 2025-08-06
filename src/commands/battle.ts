@@ -55,6 +55,19 @@ interface BattleEvent {
   fighter2Hp: number;
 }
 
+function getRealmName(backgroundFileName: string): string {
+  switch (backgroundFileName) {
+    case "deathbattle.png":
+      return "heavens";
+    case "deathbattle2.png":
+      return "ruins";
+    case "deathbattle3.png":
+      return "games";
+    default:
+      return "heavens";
+  }
+}
+
 const battleNarrations = {
   normalAttack: [
     "{attacker} strikes {defender} with fury",
@@ -68,7 +81,7 @@ const battleNarrations = {
     "{attacker} quickly strikes {defender}",
   ],
   criticalHit: [
-    "{attacker} lands a **CRITICAL** strike that shakes the heavens!",
+    "{attacker} lands a **CRITICAL** strike that shakes the {realm}!",
     "{attacker} unleashes a soul-crushing **CRITICAL** blow!",
     "{attacker} empowers their alter ego for a **DEVASTATING** hit!",
     "{attacker} delivers a space-bending **CRITICAL** attack!",
@@ -109,7 +122,7 @@ const battleNarrations = {
     "{winner} emerges as the ultimate warrior!",
     "{winner} claims the title of champion!",
     "{winner} has prevailed!",
-    "The heavens shall remember {winner}'s victory!",
+    "The {realm} shall remember {winner}'s victory!",
   ],
 };
 
@@ -132,14 +145,22 @@ async function createBattleImage(
   fighter1Name: string,
   fighter2Name: string,
   winner?: User,
-): Promise<Buffer> {
+  isRanked: boolean = false,
+): Promise<{ buffer: Buffer; backgroundFileName: string }> {
   const canvas = createCanvas(1920, 1080);
   const ctx = canvas.getContext("2d");
 
+  let backgroundFileName: string;
+  if (isRanked) {
+    backgroundFileName = "deathbattle2.png";
+  } else {
+    backgroundFileName = Math.random() < 0.1 ? "deathbattle3.png" : "deathbattle.png";
+  }
+  
   const possiblePaths = [
-    path.join(process.cwd(), "src", "deathbattle.png"),
-    path.join(process.cwd(), "dist", "deathbattle.png"),
-    path.join(process.cwd(), "altershaper-bot", "dist", "deathbattle.png"),
+    path.join(process.cwd(), "src", backgroundFileName),
+    path.join(process.cwd(), "dist", backgroundFileName),
+    path.join(process.cwd(), "altershaper-bot", "dist", backgroundFileName),
   ];
 
   let background: any = null;
@@ -219,7 +240,7 @@ async function createBattleImage(
     ctx.fillText(fighter1Name, 475, 908);
     ctx.fillText(fighter2Name, 1440, 908);
 
-    return canvas.toBuffer();
+    return { buffer: canvas.toBuffer(), backgroundFileName };
   } catch (error) {
     ctx.fillStyle = "#2F3136";
     ctx.fillRect(0, 0, 1920, 1080);
@@ -227,7 +248,7 @@ async function createBattleImage(
     ctx.font = "bold 66px Verdana";
     ctx.textAlign = "center";
     ctx.fillText("DEATHBATTLE", 960, 540);
-    return canvas.toBuffer();
+    return { buffer: canvas.toBuffer(), backgroundFileName: "deathbattle.png" };
   }
 }
 
@@ -236,6 +257,7 @@ async function simulateBattleStep(
   fighter2: Fighter,
   fighters: Fighter[],
   currentFighter: number,
+  realmName: string,
 ): Promise<{ event: BattleEvent; newCurrentFighter: number }> {
   const attacker = fighters[currentFighter];
   const defender = fighters[1 - currentFighter];
@@ -417,7 +439,9 @@ async function simulateBattleStep(
       if (isCrit) {
         narration = `💥 ${battleNarrations.criticalHit[
           Math.floor(Math.random() * battleNarrations.criticalHit.length)
-        ].replace("{attacker}", `**${attacker.name}**`)}`;
+        ]
+          .replace("{attacker}", `**${attacker.name}**`)
+          .replace("{realm}", realmName)}`;
       } else {
         narration = `⚔️ ${battleNarrations.normalAttack[
           Math.floor(Math.random() * battleNarrations.normalAttack.length)
@@ -724,15 +748,19 @@ export async function execute(
     const fighter1 = generateFighter(fighter1User, fighter1DisplayName);
     const fighter2 = generateFighter(fighter2User, fighter2DisplayName);
 
-    const imageBuffer = await createBattleImage(
+    const imageResult = await createBattleImage(
       fighter1User,
       fighter2User,
       fighter1DisplayName,
       fighter2DisplayName,
+      undefined,
+      isRanked,
     );
-    const attachment = new AttachmentBuilder(imageBuffer, {
+    const attachment = new AttachmentBuilder(imageResult.buffer, {
       name: "deathbattle.png",
     });
+    
+    const realmName = getRealmName(imageResult.backgroundFileName);
 
     const fighters = [fighter1, fighter2].sort((a, b) => b.speed - a.speed);
     let currentFighter = 0;
@@ -742,7 +770,7 @@ export async function execute(
     const setupEmbed = new EmbedBuilder()
       .setColor(isRanked ? "#FF6B35" : "#2E2B5F")
       .setTitle(
-        `⚔️ THE HEAVENS HAVE DECLARED A ${isRanked ? "RANKED " : ""}DEATHBATTLE!`,
+        `⚔️ THE ${realmName.toUpperCase()} HAVE DECLARED A ${isRanked ? "RANKED " : ""}DEATHBATTLE!`,
       )
       .setDescription(
         `**Two warriors enter the sacred arena of combat!**\n\n` +
@@ -752,6 +780,7 @@ export async function execute(
           `**Fighter Stats:**\n` +
           `🔴 **${fighter1.name}**: ${fighter1.maxHp} HP | ${fighter1.attack} ATK | ${fighter1.defense} DEF | ${fighter1.speed} SPD\n` +
           `🔵 **${fighter2.name}**: ${fighter2.maxHp} HP | ${fighter2.attack} ATK | ${fighter2.defense} DEF | ${fighter2.speed} SPD\n\n` +
+          `💨 **Speed Advantage:** Higher speed grants +1% dodge chance per point difference\n` +
           `⚔️ **Battle begins in 3 seconds...**`,
       )
       .setImage("attachment://deathbattle.png")
@@ -774,6 +803,7 @@ export async function execute(
         fighter2,
         fighters,
         currentFighter,
+        realmName,
       );
       const event = stepResult.event;
       battleLog.push(event.narration);
@@ -817,7 +847,9 @@ export async function execute(
 
     const victoryNarration = battleNarrations.victory[
       Math.floor(Math.random() * battleNarrations.victory.length)
-    ].replace("{winner}", `**${winner.name}**`);
+    ]
+      .replace("{winner}", `**${winner.name}**`)
+      .replace("{realm}", realmName);
     battleLog.push(`🏆 ${victoryNarration}`);
 
     await BattleStatsManager.recordBattle(
@@ -831,14 +863,15 @@ export async function execute(
       isRanked,
     );
 
-    const finalImageBuffer = await createBattleImage(
+    const finalImageResult = await createBattleImage(
       fighter1User,
       fighter2User,
       fighter1DisplayName,
       fighter2DisplayName,
       winner.user,
+      isRanked,
     );
-    const finalAttachment = new AttachmentBuilder(finalImageBuffer, {
+    const finalAttachment = new AttachmentBuilder(finalImageResult.buffer, {
       name: "deathbattle-final.png",
     });
 
