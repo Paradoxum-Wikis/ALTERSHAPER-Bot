@@ -146,12 +146,15 @@ async function createBattleImage(
   fighter2Name: string,
   winner?: User,
   isRanked: boolean = false,
+  forceBackground?: string,
 ): Promise<{ buffer: Buffer; backgroundFileName: string }> {
   const canvas = createCanvas(1920, 1080);
   const ctx = canvas.getContext("2d");
 
   let backgroundFileName: string;
-  if (isRanked) {
+  if (forceBackground) {
+    backgroundFileName = forceBackground;
+  } else if (isRanked) {
     backgroundFileName = "deathbattle2.png";
   } else {
     backgroundFileName = Math.random() < 0.1 ? "deathbattle3.png" : "deathbattle.png";
@@ -870,6 +873,7 @@ export async function execute(
       fighter2DisplayName,
       winner.user,
       isRanked,
+      imageResult.backgroundFileName,
     );
     const finalAttachment = new AttachmentBuilder(finalImageResult.buffer, {
       name: "deathbattle-final.png",
