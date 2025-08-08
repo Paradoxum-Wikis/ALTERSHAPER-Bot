@@ -33,22 +33,25 @@ export async function execute(
     let targetMember: GuildMember | null = null;
 
     const specifiedUser = interaction.options.getUser("target");
-    
+
     if (specifiedUser) {
       targetUser = specifiedUser;
-      targetMember = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
-      
+      targetMember = await interaction.guild.members
+        .fetch(targetUser.id)
+        .catch(() => null);
+
       if (!targetMember) {
         await interaction.reply({
-          content: "**THE ORACLES CANNOT FIND THIS MORTAL IN THE SACRED HALLS!**",
+          content:
+            "**THE ORACLES CANNOT FIND THIS MORTAL IN THE SACRED HALLS!**",
           flags: MessageFlags.Ephemeral,
         });
         return;
       }
     } else {
       const members = await interaction.guild.members.fetch();
-      const realMembers = members.filter(member => !member.user.bot);
-      
+      const realMembers = members.filter((member) => !member.user.bot);
+
       if (realMembers.size === 0) {
         await interaction.reply({
           content: "**THE SACRED HALLS ARE EMPTY OF MORTALS TO JUDGE!**",
@@ -58,13 +61,14 @@ export async function execute(
       }
 
       const membersArray = Array.from(realMembers.values());
-      targetMember = membersArray[Math.floor(Math.random() * membersArray.length)];
+      targetMember =
+        membersArray[Math.floor(Math.random() * membersArray.length)];
       targetUser = targetMember.user;
     }
 
     // Get display name for deterministic results
     const displayName = targetMember?.displayName || targetUser.displayName;
-    
+
     // Use the same hash function from fighterGenerator for consistency
     function hashString(str: string): number {
       let hash = 0;
@@ -148,20 +152,20 @@ export async function execute(
       .setTitle("🔮 THE ORACLES HAVE SPOKEN")
       .setDescription(
         `**The divine vision is ${isFurry ? "clear" : "clouded"}!**\n\n` +
-        `Through the mystical powers of the cosmos, ` +
-        `the oracles have gazed into the depths of souls and revealed:\n\n` +
-        (isFurry 
-          ? `🐾 **${displayName}** is secretly a furry! 🐾`
-          : `😐 **${displayName}** is NOT a furry.`) +
-        `\n\n` +
-        `*The truth cannot be hidden from the all-seeing divine eye...*`
+          `Through the mystical powers of the cosmos, ` +
+          `the oracles have gazed into the depths of souls and revealed:\n\n` +
+          (isFurry
+            ? `🐾 **${displayName}** is secretly a furry! 🐾`
+            : `😐 **${displayName}** is NOT a furry.`) +
+          `\n\n` +
+          `*The truth cannot be hidden from the all-seeing divine eye...*`,
       )
       .setThumbnail(targetUser.displayAvatarURL())
       .addFields(
         {
           name: "📜 ORACLE'S DECREE",
-          value: isFurry 
-            ? "This divine revelation cannot be disputed!" 
+          value: isFurry
+            ? "This divine revelation cannot be disputed!"
             : "The furry energy levels are below the sacred threshold.",
           inline: false,
         },
@@ -171,22 +175,22 @@ export async function execute(
           inline: true,
         },
         {
-          name: isFurry ? "🐺 FURSONA" : "🐺 SPECIES",
-          value: isFurry ? fursonaDisplay : "Mammal (Human)",
+          name: "🐺 FURSONA",
+          value: isFurry ? fursonaDisplay : "None",
           inline: true,
-        }
+        },
       )
-      .setFooter({ 
-        text: "The oracles' judgements are never wrong" 
+      .setFooter({
+        text: "The oracles' judgements are never wrong",
       })
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
-
   } catch (error) {
     console.error("Error in furry command:", error);
     await interaction.reply({
-      content: "**THE ORACLES ARE EXPERIENCING TECHNICAL DIFFICULTIES! THE FURRY DETECTION RITUAL HAS FAILED!**",
+      content:
+        "**THE ORACLES ARE EXPERIENCING TECHNICAL DIFFICULTIES! THE FURRY DETECTION RITUAL HAS FAILED!**",
       flags: MessageFlags.Ephemeral,
     });
   }

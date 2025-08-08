@@ -92,8 +92,7 @@ const commands: CommandInfo[] = [
   },
   {
     name: "/furry [@user]",
-    value:
-      "Check whether a user is a furry",
+    value: "Check whether a user is a furry",
     category: "basic1",
   },
   {

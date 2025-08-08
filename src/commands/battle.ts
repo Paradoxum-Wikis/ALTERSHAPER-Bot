@@ -157,9 +157,10 @@ async function createBattleImage(
   } else if (isRanked) {
     backgroundFileName = "deathbattle2.png";
   } else {
-    backgroundFileName = Math.random() < 0.1 ? "deathbattle3.png" : "deathbattle.png";
+    backgroundFileName =
+      Math.random() < 0.1 ? "deathbattle3.png" : "deathbattle.png";
   }
-  
+
   const possiblePaths = [
     path.join(process.cwd(), "src", backgroundFileName),
     path.join(process.cwd(), "dist", backgroundFileName),
@@ -410,7 +411,8 @@ async function simulateBattleStep(
     const totalDodgeChance = baseDodgeChance + speedDodgeBonus;
 
     const defenseRoll = Math.random();
-    const canBlock = abilityUsed !== "Airstrike" && abilityUsed !== "Great Will";
+    const canBlock =
+      abilityUsed !== "Airstrike" && abilityUsed !== "Great Will";
 
     if (defenseRoll < totalDodgeChance) {
       damage = 0;
@@ -421,7 +423,10 @@ async function simulateBattleStep(
               Math.floor(Math.random() * battleNarrations.dodge.length)
             ]
               .replace("{defender}", "")
-              .replace("{attacker}", `**${attacker.name}**`)} *(+${speedDifference}% dodge from speed)*`
+              .replace(
+                "{attacker}",
+                `**${attacker.name}**`,
+              )} *(+${speedDifference}% dodge from speed)*`
           : `💨 **${defender.name}** ${battleNarrations.dodge[
               Math.floor(Math.random() * battleNarrations.dodge.length)
             ]
@@ -762,7 +767,7 @@ export async function execute(
     const attachment = new AttachmentBuilder(imageResult.buffer, {
       name: "deathbattle.png",
     });
-    
+
     const realmName = getRealmName(imageResult.backgroundFileName);
 
     const fighters = [fighter1, fighter2].sort((a, b) => b.speed - a.speed);
