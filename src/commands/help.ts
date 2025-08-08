@@ -72,58 +72,70 @@ const commands: CommandInfo[] = [
     value: "Impose restraint upon the flow of messages",
     category: "moderator",
   },
-  // Basic
+  // Basic - Page 1
   {
     name: "/aura [@user]",
     value:
       "Calculate thy aura and view fighter profile based on one's display name",
-    category: "basic",
+    category: "basic1",
   },
   {
     name: "/avatar [@user]",
     value: "Behold the divine visage of a soul",
-    category: "basic",
+    category: "basic1",
   },
   {
     name: "/battle @fighter1 @fighter2 [ranked:yes/no]",
     value:
       "Witness an epic clash between two souls in divine combat (ranked requires consent)",
-    category: "basic",
+    category: "basic1",
+  },
+  {
+    name: "/furry [@user]",
+    value:
+      "Check whether a user is a furry",
+    category: "basic1",
   },
   {
     name: "/oracle [question]",
     value: "Consult the oracles for divine wisdom (8ball)",
-    category: "basic",
+    category: "basic1",
   },
+  // Basic - Page 2
   {
     name: "/info",
     value: "Behold the knowledge of the altershaper",
-    category: "basic",
+    category: "basic2",
   },
   {
     name: "/link [fandomusername]",
     value: "Link thy Discord soul with thy Fandom account",
-    category: "basic",
+    category: "basic2",
   },
   {
     name: "/checklink @user",
     value: "Check if a user is linked to Fandom and sync roles",
-    category: "basic",
+    category: "basic2",
   },
   {
     name: "/synctop5",
     value: "Synchronize the top 5 contributors roles with the rankings",
-    category: "basic",
+    category: "basic2",
   },
   {
     name: "/tdstrivia",
     value: "Fetch a random trivia fact from the TDS Wiki",
-    category: "basic",
+    category: "basic2",
+  },
+  {
+    name: "/wiki [page]",
+    value: "Navigate to a wiki page or view user profile information",
+    category: "basic2",
   },
   {
     name: "/help",
     value: "Display these instruments",
-    category: "basic",
+    category: "basic2",
   },
 ];
 
@@ -140,9 +152,14 @@ const categories = [
     commands: commands.filter((cmd) => cmd.category === "moderator"),
   },
   {
-    name: "📚 BASIC",
+    name: "📚 BASIC - USER COMMANDS",
     description: "**Available to all faithful souls in the sacred halls**",
-    commands: commands.filter((cmd) => cmd.category === "basic"),
+    commands: commands.filter((cmd) => cmd.category === "basic1"),
+  },
+  {
+    name: "📚 BASIC - UTILITIES & WIKI",
+    description: "**Available to all faithful souls in the sacred halls**",
+    commands: commands.filter((cmd) => cmd.category === "basic2"),
   },
 ];
 
@@ -172,25 +189,31 @@ function createButtons(
   currentPage: number,
   totalPages: number,
 ): ActionRowBuilder<ButtonBuilder> {
+  const buttonLabels = ["⏮️ Admin", "◀️ Previous", "Next ▶️", "Basic 2 ⏭️"];
+
+  if (currentPage === totalPages - 1) {
+    buttonLabels[3] = "Admin ⏭️";
+  }
+
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId("first")
-      .setLabel("⏮️ Admin")
+      .setLabel(buttonLabels[0])
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(currentPage === 0),
     new ButtonBuilder()
       .setCustomId("previous")
-      .setLabel("◀️ Previous")
+      .setLabel(buttonLabels[1])
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(currentPage === 0),
     new ButtonBuilder()
       .setCustomId("next")
-      .setLabel("Next ▶️")
+      .setLabel(buttonLabels[2])
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(currentPage === totalPages - 1),
     new ButtonBuilder()
       .setCustomId("last")
-      .setLabel("Basic ⏭️")
+      .setLabel(buttonLabels[3])
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(currentPage === totalPages - 1),
   );
@@ -267,7 +290,7 @@ export async function execute(
         .setDisabled(true),
       new ButtonBuilder()
         .setCustomId("last")
-        .setLabel("Basic ⏭️")
+        .setLabel("Basic 2 ⏭️")
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true),
     );
