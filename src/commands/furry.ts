@@ -62,11 +62,86 @@ export async function execute(
       targetUser = targetMember.user;
     }
 
-    const furryLevel = Math.abs(parseInt(targetUser.id.slice(-6), 16)) % 100 + 1;
-    const isFurry = furryLevel >= 50;
+    // Get display name for deterministic results
+    const displayName = targetMember?.displayName || targetUser.displayName;
     
-    const spiritAnimals = ["Wolf", "Fox", "Cat", "Dragon", "Protogen", "Seal", "Raccoon", "Tiger", "Deer", "Bear"];
-    const spiritAnimal = spiritAnimals[Math.abs(parseInt(targetUser.id.slice(-4), 16)) % spiritAnimals.length];
+    // Use the same hash function from fighterGenerator for consistency
+    function hashString(str: string): number {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash + str.charCodeAt(i)) >>> 0;
+      }
+      return hash;
+    }
+
+    // Generate furry level based on display name (same as aura system)
+    const nameHash = hashString(displayName);
+    const furryLevel = (nameHash % 100) + 1;
+    const isFurry = furryLevel >= 50;
+
+    const speciesData = [
+      { category: "Canine", specific: "Wolf" },
+      { category: "Canine", specific: "Fox" },
+      { category: "Canine", specific: "Dog" },
+      { category: "Canine", specific: "Coyote" },
+      { category: "Canine", specific: "Jackal" },
+      { category: "Canine", specific: "Dingo" },
+
+      { category: "Feline", specific: "Cat" },
+      { category: "Feline", specific: "Tiger" },
+      { category: "Feline", specific: "Lion" },
+      { category: "Feline", specific: "Panther" },
+      { category: "Feline", specific: "Leopard" },
+      { category: "Feline", specific: "Cheetah" },
+      { category: "Feline", specific: "Cougar" },
+
+      { category: "Mythical", specific: "Dragon" },
+      { category: "Mythical", specific: "Griffin" },
+      { category: "Mythical", specific: "Kirin" },
+      { category: "Mythical", specific: "Unicorn" },
+      { category: "Mythical", specific: "Phoenix" },
+      { category: "Mythical", specific: "Werewolf" },
+      { category: "Mythical", specific: "Chimera" },
+
+      { category: "Synthetic", specific: "Protogen" },
+      { category: "Synthetic", specific: "Primagen" },
+      { category: "Synthetic", specific: "Android" },
+
+      { category: "Aquatic", specific: "Seal" },
+      { category: "Aquatic", specific: "Shark" },
+      { category: "Aquatic", specific: "Dolphin" },
+      { category: "Aquatic", specific: "Orca" },
+      { category: "Aquatic", specific: "Otter" },
+      { category: "Aquatic", specific: "Octopus" },
+
+      { category: "Mammal", specific: "Raccoon" },
+      { category: "Mammal", specific: "Deer" },
+      { category: "Mammal", specific: "Bear" },
+      { category: "Mammal", specific: "Rabbit" },
+      { category: "Mammal", specific: "Horse" },
+      { category: "Mammal", specific: "Bat" },
+      { category: "Mammal", specific: "Squirrel" },
+      { category: "Mammal", specific: "Pig" },
+      { category: "Mammal", specific: "Goat" },
+      { category: "Mammal", specific: "Sheep" },
+      { category: "Mammal", specific: "Cow" },
+
+      { category: "Insect", specific: "Bee" },
+      { category: "Insect", specific: "Moth" },
+      { category: "Insect", specific: "Butterfly" },
+      { category: "Insect", specific: "Ant" },
+
+      { category: "Avian", specific: "Raven" },
+      { category: "Avian", specific: "Parrot" },
+      { category: "Avian", specific: "Bird" },
+      { category: "Avian", specific: "Hawk" },
+      { category: "Avian", specific: "Owl" },
+      { category: "Avian", specific: "Eagle" },
+    ];
+
+    const speciesHash = hashString(displayName + "species");
+    const selectedSpecies = speciesData[speciesHash % speciesData.length];
+    const fursonaDisplay = `${selectedSpecies.category} (${selectedSpecies.specific})`;
 
     const embed = new EmbedBuilder()
       .setColor(isFurry ? "#FF69B4" : "#808080")
@@ -76,8 +151,8 @@ export async function execute(
         `Through the mystical powers of the cosmos, ` +
         `the oracles have gazed into the depths of souls and revealed:\n\n` +
         (isFurry 
-          ? `🐾 **${targetMember?.displayName || targetUser.displayName}** is secretly a furry! 🐾`
-          : `😐 **${targetMember?.displayName || targetUser.displayName}** is NOT a furry.`) +
+          ? `🐾 **${displayName}** is secretly a furry! 🐾`
+          : `😐 **${displayName}** is NOT a furry.`) +
         `\n\n` +
         `*The truth cannot be hidden from the all-seeing divine eye...*`
       )
@@ -92,12 +167,12 @@ export async function execute(
         },
         {
           name: "🎭 FURRY LEVEL",
-          value: `${furryLevel}% Furry Energy Detected ${isFurry ? "✅" : "❌"}`,
+          value: `${furryLevel}% Furry Energy`,
           inline: true,
         },
         {
-          name: isFurry ? "🐺 SPIRIT ANIMAL" : "🐺 POTENTIAL SPIRIT ANIMAL",
-          value: spiritAnimal,
+          name: isFurry ? "🐺 FURSONA" : "🐺 SPECIES",
+          value: isFurry ? fursonaDisplay : "Mammal (Human)",
           inline: true,
         }
       )
