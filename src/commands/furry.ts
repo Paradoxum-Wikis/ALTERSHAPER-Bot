@@ -6,10 +6,11 @@ import {
   MessageFlags,
   User,
 } from "discord.js";
+import { hashString } from "../utils/fighterGenerator.js";
 
 export const data = new SlashCommandBuilder()
   .setName("furry")
-  .setDescription("The divine oracles reveal furry energy levels")
+  .setDescription("The oracles shall reveal one's furry energy levels")
   .addUserOption((option) =>
     option
       .setName("target")
@@ -66,19 +67,7 @@ export async function execute(
       targetUser = targetMember.user;
     }
 
-    // Get display name for deterministic results
     const displayName = targetMember?.displayName || targetUser.displayName;
-
-    // Use the same hash function from fighterGenerator for consistency
-    function hashString(str: string): number {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash + str.charCodeAt(i)) >>> 0;
-      }
-      return hash;
-    }
-
-    // Generate furry level based on display name (same as aura system)
     const nameHash = hashString(displayName);
     const furryLevel = (nameHash % 100) + 1;
     const isFurry = furryLevel >= 50;
@@ -151,7 +140,7 @@ export async function execute(
       .setColor(isFurry ? "#FF69B4" : "#808080")
       .setTitle("🔮 THE ORACLES HAVE SPOKEN")
       .setDescription(
-        `**The divine vision is ${isFurry ? "clear" : "clouded"}!**\n\n` +
+        `**The vision is ${isFurry ? "as clear as day" : "very clouded"}!**\n\n` +
           `Through the mystical powers of the cosmos, ` +
           `the oracles have gazed into the depths of souls and revealed:\n\n` +
           (isFurry
