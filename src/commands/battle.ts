@@ -357,8 +357,8 @@ async function simulateBattleStep(
         break;
       case "Call to Arms":
         damage = Math.floor(attacker.attack * 1.3);
-        attacker.hp = Math.min(attacker.maxHp, attacker.hp + 15);
-        narration = `📯 **${attacker.name}** sounds the call to arms, a platoon of soldiers unleashes a flurry of bullets, while receiving medicine for 15 HP!`;
+        attacker.hp = Math.min(attacker.maxHp, attacker.hp + 10);
+        narration = `📯 **${attacker.name}** sounds the call to arms, a platoon of soldiers unleashes a flurry of bullets, while receiving medicine for 10 life force!`;
         break;
       case "Airstrike":
         const airstrikes = Math.floor(Math.random() * 5) + 1;
