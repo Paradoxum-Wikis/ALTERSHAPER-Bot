@@ -301,8 +301,8 @@ async function simulateBattleStep(
         narration = `😡 **${attacker.name}** enters a berserker rage! (+5 ATK, -2 DEF)`;
         break;
       case "Time Slow":
-        attacker.speed += 5;
-        narration = `⏰ **${attacker.name}** manipulates time, increasing their speed! (+5 SPD)`;
+        attacker.speed += 6;
+        narration = `⏰ **${attacker.name}** manipulates time, increasing their speed! (+6 SPD)`;
         break;
       case "Soul Strike":
         attacker.speed += 1;
