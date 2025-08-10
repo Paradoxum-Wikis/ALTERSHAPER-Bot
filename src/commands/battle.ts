@@ -369,7 +369,7 @@ async function simulateBattleStep(
         const divineHeal = Math.floor(attacker.maxHp * 0.25);
         attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
         attacker.defense += 5;
-        narration = `⭐ **${attacker.name}** receives the labyrinth's divine intervention, healing ${divineHeal} HP and gaining divine protection!`;
+        narration = `⭐ **${attacker.name}** prayed and received the labyrinth's divine intervention, healing ${divineHeal} HP!`;
         break;
       case "Great Will":
         const missingHp = attacker.maxHp - attacker.hp;
