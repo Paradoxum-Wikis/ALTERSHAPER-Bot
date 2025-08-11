@@ -352,10 +352,10 @@ async function simulateBattleStep(
         narration = `🗡️ **${attacker.name}** lets out a warrior's cry, increasing their battle fury! (+4 ATK)`;
         break;
       case "Drop the Beat":
-        defender.speed = Math.max(1, defender.speed - 3);
-        defender.attack = Math.max(1, defender.attack - 2);
+        defender.speed = Math.max(1, defender.speed - 1);
+        defender.attack = Math.max(1, defender.attack - 1);
         defender.defense = Math.max(1, defender.defense - 1);
-        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-3 SPD, -2 ATK, -1 DEF to enemy)`;
+        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-1 SPD, -1 ATK, -1 DEF to enemy)`;
         break;
       case "Call to Arms":
         damage = Math.floor(attacker.attack * 1.3);
