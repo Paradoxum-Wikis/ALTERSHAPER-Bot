@@ -296,9 +296,9 @@ async function simulateBattleStep(
         narration = `✨ **${attacker.name}** bathes in the gracious healing light, restoring ${heal} HP!`;
         break;
       case "Berserker Rage":
-        attacker.attack += 5;
+        attacker.attack += 6;
         attacker.defense = Math.max(1, attacker.defense - 2);
-        narration = `😡 **${attacker.name}** enters a berserker rage! (+5 ATK, -2 DEF)`;
+        narration = `😡 **${attacker.name}** enters a berserker rage! (+6 ATK, -2 DEF)`;
         break;
       case "Time Slow":
         attacker.speed += 6;
@@ -353,7 +353,9 @@ async function simulateBattleStep(
         break;
       case "Drop the Beat":
         defender.speed = Math.max(1, defender.speed - 3);
-        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-3 SPD to enemy)`;
+        defender.attack = Math.max(1, defender.attack - 2);
+        defender.defense = Math.max(1, defender.defense - 1);
+        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-3 SPD, -2 ATK, -1 DEF to enemy)`;
         break;
       case "Call to Arms":
         damage = Math.floor(attacker.attack * 1.3);
