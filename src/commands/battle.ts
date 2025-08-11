@@ -355,7 +355,7 @@ async function simulateBattleStep(
         defender.speed = Math.max(1, defender.speed - 1);
         defender.attack = Math.max(1, defender.attack - 1);
         defender.defense = Math.max(1, defender.defense - 1);
-        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-1 SPD, -1 ATK, -1 DEF to enemy)`;
+        narration = `🎵 **${attacker.name}** drops the beat, disrupting **${defender.name}**'s rhythm! (-1 to all stats to enemy)`;
         break;
       case "Call to Arms":
         damage = Math.floor(attacker.attack * 1.3);
