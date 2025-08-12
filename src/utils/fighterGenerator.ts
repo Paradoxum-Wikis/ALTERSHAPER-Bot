@@ -58,8 +58,8 @@ export function calculateAuraLevel(percentage: number): number {
   }
 }
 
-export function generateFighter(user: User, displayName: string): Fighter {
-  const percentage = calculateAuraPercentage(displayName);
+export function generateFighter(user: User, displayName: string, forceAuraPercentage?: number): Fighter {
+  const percentage = forceAuraPercentage !== undefined ? forceAuraPercentage : calculateAuraPercentage(displayName);
 
   // Convert percentage to stats (higher aura = better stats)
   // Scale percentage from -100 to 100 range to 0-1 multiplier

@@ -636,6 +636,14 @@ export async function execute(
   const rankedOption = interaction.options.getString("ranked") || "no";
   const isRanked = rankedOption === "yes";
 
+  if (isRanked && interaction.guildId !== "1362084781134708907") {
+    await interaction.reply({
+      content: "**RANKED BATTLES CAN ONLY BE CONDUCTED IN THE SACRED ALTER EGO WIKI (.gg/aewiki)! This server does not have permission for competitive combat.**",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
   console.log(`[DEATHBATTLE] Starting deathbattle command`);
   console.log(
     `[DEATHBATTLE] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`,
@@ -755,8 +763,17 @@ export async function execute(
       fighter2DisplayName = fighter2User.username;
     }
 
-    const fighter1 = generateFighter(fighter1User, fighter1DisplayName);
-    const fighter2 = generateFighter(fighter2User, fighter2DisplayName);
+    // Use 90% aura for ranked battles
+    let fighter1: Fighter;
+    let fighter2: Fighter;
+
+    if (isRanked) {
+      fighter1 = generateFighter(fighter1User, fighter1DisplayName, 90);
+      fighter2 = generateFighter(fighter2User, fighter2DisplayName, 90);
+    } else {
+      fighter1 = generateFighter(fighter1User, fighter1DisplayName);
+      fighter2 = generateFighter(fighter2User, fighter2DisplayName);
+    }
 
     const imageResult = await createBattleImage(
       fighter1User,
@@ -784,12 +801,12 @@ export async function execute(
       )
       .setDescription(
         `**Two warriors enter the sacred arena of combat!**\n\n` +
-          `${isRanked ? "🏆 **RANKED BATTLE** - Results will affect competitive ratings!\n\n" : ""}` +
+          `${isRanked ? "🏆 **RANKED BATTLE** - Results will affect competitive ratings!\n⚡ **All fighters have been adjusted to 90% aura!**\n\n" : ""}` +
           `**${fighter1.name}** vs **${fighter2.name}**\n\n` +
           `🏃 **${fighters[0].name}** moves first with superior speed!\n\n` +
           `**Fighter Stats:**\n` +
-          `🔴 **${fighter1.name}**: ${fighter1.maxHp} HP | ${fighter1.attack} ATK | ${fighter1.defense} DEF | ${fighter1.speed} SPD\n` +
-          `🔵 **${fighter2.name}**: ${fighter2.maxHp} HP | ${fighter2.attack} ATK | ${fighter2.defense} DEF | ${fighter2.speed} SPD\n\n` +
+          `🔴 **${fighter1.name}**: ${fighter1.maxHp} HP | ${fighter1.attack} ATK | ${fighter1.defense} DEF | ${fighter1.speed} SPD${isRanked ? " (90% aura)" : ""}\n` +
+          `🔵 **${fighter2.name}**: ${fighter2.maxHp} HP | ${fighter2.attack} ATK | ${fighter2.defense} DEF | ${fighter2.speed} SPD${isRanked ? " (90% aura)" : ""}\n\n` +
           `💨 **Speed Advantage:** Higher speed grants +1% dodge chance per point difference\n` +
           `⚔️ **Battle begins in 3 seconds...**`,
       )
@@ -895,8 +912,8 @@ export async function execute(
       .setTitle(`🏆 THE ${isRanked ? "RANKED " : ""}DEATHBATTLE HAS CONCLUDED`)
       .setDescription(
         `**${winner.name}** emerges victorious after ${turn} turns!\n\n` +
-          (turn >= 50
-            ? "**The heavens are satisfied. The battle has been forcefully stopped!**\n\n"
+          (turn >= 55
+            ? "**The heavens are satisfied. The battle has been forcefully stopped, the combatant with the lowest health has been executed!**\n\n"
             : "") +
           `**Final Results:**\n` +
           `🏆 **Victor:** ${winner.name} (${winner.hp}/${winner.maxHp} HP)\n` +

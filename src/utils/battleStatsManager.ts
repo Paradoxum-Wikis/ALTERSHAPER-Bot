@@ -29,7 +29,7 @@ export interface BattleRecord {
   winnerHpRemaining: number;
   winnerMaxHp: number;
   isRanked: boolean;
-  guildId: string; // Add guild ID field
+  guildId: string;
 }
 
 export class BattleStatsManager {
