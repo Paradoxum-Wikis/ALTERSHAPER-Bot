@@ -29,6 +29,7 @@ export interface BattleRecord {
   winnerHpRemaining: number;
   winnerMaxHp: number;
   isRanked: boolean;
+  guildId: string; // Add guild ID field
 }
 
 export class BattleStatsManager {
@@ -104,6 +105,7 @@ export class BattleStatsManager {
     winnerHpRemaining: number,
     winnerMaxHp: number,
     isRanked: boolean = false,
+    guildId?: string,
   ): Promise<void> {
     const stats = await this.readStats();
     const records = await this.readRecords();
@@ -121,6 +123,7 @@ export class BattleStatsManager {
       winnerHpRemaining,
       winnerMaxHp,
       isRanked,
+      guildId: guildId || "1362084781134708907",
     };
     records.push(battleRecord);
 

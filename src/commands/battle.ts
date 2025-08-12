@@ -871,6 +871,7 @@ export async function execute(
       winner.hp,
       winner.maxHp,
       isRanked,
+      interaction.guildId || undefined,
     );
 
     const finalImageResult = await createBattleImage(
