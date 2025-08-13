@@ -1,6 +1,21 @@
 import fs from "fs/promises";
 import path from "path";
 
+let isWriting = false;
+
+async function withFileLock<T>(task: () => Promise<T>): Promise<T> {
+  while (isWriting) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+
+  try {
+    isWriting = true;
+    return await task();
+  } finally {
+    isWriting = false;
+  }
+}
+
 export interface BattleStats {
   userId: string;
   userTag: string;
@@ -107,106 +122,108 @@ export class BattleStatsManager {
     isRanked: boolean = false,
     guildId?: string,
   ): Promise<void> {
-    const stats = await this.readStats();
-    const records = await this.readRecords();
-    const battleDate = new Date().toISOString();
-    const battleId = `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await withFileLock(async () => {
+      const stats = await this.readStats();
+      const records = await this.readRecords();
+      const battleDate = new Date().toISOString();
+      const battleId = `battle_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    const battleRecord: BattleRecord = {
-      battleId,
-      winnerId,
-      winnerTag,
-      loserId,
-      loserTag,
-      battleDate,
-      turns,
-      winnerHpRemaining,
-      winnerMaxHp,
-      isRanked,
-      guildId: guildId || "1362084781134708907",
-    };
-    records.push(battleRecord);
-
-    let winnerStats = stats.find((s) => s.userId === winnerId);
-    if (!winnerStats) {
-      winnerStats = {
-        userId: winnerId,
-        userTag: winnerTag,
-        wins: 0,
-        losses: 0,
-        totalBattles: 0,
-        winRate: 0,
-        lastCasualBattleAt: undefined,
-        rankedWins: 0,
-        rankedLosses: 0,
-        rankedTotalBattles: 0,
-        rankedWinRate: 0,
-        lastRankedBattleAt: undefined,
+      const battleRecord: BattleRecord = {
+        battleId,
+        winnerId,
+        winnerTag,
+        loserId,
+        loserTag,
+        battleDate,
+        turns,
+        winnerHpRemaining,
+        winnerMaxHp,
+        isRanked,
+        guildId: guildId || "1362084781134708907",
       };
-      stats.push(winnerStats);
-    }
+      records.push(battleRecord);
 
-    if (isRanked) {
-      winnerStats.rankedWins++;
-      winnerStats.rankedTotalBattles++;
-      winnerStats.rankedWinRate = this.calculateWinRate(
-        winnerStats.rankedWins,
-        winnerStats.rankedTotalBattles,
-      );
-      winnerStats.lastRankedBattleAt = battleDate;
-    } else {
-      winnerStats.wins++;
-      winnerStats.totalBattles++;
-      winnerStats.winRate = this.calculateWinRate(
-        winnerStats.wins,
-        winnerStats.totalBattles,
-      );
-      winnerStats.lastCasualBattleAt = battleDate;
-    }
+      let winnerStats = stats.find((s) => s.userId === winnerId);
+      if (!winnerStats) {
+        winnerStats = {
+          userId: winnerId,
+          userTag: winnerTag,
+          wins: 0,
+          losses: 0,
+          totalBattles: 0,
+          winRate: 0,
+          lastCasualBattleAt: undefined,
+          rankedWins: 0,
+          rankedLosses: 0,
+          rankedTotalBattles: 0,
+          rankedWinRate: 0,
+          lastRankedBattleAt: undefined,
+        };
+        stats.push(winnerStats);
+      }
 
-    winnerStats.userTag = winnerTag;
+      if (isRanked) {
+        winnerStats.rankedWins++;
+        winnerStats.rankedTotalBattles++;
+        winnerStats.rankedWinRate = this.calculateWinRate(
+          winnerStats.rankedWins,
+          winnerStats.rankedTotalBattles,
+        );
+        winnerStats.lastRankedBattleAt = battleDate;
+      } else {
+        winnerStats.wins++;
+        winnerStats.totalBattles++;
+        winnerStats.winRate = this.calculateWinRate(
+          winnerStats.wins,
+          winnerStats.totalBattles,
+        );
+        winnerStats.lastCasualBattleAt = battleDate;
+      }
 
-    let loserStats = stats.find((s) => s.userId === loserId);
-    if (!loserStats) {
-      loserStats = {
-        userId: loserId,
-        userTag: loserTag,
-        wins: 0,
-        losses: 0,
-        totalBattles: 0,
-        winRate: 0,
-        lastCasualBattleAt: undefined,
-        rankedWins: 0,
-        rankedLosses: 0,
-        rankedTotalBattles: 0,
-        rankedWinRate: 0,
-        lastRankedBattleAt: undefined,
-      };
-      stats.push(loserStats);
-    }
+      winnerStats.userTag = winnerTag;
 
-    if (isRanked) {
-      loserStats.rankedLosses++;
-      loserStats.rankedTotalBattles++;
-      loserStats.rankedWinRate = this.calculateWinRate(
-        loserStats.rankedWins,
-        loserStats.rankedTotalBattles,
-      );
-      loserStats.lastRankedBattleAt = battleDate;
-    } else {
-      loserStats.losses++;
-      loserStats.totalBattles++;
-      loserStats.winRate = this.calculateWinRate(
-        loserStats.wins,
-        loserStats.totalBattles,
-      );
-      loserStats.lastCasualBattleAt = battleDate;
-    }
+      let loserStats = stats.find((s) => s.userId === loserId);
+      if (!loserStats) {
+        loserStats = {
+          userId: loserId,
+          userTag: loserTag,
+          wins: 0,
+          losses: 0,
+          totalBattles: 0,
+          winRate: 0,
+          lastCasualBattleAt: undefined,
+          rankedWins: 0,
+          rankedLosses: 0,
+          rankedTotalBattles: 0,
+          rankedWinRate: 0,
+          lastRankedBattleAt: undefined,
+        };
+        stats.push(loserStats);
+      }
 
-    loserStats.userTag = loserTag;
+      if (isRanked) {
+        loserStats.rankedLosses++;
+        loserStats.rankedTotalBattles++;
+        loserStats.rankedWinRate = this.calculateWinRate(
+          loserStats.rankedWins,
+          loserStats.rankedTotalBattles,
+        );
+        loserStats.lastRankedBattleAt = battleDate;
+      } else {
+        loserStats.losses++;
+        loserStats.totalBattles++;
+        loserStats.winRate = this.calculateWinRate(
+          loserStats.wins,
+          loserStats.totalBattles,
+        );
+        loserStats.lastCasualBattleAt = battleDate;
+      }
 
-    await this.writeStats(stats);
-    await this.writeRecords(records);
+      loserStats.userTag = loserTag;
+
+      await this.writeStats(stats);
+      await this.writeRecords(records);
+    });
   }
 
   public static async getUserStats(

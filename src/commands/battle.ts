@@ -14,9 +14,7 @@ import { createCanvas, loadImage } from "canvas";
 import path from "path";
 import { generateFighter, Fighter } from "../utils/fighterGenerator.js";
 import { BattleStatsManager } from "../utils/battleStatsManager.js";
-
-let isBattleActive = false;
-let currentBattleUsers: Set<string> = new Set();
+import { BattleLockManager } from "../utils/battleLockManager.js";
 
 export const data = new SlashCommandBuilder()
   .setName("battle")
@@ -638,7 +636,8 @@ export async function execute(
 
   if (isRanked && interaction.guildId !== "1362084781134708907") {
     await interaction.reply({
-      content: "**RANKED BATTLES CAN ONLY BE CONDUCTED IN THE SACRED ALTER EGO WIKI (.gg/aewiki)! This server does not have permission for competitive combat.**",
+      content:
+        "**RANKED BATTLES CAN ONLY BE CONDUCTED IN THE SACRED ALTER EGO WIKI (.gg/aewiki)! This server does not have permission for competitive combat.**",
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -681,21 +680,25 @@ export async function execute(
     return;
   }
 
-  if (isBattleActive) {
-    console.log(`[DEATHBATTLE] Battle already active, rejecting new battle`);
+  if (BattleLockManager.isLocked(interaction.guildId!)) {
+    console.log(
+      `[DEATHBATTLE] Battle already active in guild ${interaction.guildId}, rejecting new battle`,
+    );
     await interaction.reply({
       content:
-        "**THE ARENA IS OCCUPIED! Another grand battle is already taking place. Wait for the current clash to conclude before summoning new warriors to the arena!**",
+        "**THE ARENA IS OCCUPIED! Another grand battle is already taking place in the halls. Wait for the current clash to conclude before summoning new warriors to the arena!**",
       flags: MessageFlags.Ephemeral,
     });
     return;
   }
 
   if (
-    currentBattleUsers.has(fighter1User.id) ||
-    currentBattleUsers.has(fighter2User.id)
+    BattleLockManager.isUserInAnyBattle(fighter1User.id) ||
+    BattleLockManager.isUserInAnyBattle(fighter2User.id)
   ) {
-    console.log(`[DEATHBATTLE] One of the fighters is already in battle`);
+    console.log(
+      `[DEATHBATTLE] One of the fighters is already in a battle elsewhere`,
+    );
     await interaction.reply({
       content:
         "**ONE OF THE CHOSEN WARRIORS IS ALREADY ENGAGED IN COMBAT! Wait for their current battle to finish before challenging them again!**",
@@ -704,10 +707,19 @@ export async function execute(
     return;
   }
 
-  console.log(`[DEATHBATTLE] Locking battle system`);
-  isBattleActive = true;
-  currentBattleUsers.add(fighter1User.id);
-  currentBattleUsers.add(fighter2User.id);
+  const lockAcquired = BattleLockManager.acquireLock(interaction.guildId!, [
+    fighter1User.id,
+    fighter2User.id,
+  ]);
+
+  if (!lockAcquired) {
+    // This is a fallback, should never happen as it should be caught by the checks above
+    await interaction.reply({
+      content: "**Failed to acquire a battle lock. The arena might be busy.**",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
 
   await interaction.deferReply();
 
@@ -824,7 +836,7 @@ export async function execute(
 
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    while (fighter1.hp > 0 && fighter2.hp > 0 && turn < 50) {
+    while (fighter1.hp > 0 && fighter2.hp > 0 && turn < 55) {
       const stepResult = await simulateBattleStep(
         fighter1,
         fighter2,
@@ -947,7 +959,9 @@ export async function execute(
       components: [],
     });
   } finally {
-    isBattleActive = false;
-    currentBattleUsers.clear();
+    BattleLockManager.releaseLock(interaction.guildId!);
+    console.log(
+      `[DEATHBATTLE] Released battle lock for guild ${interaction.guildId}`,
+    );
   }
 }
