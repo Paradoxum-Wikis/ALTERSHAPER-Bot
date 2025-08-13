@@ -21,6 +21,7 @@ import {
 import { loadCommands, Command } from "./utils/commandLoader.js";
 import { ReactionRoleHandler } from "./utils/reactionRoleHandler.js";
 import { RolePermissions } from "./utils/rolePermissions.js";
+import { CommandAccessManager } from "./utils/commandAccessManager.js";
 
 class AltershaperBot {
   private client: Client;
@@ -84,6 +85,14 @@ class AltershaperBot {
 
   private async handleInteraction(interaction: Interaction): Promise<void> {
     if (!interaction.isChatInputCommand()) return;
+
+    if (!CommandAccessManager.canUseCommand(interaction.commandName, interaction.guildId)) {
+      await interaction.reply({
+        content: CommandAccessManager.getAccessDeniedMessage(),
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
 
     const command = this.commands.get(interaction.commandName);
     if (!command) return;
