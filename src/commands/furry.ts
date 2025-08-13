@@ -152,13 +152,6 @@ export async function execute(
       .setThumbnail(targetUser.displayAvatarURL())
       .addFields(
         {
-          name: "📜 ORACLE'S DECREE",
-          value: isFurry
-            ? "This divine revelation cannot be disputed!"
-            : "The furry energy levels are below the sacred threshold.",
-          inline: false,
-        },
-        {
           name: "🎭 FURRY LEVEL",
           value: `${furryLevel}% Furry Energy`,
           inline: true,
