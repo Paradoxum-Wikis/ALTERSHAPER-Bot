@@ -23,22 +23,22 @@ export const data = new SlashCommandBuilder()
     option
       .setName("fighter1")
       .setDescription("The first warrior to enter the arena")
-      .setRequired(true),
+      .setRequired(true)
   )
   .addUserOption((option) =>
     option
       .setName("fighter2")
       .setDescription("The second warrior to challenge fate")
-      .setRequired(true),
+      .setRequired(true)
   )
   .addStringOption((option) =>
     option
       .setName("ranked")
       .setDescription(
-        "Start a ranked battle (requires consent from both fighters)",
+        "Start a ranked battle (requires consent from both fighters)"
       )
       .addChoices({ name: "Yes", value: "yes" }, { name: "No", value: "no" })
-      .setRequired(false),
+      .setRequired(false)
   );
 
 interface BattleEvent {
@@ -144,7 +144,7 @@ async function createBattleImage(
   fighter2Name: string,
   winner?: User,
   isRanked: boolean = false,
-  forceBackground?: string,
+  forceBackground?: string
 ): Promise<{ buffer: Buffer; backgroundFileName: string }> {
   const canvas = createCanvas(1920, 1080);
   const ctx = canvas.getContext("2d");
@@ -189,10 +189,10 @@ async function createBattleImage(
     }
 
     const avatar1 = await loadImage(
-      fighter1.displayAvatarURL({ extension: "png", size: 512 }),
+      fighter1.displayAvatarURL({ extension: "png", size: 512 })
     );
     const avatar2 = await loadImage(
-      fighter2.displayAvatarURL({ extension: "png", size: 512 }),
+      fighter2.displayAvatarURL({ extension: "png", size: 512 })
     );
 
     ctx.drawImage(avatar1, 225, 285, 512, 512);
@@ -220,7 +220,7 @@ async function createBattleImage(
 
       for (let i = 0; i < data.length; i += 4) {
         const gray = Math.round(
-          0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2],
+          0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]
         );
         data[i] = gray;
         data[i + 1] = gray;
@@ -259,7 +259,7 @@ async function simulateBattleStep(
   fighter2: Fighter,
   fighters: Fighter[],
   currentFighter: number,
-  realmName: string,
+  realmName: string
 ): Promise<{ event: BattleEvent; newCurrentFighter: number }> {
   const attacker = fighters[currentFighter];
   const defender = fighters[1 - currentFighter];
@@ -280,8 +280,8 @@ async function simulateBattleStep(
         narration = `💥 **${attacker.name}** channels their alter ego for a devastating burst attack!`;
         break;
       case "Ego Shield":
-        attacker.defense += 4;
-        narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense! (+4 DEF)`;
+        attacker.defense += 10;
+        narration = `🛡️ **${attacker.name}** raises an ego shield, increasing their defense! (+10 DEF)`;
         break;
       case "Shadow Clone":
         attacker.attack += 1;
@@ -366,10 +366,17 @@ async function simulateBattleStep(
         narration = `✈️ **${attacker.name}** calls in an airstrike from above, ${airstrikes} bomber${airstrikes > 1 ? "s" : ""} raining destruction!`;
         break;
       case "Divine Intervention":
-        const divineHeal = Math.floor(attacker.maxHp * 0.25);
-        attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
-        attacker.defense += 5;
-        narration = `⭐ **${attacker.name}** prayed and received the labyrinth's divine intervention, healing ${divineHeal} HP!`;
+        if (attacker.hp > Math.floor(attacker.maxHp / 2)) {
+          const divineHeal = Math.floor(attacker.maxHp * 0.1);
+          attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
+          attacker.defense += 6;
+          narration = `⭐ **${attacker.name}** prayed and received the labyrinth's divine intervention, healing ${divineHeal} HP and fortifying their body (+6 DEF)!`;
+        } else {
+          const divineHeal = Math.floor(attacker.maxHp * 0.25);
+          attacker.hp = Math.min(attacker.hp + divineHeal, attacker.maxHp);
+          attacker.defense += 3;
+          narration = `⭐ **${attacker.name}** prayed and received the labyrinth's divine intervention, healing ${divineHeal} HP and gaining resilience (+3 DEF)!`;
+        }
         break;
       case "Great Will":
         const missingHp = attacker.maxHp - attacker.hp;
@@ -425,7 +432,7 @@ async function simulateBattleStep(
               .replace("{defender}", "")
               .replace(
                 "{attacker}",
-                `**${attacker.name}**`,
+                `**${attacker.name}**`
               )} *(+${speedDifference}% dodge from speed)*`
           : `💨 **${defender.name}** ${battleNarrations.dodge[
               Math.floor(Math.random() * battleNarrations.dodge.length)
@@ -462,11 +469,14 @@ async function simulateBattleStep(
 
   if (damage > 0) {
     if (useAbility) {
-      if (abilityUsed === "Relic of Exo" || abilityUsed === "Soul Strike") {
-        const effectiveDefense = Math.floor(defender.defense * 0.7);
+      if (abilityUsed === "Relic of Exo") {
+        const effectiveDefense = Math.floor(defender.defense * 0.3); // 70% bypass
+        damage = Math.max(1, damage - effectiveDefense);
+      } else if (abilityUsed === "Soul Strike") {
+        const effectiveDefense = Math.floor(defender.defense * 0.4); // 60% bypass
         damage = Math.max(1, damage - effectiveDefense);
       } else {
-        damage = Math.max(1, damage - Math.floor(defender.defense / 2));
+        damage = Math.max(1, damage - Math.floor(defender.defense * 0.5));
       }
     }
 
@@ -497,7 +507,7 @@ async function simulateBattleStep(
 async function handleConsentPhase(
   interaction: ChatInputCommandInteraction,
   fighter1User: User,
-  fighter2User: User,
+  fighter2User: User
 ): Promise<boolean> {
   console.log(`[CONSENT] Starting consent phase for ranked battle`);
   console.log(`[CONSENT] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`);
@@ -511,7 +521,7 @@ async function handleConsentPhase(
         `A **RANKED** deathbattle has been proposed!\n\n` +
         `🏆 **This is a RANKED battle - results will affect your competitive rating!**\n\n` +
         `Both fighters must consent to engage in combat.\n` +
-        `You have **15 seconds** to respond.`,
+        `You have **15 seconds** to respond.`
     )
     .setFooter({
       text: "Glory awaits in the arena of Alteruism!",
@@ -529,7 +539,7 @@ async function handleConsentPhase(
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     acceptButton,
-    declineButton,
+    declineButton
   );
 
   console.log(`[CONSENT] Sending consent embed with buttons`);
@@ -552,13 +562,13 @@ async function handleConsentPhase(
       collector.on("collect", async (buttonInteraction) => {
         const userId = buttonInteraction.user.id;
         console.log(
-          `[CONSENT] Button interaction from user: ${buttonInteraction.user.tag} (${userId})`,
+          `[CONSENT] Button interaction from user: ${buttonInteraction.user.tag} (${userId})`
         );
         console.log(`[CONSENT] Button ID: ${buttonInteraction.customId}`);
 
         if (userId !== fighter1User.id && userId !== fighter2User.id) {
           console.log(
-            `[CONSENT] Unauthorized user ${buttonInteraction.user.tag} tried to respond`,
+            `[CONSENT] Unauthorized user ${buttonInteraction.user.tag} tried to respond`
           );
           await buttonInteraction.reply({
             content:
@@ -571,7 +581,7 @@ async function handleConsentPhase(
         if (buttonInteraction.customId === "accept_battle") {
           acceptedUsers.add(userId);
           console.log(
-            `[CONSENT] User ${buttonInteraction.user.tag} accepted the battle`,
+            `[CONSENT] User ${buttonInteraction.user.tag} accepted the battle`
           );
           console.log(`[CONSENT] Accepted users: ${Array.from(acceptedUsers)}`);
           await buttonInteraction.reply({
@@ -580,7 +590,7 @@ async function handleConsentPhase(
           });
         } else if (buttonInteraction.customId === "decline_battle") {
           console.log(
-            `[CONSENT] User ${buttonInteraction.user.tag} declined the battle`,
+            `[CONSENT] User ${buttonInteraction.user.tag} declined the battle`
           );
           await buttonInteraction.reply({
             content: `**You have declined the battle challenge!**`,
@@ -598,10 +608,10 @@ async function handleConsentPhase(
           acceptedUsers.has(fighter2User.id);
         console.log(`[CONSENT] Both users accepted check: ${bothAccepted}`);
         console.log(
-          `[CONSENT] Fighter1 accepted: ${acceptedUsers.has(fighter1User.id)}`,
+          `[CONSENT] Fighter1 accepted: ${acceptedUsers.has(fighter1User.id)}`
         );
         console.log(
-          `[CONSENT] Fighter2 accepted: ${acceptedUsers.has(fighter2User.id)}`,
+          `[CONSENT] Fighter2 accepted: ${acceptedUsers.has(fighter2User.id)}`
         );
 
         if (bothAccepted) {
@@ -627,7 +637,7 @@ async function handleConsentPhase(
 }
 
 export async function execute(
-  interaction: ChatInputCommandInteraction,
+  interaction: ChatInputCommandInteraction
 ): Promise<void> {
   const fighter1User = interaction.options.getUser("fighter1")!;
   const fighter2User = interaction.options.getUser("fighter2")!;
@@ -645,15 +655,15 @@ export async function execute(
 
   console.log(`[DEATHBATTLE] Starting deathbattle command`);
   console.log(
-    `[DEATHBATTLE] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`,
+    `[DEATHBATTLE] Fighter 1: ${fighter1User.tag} (${fighter1User.id})`
   );
   console.log(
-    `[DEATHBATTLE] Fighter 2: ${fighter2User.tag} (${fighter2User.id})`,
+    `[DEATHBATTLE] Fighter 2: ${fighter2User.tag} (${fighter2User.id})`
   );
   console.log(`[DEATHBATTLE] Ranked option: ${rankedOption}`);
   console.log(`[DEATHBATTLE] Is ranked: ${isRanked}`);
   console.log(
-    `[DEATHBATTLE] Command user: ${interaction.user.tag} (${interaction.user.id})`,
+    `[DEATHBATTLE] Command user: ${interaction.user.tag} (${interaction.user.id})`
   );
 
   if (fighter1User.id === fighter2User.id) {
@@ -682,7 +692,7 @@ export async function execute(
 
   if (BattleLockManager.isLocked(interaction.guildId!)) {
     console.log(
-      `[DEATHBATTLE] Battle already active in guild ${interaction.guildId}, rejecting new battle`,
+      `[DEATHBATTLE] Battle already active in guild ${interaction.guildId}, rejecting new battle`
     );
     await interaction.reply({
       content:
@@ -697,7 +707,7 @@ export async function execute(
     BattleLockManager.isUserInAnyBattle(fighter2User.id)
   ) {
     console.log(
-      `[DEATHBATTLE] One of the fighters is already in a battle elsewhere`,
+      `[DEATHBATTLE] One of the fighters is already in a battle elsewhere`
     );
     await interaction.reply({
       content:
@@ -726,12 +736,12 @@ export async function execute(
   try {
     if (isRanked) {
       console.log(
-        `[DEATHBATTLE] This is a ranked battle, starting consent phase`,
+        `[DEATHBATTLE] This is a ranked battle, starting consent phase`
       );
       const consentGiven = await handleConsentPhase(
         interaction,
         fighter1User,
-        fighter2User,
+        fighter2User
       );
 
       console.log(`[DEATHBATTLE] Consent phase result: ${consentGiven}`);
@@ -743,7 +753,7 @@ export async function execute(
           .setTitle("⚔️ RANKED BATTLE CANCELLED")
           .setDescription(
             `The **RANKED** battle has been cancelled.\n\n` +
-              `*The warriors have chosen not to engage in competitive combat at this time.*`,
+              `*The warriors have chosen not to engage in competitive combat at this time.*`
           )
           .setFooter({ text: "🔓 Arena is now available for new battles" });
 
@@ -756,7 +766,7 @@ export async function execute(
       }
     } else {
       console.log(
-        `[DEATHBATTLE] This is a casual battle, skipping consent phase`,
+        `[DEATHBATTLE] This is a casual battle, skipping consent phase`
       );
     }
 
@@ -793,7 +803,7 @@ export async function execute(
       fighter1DisplayName,
       fighter2DisplayName,
       undefined,
-      isRanked,
+      isRanked
     );
     const attachment = new AttachmentBuilder(imageResult.buffer, {
       name: "deathbattle.png",
@@ -809,7 +819,7 @@ export async function execute(
     const setupEmbed = new EmbedBuilder()
       .setColor(isRanked ? "#FF6B35" : "#2E2B5F")
       .setTitle(
-        `⚔️ THE ${realmName.toUpperCase()} HAVE DECLARED A ${isRanked ? "RANKED " : ""}DEATHBATTLE!`,
+        `⚔️ THE ${realmName.toUpperCase()} HAVE DECLARED A ${isRanked ? "RANKED " : ""}DEATHBATTLE!`
       )
       .setDescription(
         `**Two warriors enter the sacred arena of combat!**\n\n` +
@@ -820,7 +830,7 @@ export async function execute(
           `🔴 **${fighter1.name}**: ${fighter1.maxHp} HP | ${fighter1.attack} ATK | ${fighter1.defense} DEF | ${fighter1.speed} SPD${isRanked ? " (90% aura)" : ""}\n` +
           `🔵 **${fighter2.name}**: ${fighter2.maxHp} HP | ${fighter2.attack} ATK | ${fighter2.defense} DEF | ${fighter2.speed} SPD${isRanked ? " (90% aura)" : ""}\n\n` +
           `💨 **Speed Advantage:** Higher speed grants +1% dodge chance per point difference\n` +
-          `⚔️ **Battle begins in 3 seconds...**`,
+          `⚔️ **Battle begins in 3 seconds...**`
       )
       .setImage("attachment://deathbattle.png")
       .setFooter({
@@ -842,7 +852,7 @@ export async function execute(
         fighter2,
         fighters,
         currentFighter,
-        realmName,
+        realmName
       );
       const event = stepResult.event;
       battleLog.push(event.narration);
@@ -860,7 +870,7 @@ export async function execute(
             `🔵 **${fighter2.name}**: ${fighter2.hp}/${fighter2.maxHp} HP\n` +
             `${createHpBar(fighter2.hp, fighter2.maxHp)}\n\n` +
             `**The Battle:**\n` +
-            battleLog.slice(-5).join("\n"),
+            battleLog.slice(-5).join("\n")
         )
         .setImage("attachment://deathbattle.png")
         .setFooter({
@@ -900,7 +910,7 @@ export async function execute(
       winner.hp,
       winner.maxHp,
       isRanked,
-      interaction.guildId || undefined,
+      interaction.guildId || undefined
     );
 
     const finalImageResult = await createBattleImage(
@@ -910,7 +920,7 @@ export async function execute(
       fighter2DisplayName,
       winner.user,
       isRanked,
-      imageResult.backgroundFileName,
+      imageResult.backgroundFileName
     );
     const finalAttachment = new AttachmentBuilder(finalImageResult.buffer, {
       name: "deathbattle-final.png",
@@ -938,7 +948,7 @@ export async function execute(
               `🏆 **${winner.name}:** ${winnerStats?.rankedWins || 1}W-${winnerStats?.rankedLosses || 0}L (${winnerStats?.rankedWinRate || 100}% WR)\n` +
               `💀 **${loser.name}:** ${loserStats?.rankedWins || 0}W-${loserStats?.rankedLosses || 1}L (${loserStats?.rankedWinRate || 0}% WR)\n\n`
             : "") +
-          `*The arena falls silent as ${winner.name} stands triumphant...*`,
+          `*The arena falls silent as ${winner.name} stands triumphant...*`
       )
       .setImage("attachment://deathbattle-final.png")
       .setFooter({
@@ -961,7 +971,7 @@ export async function execute(
   } finally {
     BattleLockManager.releaseLock(interaction.guildId!);
     console.log(
-      `[DEATHBATTLE] Released battle lock for guild ${interaction.guildId}`,
+      `[DEATHBATTLE] Released battle lock for guild ${interaction.guildId}`
     );
   }
 }
