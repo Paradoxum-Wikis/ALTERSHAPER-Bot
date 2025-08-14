@@ -127,11 +127,6 @@ const commands: CommandInfo[] = [
     category: "basic2",
   },
   {
-    name: "/wiki [page]",
-    value: "Navigate to a wiki page or view user profile information",
-    category: "basic2",
-  },
-  {
     name: "/help",
     value: "Display these instruments",
     category: "basic2",

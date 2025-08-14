@@ -10,7 +10,7 @@ import { hashString } from "../utils/fighterGenerator.js";
 
 export const data = new SlashCommandBuilder()
   .setName("furry")
-  .setDescription("The oracles shall reveal one's furry energy levels")
+  .setDescription("The oracles shall reveal one's furry energy levels, will randomly selects a user by default")
   .addUserOption((option) =>
     option
       .setName("target")
