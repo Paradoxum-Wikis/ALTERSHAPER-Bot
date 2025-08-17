@@ -25,20 +25,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   slowmode: PermissionLevel.MODERATOR,
 
   // Basic
-  help: PermissionLevel.BASIC,
-  info: PermissionLevel.BASIC,
-  avatar: PermissionLevel.BASIC,
-  link: PermissionLevel.BASIC,
-  checklink: PermissionLevel.BASIC,
-  synctop5: PermissionLevel.BASIC,
-  sins: PermissionLevel.BASIC,
-  oracle: PermissionLevel.BASIC,
-  tdstrivia: PermissionLevel.BASIC,
-  aura: PermissionLevel.BASIC,
-  battle: PermissionLevel.BASIC,
-  battlestats: PermissionLevel.BASIC,
-  furry: PermissionLevel.BASIC,
-  ship: PermissionLevel.BASIC,
+  // everything else basically
 
   // Basic2
   anime: PermissionLevel.BASIC2
@@ -151,6 +138,6 @@ export class RolePermissions {
    * Get error message for wrong channel usage
    */
   public static getChannelErrorMessage(): string {
-    return `**THOU MUST UTTER THIS COMMAND IN THE DESIGNATED CHANNEL!** Please use <#${COMMANDS_CHANNEL_ID}> in the ALTER EGO Wiki server for this command.`;
+    return `**THOU MUST UTTER THIS COMMAND IN THE DESIGNATED CHANNEL!** Please use <#${COMMANDS_CHANNEL_ID}> for this command.`;
   }
 }
