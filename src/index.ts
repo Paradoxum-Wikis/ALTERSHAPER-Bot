@@ -79,11 +79,14 @@ class AltershaperBot {
         let canRead = false;
 
         const permissions = channel.permissionsFor(this.client.user!);
-        
+
         switch (channel.type) {
           case ChannelType.GuildText:
             channelType = "Text";
-            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
+            canRead =
+              (permissions?.has("ViewChannel") &&
+                permissions?.has("ReadMessageHistory")) ||
+              false;
             break;
           case ChannelType.GuildVoice:
             channelType = "Voice";
@@ -95,7 +98,10 @@ class AltershaperBot {
             break;
           case ChannelType.GuildAnnouncement:
             channelType = "Announcement";
-            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
+            canRead =
+              (permissions?.has("ViewChannel") &&
+                permissions?.has("ReadMessageHistory")) ||
+              false;
             break;
           case ChannelType.GuildStageVoice:
             channelType = "Stage";
@@ -107,16 +113,24 @@ class AltershaperBot {
             break;
           case ChannelType.PublicThread:
             channelType = "Public Thread";
-            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
+            canRead =
+              (permissions?.has("ViewChannel") &&
+                permissions?.has("ReadMessageHistory")) ||
+              false;
             break;
           case ChannelType.PrivateThread:
             channelType = "Private Thread";
-            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
+            canRead =
+              (permissions?.has("ViewChannel") &&
+                permissions?.has("ReadMessageHistory")) ||
+              false;
             break;
         }
 
         const readStatus = canRead ? "✅ CAN READ" : "❌ CANNOT READ";
-        console.log(`  📝 ${channelType}: #${channel.name} (ID: ${channel.id}) - ${readStatus}`);
+        console.log(
+          `  📝 ${channelType}: #${channel.name} (ID: ${channel.id}) - ${readStatus}`,
+        );
       });
 
       console.log("");
@@ -147,7 +161,12 @@ class AltershaperBot {
   private async handleInteraction(interaction: Interaction): Promise<void> {
     if (!interaction.isChatInputCommand()) return;
 
-    if (!CommandAccessManager.canUseCommand(interaction.commandName, interaction.guildId)) {
+    if (
+      !CommandAccessManager.canUseCommand(
+        interaction.commandName,
+        interaction.guildId,
+      )
+    ) {
       await interaction.reply({
         content: CommandAccessManager.getAccessDeniedMessage(),
         flags: MessageFlags.Ephemeral,

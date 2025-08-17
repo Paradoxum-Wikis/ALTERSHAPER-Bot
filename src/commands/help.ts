@@ -75,7 +75,8 @@ const commands: CommandInfo[] = [
   // Basic - Page 1
   {
     name: "/aura [@user]",
-    value: "Calculate thy aura and view fighter profile based on one's display name",
+    value:
+      "Calculate thy aura and view fighter profile based on one's display name",
     category: "basic1",
   },
   {
@@ -90,7 +91,8 @@ const commands: CommandInfo[] = [
   },
   {
     name: "/battle [@fighter1] [@fighter2] [ranked:boolean]",
-    value: "Witness an epic clash between two souls in divine combat (ranked requires consent)",
+    value:
+      "Witness an epic clash between two souls in divine combat (ranked requires consent)",
     category: "basic1",
   },
   {
@@ -98,11 +100,11 @@ const commands: CommandInfo[] = [
     value: "View deathbattle statistics and leaderboards",
     category: "basic1",
   },
-//  {
-//    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
-//    value: "Four warriors unite against a mighty boss in epic combat",
-//    category: "basic1",
-//  },
+  //  {
+  //    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
+  //    value: "Four warriors unite against a mighty boss in epic combat",
+  //    category: "basic1",
+  //  },
   {
     name: "/furry [@user]",
     value: "Check whether a user is a furry",

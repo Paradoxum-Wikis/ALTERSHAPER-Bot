@@ -34,13 +34,13 @@ function createShipName(name1: string, name2: string): string {
 function calculateShipPercentage(name1: string, name2: string): number {
   const combinedNames = (name1 + name2).toLowerCase();
   let hash = 0;
-  
+
   for (let i = 0; i < combinedNames.length; i++) {
     const char = combinedNames.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
-  
+
   return Math.abs(hash) % 101;
 }
 
@@ -48,8 +48,11 @@ function createProgressBar(percentage: number): string {
   const totalBars = 10;
   const filledBars = Math.round((percentage / 100) * totalBars);
   const emptyBars = totalBars - filledBars;
-  
-  return ":purple_square:".repeat(filledBars) + ":black_large_square:".repeat(emptyBars);
+
+  return (
+    ":purple_square:".repeat(filledBars) +
+    ":black_large_square:".repeat(emptyBars)
+  );
 }
 
 function getShipRating(percentage: number): string {
@@ -86,10 +89,12 @@ function getFlavorText(percentage: number): string {
     15: "Ego stares back disapprovingly... 🕳️",
     10: "Chaos would ensue from this union! 💥",
     5: "Their alters are about to clash... ☄️",
-    0: "May ego have mercy on their souls... ⚰️"
+    0: "May ego have mercy on their souls... ⚰️",
   };
 
-  const keys = Object.keys(flavorTexts).map(Number).sort((a, b) => b - a);
+  const keys = Object.keys(flavorTexts)
+    .map(Number)
+    .sort((a, b) => b - a);
   for (const key of keys) {
     if (percentage >= key) {
       return flavorTexts[key as keyof typeof flavorTexts];
@@ -107,7 +112,7 @@ async function createShipImage(
   const canvas = createCanvas(1920, 1080);
   const ctx = canvas.getContext("2d");
   const backgroundFile = percentage >= 60 ? "ship.png" : "ship2.png";
-  
+
   const possiblePaths = [
     path.join(process.cwd(), "src", backgroundFile),
     path.join(process.cwd(), "dist", backgroundFile),
@@ -138,10 +143,10 @@ async function createShipImage(
     }
 
     const avatar1 = await loadImage(
-      user1.displayAvatarURL({ extension: "png", size: 512 })
+      user1.displayAvatarURL({ extension: "png", size: 512 }),
     );
     const avatar2 = await loadImage(
-      user2.displayAvatarURL({ extension: "png", size: 512 })
+      user2.displayAvatarURL({ extension: "png", size: 512 }),
     );
 
     // avatars
@@ -157,7 +162,7 @@ async function createShipImage(
     return canvas.toBuffer();
   } catch (error) {
     console.error("Error creating ship image:", error);
-    
+
     ctx.fillStyle = "#FFB6C1";
     ctx.fillRect(0, 0, 1920, 1080);
     ctx.fillStyle = "#000";
@@ -168,25 +173,30 @@ async function createShipImage(
   }
 }
 
-export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
   let user1 = interaction.options.getUser("user1");
   let user2 = interaction.options.getUser("user2");
 
   if (!user1 && !user2) {
     if (!interaction.inGuild()) {
       await interaction.reply({
-        content: "**You need to specify users when using this command outside of a server!**",
+        content:
+          "**You need to specify users when using this command outside of a server!**",
         flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     user1 = interaction.user;
-    
+
     try {
       const members = await interaction.guild!.members.fetch();
-      const memberArray = members.filter(member => member.user.id !== user1!.id);
-      
+      const memberArray = members.filter(
+        (member) => member.user.id !== user1!.id,
+      );
+
       if (memberArray.size === 0) {
         await interaction.reply({
           content: "**No other members found in this server to ship with!**",
@@ -194,7 +204,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
         });
         return;
       }
-      
+
       const randomMember = memberArray.random();
       user2 = randomMember!.user;
     } catch (error) {
@@ -242,7 +252,12 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const progressBar = createProgressBar(percentage);
     const flavorText = getFlavorText(percentage);
 
-    const imageBuffer = await createShipImage(user1, user2, shipName, percentage);
+    const imageBuffer = await createShipImage(
+      user1,
+      user2,
+      shipName,
+      percentage,
+    );
     const attachment = new AttachmentBuilder(imageBuffer, { name: "ship.png" });
 
     const embed = new EmbedBuilder()
@@ -250,7 +265,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       .setTitle("💕 SHIP RESULTS")
       .setDescription(
         `**Ship Name:** ${shipName}\n` +
-        `${percentage}% ${progressBar} ${rating}`
+          `${percentage}% ${progressBar} ${rating}`,
       )
       .setImage("attachment://ship.png")
       .setFooter({ text: flavorText })
@@ -260,7 +275,6 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       embeds: [embed],
       files: [attachment],
     });
-
   } catch (error) {
     console.error("Ship error:", error);
     await interaction.editReply({

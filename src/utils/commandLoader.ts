@@ -58,7 +58,7 @@ export function loadCommands(): Collection<string, Command> {
     furry,
     anime,
     ship,
-  // bossfight,
+    // bossfight,
   ];
 
   for (const command of commandModules) {

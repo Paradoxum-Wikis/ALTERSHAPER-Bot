@@ -11,13 +11,17 @@ export const data = new SlashCommandBuilder()
   .addStringOption((option) =>
     option
       .setName("include")
-      .setDescription("Include specific tags (comma-separated, e.g: girl, long_hair)")
+      .setDescription(
+        "Include specific tags (comma-separated, e.g: girl, long_hair)",
+      )
       .setRequired(false),
   )
   .addStringOption((option) =>
     option
       .setName("exclude")
-      .setDescription("Exclude specific tags (comma-separated, e.g: boy, short_hair)")
+      .setDescription(
+        "Exclude specific tags (comma-separated, e.g: boy, short_hair)",
+      )
       .setRequired(false),
   )
   .addIntegerOption((option) =>
@@ -69,59 +73,67 @@ export async function execute(
     const maxSize = interaction.options.getInteger("max_size");
     const highQuality = interaction.options.getBoolean("high_quality") ?? false;
     const params = new URLSearchParams();
-    
+
     if (includeParam) {
-      const includeTags = includeParam.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
+      const includeTags = includeParam
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter((tag) => tag.length > 0);
       if (includeTags.length > 0) {
-        params.append('in', includeTags.join(','));
+        params.append("in", includeTags.join(","));
       }
-    }
-    
-    if (excludeParam) {
-      const excludeTags = excludeParam.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
-      if (excludeTags.length > 0) {
-        params.append('nin', excludeTags.join(','));
-      }
-    }
-    
-    if (minSize) {
-      params.append('min_size', minSize.toString());
-    }
-    
-    if (maxSize) {
-      params.append('max_size', maxSize.toString());
-    }
-    
-    if (!highQuality) {
-      params.append('compress', 'true');
     }
 
-    const metadataUrl = `${API_BASE_URL}/image.json${params.toString() ? '?' + params.toString() : ''}`;
+    if (excludeParam) {
+      const excludeTags = excludeParam
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase())
+        .filter((tag) => tag.length > 0);
+      if (excludeTags.length > 0) {
+        params.append("nin", excludeTags.join(","));
+      }
+    }
+
+    if (minSize) {
+      params.append("min_size", minSize.toString());
+    }
+
+    if (maxSize) {
+      params.append("max_size", maxSize.toString());
+    }
+
+    if (!highQuality) {
+      params.append("compress", "true");
+    }
+
+    const metadataUrl = `${API_BASE_URL}/image.json${params.toString() ? "?" + params.toString() : ""}`;
     console.log(`[ANIME] Fetching metadata from: ${metadataUrl}`);
-    
+
     const response = await fetch(metadataUrl);
-    
+
     if (!response.ok) {
       throw new Error(`API responded with status: ${response.status}`);
     }
-    
-    const imageData = await response.json() as AnimeImageResponse;
-    
+
+    const imageData = (await response.json()) as AnimeImageResponse;
+
     let imageUrl = imageData.file_url;
-    if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+    if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
       imageUrl = `https://${imageUrl}`;
     }
 
     console.log(`[ANIME] Fetching image from: ${imageUrl}`);
     const imageResponse = await fetch(imageUrl);
-    
+
     if (!imageResponse.ok) {
-      throw new Error(`Image fetch failed with status: ${imageResponse.status}`);
+      throw new Error(
+        `Image fetch failed with status: ${imageResponse.status}`,
+      );
     }
-    
+
     const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-    const urlParts = imageUrl.split('.');
-    const extension = urlParts[urlParts.length - 1].split('?')[0] || 'jpg';
+    const urlParts = imageUrl.split(".");
+    const extension = urlParts[urlParts.length - 1].split("?")[0] || "jpg";
     const attachment = new AttachmentBuilder(imageBuffer, {
       name: `anime_${imageData._id}.${extension}`,
     });
@@ -131,13 +143,11 @@ export async function execute(
       .setTitle("🎨 ARTWORK SUMMONED")
       .setDescription("**An image has been retrieved from the archives!**")
       .setImage(`attachment://anime_${imageData._id}.${extension}`)
-      .addFields(
-        {
-          name: "📊 Details",
-          value: `**Dimensions:** ${imageData.width} × ${imageData.height}px`,
-          inline: true,
-        }
-      )
+      .addFields({
+        name: "📊 Details",
+        value: `**Dimensions:** ${imageData.width} × ${imageData.height}px`,
+        inline: true,
+      })
       .setFooter({
         text: "Sacred archives of pic.re",
       })
@@ -161,8 +171,11 @@ export async function execute(
 
     if (imageData.tags && imageData.tags.length > 0) {
       const displayTags = imageData.tags.slice(0, 20);
-      const tagString = displayTags.map(tag => `\`${tag}\``).join(', ');
-      const moreTagsText = imageData.tags.length > 20 ? ` and ${imageData.tags.length - 20} more...` : '';
+      const tagString = displayTags.map((tag) => `\`${tag}\``).join(", ");
+      const moreTagsText =
+        imageData.tags.length > 20
+          ? ` and ${imageData.tags.length - 20} more...`
+          : "";
 
       embed.addFields({
         name: `🏷️ Tags (${imageData.tags.length})`,
@@ -175,25 +188,27 @@ export async function execute(
       embeds: [embed],
       files: [attachment],
     });
-
-    } catch (error) {
+  } catch (error) {
     console.error("Error fetching image:", error);
-    
+
     let errorMessage = "**THE ARCHIVES HAVE FAILED TO RESPOND!**";
-    
+
     // i may make these ephemerals in the future,
     // but for now i want to know errors in pubs too
     // in case the moment someone run into this issue
     if (error instanceof Error) {
-      if (error.message.includes('404')) {
-        errorMessage = "**NO IMAGES FOUND MATCHING YOUR CRITERIA!** Try different tags or remove some filters.";
-      } else if (error.message.includes('403')) {
-        errorMessage = "**ACCESS TO THE ARCHIVES IS FORBIDDEN!** The API may be temporarily unavailable.";
-      } else if (error.message.includes('timeout')) {
-        errorMessage = "**THE ARCHIVES ARE TAKING TOO LONG TO RESPOND!** Please try again.";
+      if (error.message.includes("404")) {
+        errorMessage =
+          "**NO IMAGES FOUND MATCHING YOUR CRITERIA!** Try different tags or remove some filters.";
+      } else if (error.message.includes("403")) {
+        errorMessage =
+          "**ACCESS TO THE ARCHIVES IS FORBIDDEN!** The API may be temporarily unavailable.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage =
+          "**THE ARCHIVES ARE TAKING TOO LONG TO RESPOND!** Please try again.";
       }
     }
-    
+
     await interaction.editReply({
       content: errorMessage,
     });

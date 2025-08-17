@@ -7,7 +7,7 @@ interface BattleLock {
 const locks = new Map<string, BattleLock>();
 export class BattleLockManager {
   private static readonly BATTLE_TIMEOUT = 1000 * 60 * 5; // 5 minutes
-   // Checks if a battle is active in a specific server
+  // Checks if a battle is active in a specific server
   public static isLocked(guildId: string): boolean {
     this.cleanupOldBattles();
     return locks.has(guildId);
@@ -24,8 +24,8 @@ export class BattleLockManager {
     return false;
   }
 
-   // Acquires a battle lock for a specific server and users
-   // Returns true if the lock was acquired, false otherwise
+  // Acquires a battle lock for a specific server and users
+  // Returns true if the lock was acquired, false otherwise
   public static acquireLock(guildId: string, userIds: string[]): boolean {
     if (this.isLocked(guildId)) {
       return false;

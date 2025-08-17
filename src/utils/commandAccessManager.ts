@@ -28,7 +28,10 @@ export class CommandAccessManager {
    * @param guildId The ID of the guild where the command is being used.
    * @returns True if the command is allowed, false otherwise.
    */
-  public static canUseCommand(commandName: string, guildId: string | null): boolean {
+  public static canUseCommand(
+    commandName: string,
+    guildId: string | null,
+  ): boolean {
     if (!RESTRICTED_COMMANDS.includes(commandName)) {
       return true;
     }
