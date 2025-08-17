@@ -165,7 +165,7 @@ async function createShipImage(
     ctx.fillStyle = "#FFFFFF";
     ctx.font = "bold 66px Verdana";
     ctx.textAlign = "center";
-    ctx.fillText(shipName, 960, 955);
+    ctx.fillText(shipName, 960, 952);
 
     return canvas.toBuffer();
   } catch (error) {
@@ -286,8 +286,9 @@ export async function execute(
       .setColor(percentage >= 60 ? "#ff00cd" : "#bf40a2")
       .setTitle("💕 SHIP RESULTS")
       .setDescription(
+        `**${user1Name} × ${user2Name}**\n` +
         `**Ship Name:** ${shipName}\n` +
-          `${percentage}% ${progressBar} ${rating}`,
+        `${percentage}% ${progressBar} ${rating}`,
       )
       .setImage("attachment://ship.png")
       .setFooter({ text: flavorText })
