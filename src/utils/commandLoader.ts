@@ -21,6 +21,7 @@ import * as aura from "../commands/aura.js";
 import * as battle from "../commands/battle.js";
 import * as battlestats from "../commands/battlestats.js";
 import * as furry from "../commands/furry.js";
+import * as anime from "../commands/anime.js";
 
 export interface Command {
   data: any;
@@ -53,6 +54,7 @@ export function loadCommands(): Collection<string, Command> {
     battle,
     battlestats,
     furry,
+    anime,
   ];
 
   for (const command of commandModules) {
