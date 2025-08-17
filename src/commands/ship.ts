@@ -58,8 +58,8 @@ function createProgressBar(percentage: number): string {
   const emptyBars = totalBars - filledBars;
 
   return (
-    ":purple_square:".repeat(filledBars) +
-    ":black_large_square:".repeat(emptyBars)
+    "🟪".repeat(filledBars) +
+    "⬛️".repeat(emptyBars)
   );
 }
 
