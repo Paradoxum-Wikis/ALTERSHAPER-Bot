@@ -5,6 +5,7 @@ const COMMANDS_CHANNEL_ID = "1366497229161894018";
 
 export enum PermissionLevel {
   BASIC = "basic",
+  BASIC2 = "basic2", // Basic commands that require designated channel
   MODERATOR = "moderator",
   ADMIN = "admin",
 }
@@ -30,12 +31,17 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   link: PermissionLevel.BASIC,
   checklink: PermissionLevel.BASIC,
   synctop5: PermissionLevel.BASIC,
-  sins: PermissionLevel.MODERATOR,
+  sins: PermissionLevel.BASIC,
   oracle: PermissionLevel.BASIC,
   tdstrivia: PermissionLevel.BASIC,
   aura: PermissionLevel.BASIC,
   battle: PermissionLevel.BASIC,
   battlestats: PermissionLevel.BASIC,
+  furry: PermissionLevel.BASIC,
+  ship: PermissionLevel.BASIC,
+
+  // Basic2
+  anime: PermissionLevel.BASIC2
 };
 
 // permission levels
@@ -84,6 +90,7 @@ export class RolePermissions {
     // hierarchy
     switch (requiredLevel) {
       case PermissionLevel.BASIC:
+      case PermissionLevel.BASIC2:
         return true;
       case PermissionLevel.MODERATOR:
         return (
@@ -115,27 +122,35 @@ export class RolePermissions {
 
   /**
    * Checks if a user can use commands in the current channel
-   * Basics can only use commands in the designated commands channel
+   * Basic2 commands require designated channel for basic users
+   * Mods and admins can use any command anywhere
    */
   public static canUseCommandInChannel(
     member: GuildMember,
     channelId: string,
+    commandName: string,
   ): boolean {
-    //const userLevel = this.getUserPermissionLevel(member);
+    const userLevel = this.getUserPermissionLevel(member);
+    const requiredLevel = COMMAND_PERMISSIONS[commandName];
 
-    // mods and admins can use commands anywhere
-    //if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
+    // mods + admins
+    if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
+      return true;
+    }
+
+    // basic2
+    if (requiredLevel === PermissionLevel.BASIC2) {
+      return channelId === COMMANDS_CHANNEL_ID;
+    }
+
+    // basic
     return true;
-    //}
-
-    // Basic can only use commands in the designated channel
-    //return channelId === COMMANDS_CHANNEL_ID;
   }
 
   /**
    * Get error message for wrong channel usage
    */
   public static getChannelErrorMessage(): string {
-    return `**THOU MUST SPEAK THY COMMANDS IN THE DESIGNATED CHANNEL!** Please use <#${COMMANDS_CHANNEL_ID}> for bot commands.`;
+    return `**THOU MUST UTTER THIS COMMAND IN THE DESIGNATED CHANNEL!** Please use <#${COMMANDS_CHANNEL_ID}> in the ALTER EGO Wiki server for this command.`;
   }
 }
