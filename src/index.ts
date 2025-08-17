@@ -51,6 +51,9 @@ class AltershaperBot {
         `✅ Altershaper bot hath awakened as ${this.client.user?.tag}`,
       );
       this.client.user?.setActivity("Alter Egoists", { type: 3 });
+
+      this.logVisibleChannels();
+
       await this.registerSlashCommands();
       await ReactionRoleHandler.initialize(this.client);
     });
@@ -62,6 +65,52 @@ class AltershaperBot {
       "messageReactionRemove",
       this.handleReactionRemove.bind(this),
     );
+  }
+
+  private logVisibleChannels(): void {
+    console.log("🔍 Visible channels:");
+    console.log("==================");
+
+    this.client.guilds.cache.forEach((guild) => {
+      console.log(`📁 Server: ${guild.name} (ID: ${guild.id})`);
+
+      guild.channels.cache.forEach((channel) => {
+        let channelType = "Unknown";
+
+        switch (channel.type) {
+          case ChannelType.GuildText:
+            channelType = "Text";
+            break;
+          case ChannelType.GuildVoice:
+            channelType = "Voice";
+            break;
+          case ChannelType.GuildCategory:
+            channelType = "Category";
+            break;
+          case ChannelType.GuildAnnouncement:
+            channelType = "Announcement";
+            break;
+          case ChannelType.GuildStageVoice:
+            channelType = "Stage";
+            break;
+          case ChannelType.GuildForum:
+            channelType = "Forum";
+            break;
+          case ChannelType.PublicThread:
+            channelType = "Public Thread";
+            break;
+          case ChannelType.PrivateThread:
+            channelType = "Private Thread";
+            break;
+        }
+
+        console.log(`  📝 ${channelType}: #${channel.name} (ID: ${channel.id})`);
+      });
+
+      console.log("");
+    });
+
+    console.log("==================");
   }
 
   private async registerSlashCommands(): Promise<void> {
