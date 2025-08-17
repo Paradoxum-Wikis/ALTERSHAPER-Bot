@@ -31,8 +31,16 @@ function createShipName(name1: string, name2: string): string {
   return firstHalf + secondHalf;
 }
 
+function createRealShipName(name1: string, name2: string): string {
+  const sortedNames = [name1, name2].sort();
+  const firstHalf = sortedNames[0].slice(0, Math.ceil(sortedNames[0].length / 2));
+  const secondHalf = sortedNames[1].slice(Math.floor(sortedNames[1].length / 2));
+  return firstHalf + secondHalf;
+}
+
 function calculateShipPercentage(name1: string, name2: string): number {
-  const combinedNames = (name1 + name2).toLowerCase();
+  const realShipName = createRealShipName(name1, name2);
+  const combinedNames = realShipName.toLowerCase();
   let hash = 0;
 
   for (let i = 0; i < combinedNames.length; i++) {
@@ -261,7 +269,7 @@ export async function execute(
     const attachment = new AttachmentBuilder(imageBuffer, { name: "ship.png" });
 
     const embed = new EmbedBuilder()
-      .setColor("#ff1e8e")
+      .setColor(percentage >= 60 ? "#ff00cd" : "#bf40a2")
       .setTitle("💕 SHIP RESULTS")
       .setDescription(
         `**Ship Name:** ${shipName}\n` +
