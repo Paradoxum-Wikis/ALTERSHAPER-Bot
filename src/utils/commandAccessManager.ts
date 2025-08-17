@@ -19,6 +19,7 @@ const RESTRICTED_COMMANDS: string[] = [
   "synctop5",
   "removelink",
   "removesin",
+  "anime",
 ];
 
 export class CommandAccessManager {
