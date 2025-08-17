@@ -37,7 +37,7 @@ export const data = new SlashCommandBuilder()
       .setDescription(
         "Start a ranked battle (requires consent from both fighters)"
       )
-      .addChoices({ name: "Yes", value: "yes" }, { name: "No", value: "no" })
+      .addChoices({ name: "True", value: "yes" }, { name: "False", value: "no" })
       .setRequired(false)
   );
 

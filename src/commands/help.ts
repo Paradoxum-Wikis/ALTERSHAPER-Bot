@@ -75,8 +75,7 @@ const commands: CommandInfo[] = [
   // Basic - Page 1
   {
     name: "/aura [@user]",
-    value:
-      "Calculate thy aura and view fighter profile based on one's display name",
+    value: "Calculate thy aura and view fighter profile based on one's display name",
     category: "basic1",
   },
   {
@@ -85,11 +84,25 @@ const commands: CommandInfo[] = [
     category: "basic1",
   },
   {
-    name: "/battle @fighter1 @fighter2 [ranked:yes/no]",
-    value:
-      "Witness an epic clash between two souls in divine combat (ranked requires consent)",
+    name: "/anime [include:tags] [exclude:tags] [min_size:number] [max_size:number] [high_quality:boolean]",
+    value: "Summon a random anime image from sacred archives of pic.re",
     category: "basic1",
   },
+  {
+    name: "/battle [@fighter1] [@fighter2] [ranked:boolean]",
+    value: "Witness an epic clash between two souls in divine combat (ranked requires consent)",
+    category: "basic1",
+  },
+  {
+    name: "/battlestats [user|leaderboard|history] [@user] [mode]",
+    value: "View deathbattle statistics and leaderboards",
+    category: "basic1",
+  },
+//  {
+//    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
+//    value: "Four warriors unite against a mighty boss in epic combat",
+//    category: "basic1",
+//  },
   {
     name: "/furry [@user]",
     value: "Check whether a user is a furry",
@@ -98,6 +111,11 @@ const commands: CommandInfo[] = [
   {
     name: "/oracle [question]",
     value: "Consult the oracles for divine wisdom (8ball)",
+    category: "basic1",
+  },
+  {
+    name: "/ship [@user1] [@user2]",
+    value: "Ship two users together and see their compatibility",
     category: "basic1",
   },
   // Basic - Page 2

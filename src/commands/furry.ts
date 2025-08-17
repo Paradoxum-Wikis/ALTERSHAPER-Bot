@@ -51,9 +51,8 @@ export async function execute(
       }
     } else {
       const members = await interaction.guild.members.fetch();
-      const realMembers = members.filter((member) => !member.user.bot);
 
-      if (realMembers.size === 0) {
+      if (members.size === 0) {
         await interaction.reply({
           content: "**THE SACRED HALLS ARE EMPTY OF MORTALS TO JUDGE!**",
           flags: MessageFlags.Ephemeral,
@@ -61,9 +60,8 @@ export async function execute(
         return;
       }
 
-      const membersArray = Array.from(realMembers.values());
-      targetMember =
-        membersArray[Math.floor(Math.random() * membersArray.length)];
+      const membersArray = Array.from(members.values());
+      targetMember = membersArray[Math.floor(Math.random() * membersArray.length)];
       targetUser = targetMember.user;
     }
 
