@@ -24,12 +24,14 @@ export interface BattleStats {
   losses: number;
   totalBattles: number;
   winRate: number;
+  weightedScore: number;
   lastCasualBattleAt?: string;
   // Ranked
   rankedWins: number;
   rankedLosses: number;
   rankedTotalBattles: number;
   rankedWinRate: number;
+  rankedWeightedScore: number;
   lastRankedBattleAt?: string;
 }
 
@@ -111,6 +113,16 @@ export class BattleStatsManager {
     return totalBattles > 0 ? Math.round((wins / totalBattles) * 100) : 0;
   }
 
+  private static calculateWeightedScore(wins: number, totalBattles: number): number {
+    if (totalBattles === 0) return 0;
+    
+    const winRate = wins / totalBattles;
+    const gamesFactor = 1 - Math.exp(-0.12 * totalBattles);
+    const weightedScore = winRate * gamesFactor;
+    
+    return Math.round(weightedScore * 100000) / 1000;
+  }
+
   public static async recordBattle(
     winnerId: string,
     winnerTag: string,
@@ -143,6 +155,7 @@ export class BattleStatsManager {
       };
       records.push(battleRecord);
 
+      // winner stat update
       let winnerStats = stats.find((s) => s.userId === winnerId);
       if (!winnerStats) {
         winnerStats = {
@@ -152,11 +165,13 @@ export class BattleStatsManager {
           losses: 0,
           totalBattles: 0,
           winRate: 0,
+          weightedScore: 0,
           lastCasualBattleAt: undefined,
           rankedWins: 0,
           rankedLosses: 0,
           rankedTotalBattles: 0,
           rankedWinRate: 0,
+          rankedWeightedScore: 0,
           lastRankedBattleAt: undefined,
         };
         stats.push(winnerStats);
@@ -169,6 +184,10 @@ export class BattleStatsManager {
           winnerStats.rankedWins,
           winnerStats.rankedTotalBattles,
         );
+        winnerStats.rankedWeightedScore = this.calculateWeightedScore(
+          winnerStats.rankedWins,
+          winnerStats.rankedTotalBattles,
+        );
         winnerStats.lastRankedBattleAt = battleDate;
       } else {
         winnerStats.wins++;
@@ -177,11 +196,16 @@ export class BattleStatsManager {
           winnerStats.wins,
           winnerStats.totalBattles,
         );
+        winnerStats.weightedScore = this.calculateWeightedScore(
+          winnerStats.wins,
+          winnerStats.totalBattles,
+        );
         winnerStats.lastCasualBattleAt = battleDate;
       }
 
       winnerStats.userTag = winnerTag;
 
+      // loser stats update
       let loserStats = stats.find((s) => s.userId === loserId);
       if (!loserStats) {
         loserStats = {
@@ -191,11 +215,13 @@ export class BattleStatsManager {
           losses: 0,
           totalBattles: 0,
           winRate: 0,
+          weightedScore: 0,
           lastCasualBattleAt: undefined,
           rankedWins: 0,
           rankedLosses: 0,
           rankedTotalBattles: 0,
           rankedWinRate: 0,
+          rankedWeightedScore: 0,
           lastRankedBattleAt: undefined,
         };
         stats.push(loserStats);
@@ -208,11 +234,19 @@ export class BattleStatsManager {
           loserStats.rankedWins,
           loserStats.rankedTotalBattles,
         );
+        loserStats.rankedWeightedScore = this.calculateWeightedScore(
+          loserStats.rankedWins,
+          loserStats.rankedTotalBattles,
+        );
         loserStats.lastRankedBattleAt = battleDate;
       } else {
         loserStats.losses++;
         loserStats.totalBattles++;
         loserStats.winRate = this.calculateWinRate(
+          loserStats.wins,
+          loserStats.totalBattles,
+        );
+        loserStats.weightedScore = this.calculateWeightedScore(
           loserStats.wins,
           loserStats.totalBattles,
         );
@@ -247,14 +281,16 @@ export class BattleStatsManager {
           : s.totalBattles >= minBattles,
       )
       .sort((a, b) => {
-        const aWinRate = ranked ? a.rankedWinRate : a.winRate;
-        const bWinRate = ranked ? b.rankedWinRate : b.winRate;
+        const aWeightedScore = ranked ? a.rankedWeightedScore : a.weightedScore;
+        const bWeightedScore = ranked ? b.rankedWeightedScore : b.weightedScore;
         const aWins = ranked ? a.rankedWins : a.wins;
         const bWins = ranked ? b.rankedWins : b.wins;
 
-        if (bWinRate !== aWinRate) {
-          return bWinRate - aWinRate;
+        // sort by weighted score
+        if (bWeightedScore !== aWeightedScore) {
+          return bWeightedScore - aWeightedScore;
         }
+        // tiebreaker by total wins
         return bWins - aWins;
       })
       .slice(0, limit);
