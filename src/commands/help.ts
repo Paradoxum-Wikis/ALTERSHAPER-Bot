@@ -22,12 +22,12 @@ interface CommandInfo {
 const commands: CommandInfo[] = [
   // Admin
   {
-    name: "/ban @user [reason]",
+    name: "/ban @user [-reason]",
     value: "Eternal banishment for heretical defiance",
     category: "admin",
   },
   {
-    name: "/removesin [entryid]",
+    name: "/removesin -entryid",
     value: "Absolve a soul and undo its punishment",
     category: "admin",
   },
@@ -38,22 +38,22 @@ const commands: CommandInfo[] = [
   },
   // Moderator
   {
-    name: "/kick @user [reason]",
+    name: "/kick @user [-reason]",
     value: "Cast out those who defy sacred alteruism",
     category: "moderator",
   },
   {
-    name: "/timeout @user [minutes] [reason]",
+    name: "/timeout @user -minutes [-reason]",
     value: "Impose silence upon the wayward",
     category: "moderator",
   },
   {
-    name: "/clear [amount]",
+    name: "/clear -amount",
     value: "Purge up to 100 messages from the sacred halls",
     category: "moderator",
   },
   {
-    name: "/warn @user [reason]",
+    name: "/warn @user [-reason]",
     value: "Issue divine warning to the straying",
     category: "moderator",
   },
@@ -63,20 +63,19 @@ const commands: CommandInfo[] = [
     category: "moderator",
   },
   {
-    name: "/archives [actionid]",
+    name: "/archives [-actionid]",
     value: "View the seraphic archives of purged messages",
     category: "moderator",
   },
   {
-    name: "/slowmode [seconds] [reason]",
+    name: "/slowmode -seconds [-reason]",
     value: "Impose restraint upon the flow of messages",
     category: "moderator",
   },
   // Basic - Page 1
   {
     name: "/aura [@user]",
-    value:
-      "Calculate thy aura and view fighter profile based on one's display name",
+    value: "Calculate thy aura and view fighter profile based on one's display name",
     category: "basic1",
   },
   {
@@ -85,33 +84,32 @@ const commands: CommandInfo[] = [
     category: "basic1",
   },
   {
-    name: "/anime [include:tags] [exclude:tags] [min_size:number] [max_size:number] [high_quality:boolean]",
+    name: "/anime [-include] [-exclude] [-min_size] [-max_size] [-high_quality]",
     value: "Summon a random anime image from sacred archives of pic.re",
     category: "basic1",
   },
   {
-    name: "/battle [@fighter1] [@fighter2] [ranked:boolean]",
-    value:
-      "Witness an epic clash between two souls in divine combat (ranked requires consent)",
+    name: "/battle [@fighter1] [@fighter2] [-ranked]",
+    value: "Witness an epic clash between two souls in divine combat (ranked requires consent)",
     category: "basic1",
   },
   {
-    name: "/battlestats [user|leaderboard|history] [@user] [mode]",
+    name: "/battlestats >subcommand [@user] [-mode]",
     value: "View deathbattle statistics and leaderboards",
     category: "basic1",
   },
-  //  {
-  //    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
-  //    value: "Four warriors unite against a mighty boss in epic combat",
-  //    category: "basic1",
-  //  },
+  {
+    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
+    value: "Four warriors unite against a mighty boss in epic combat",
+    category: "basic1",
+  },
   {
     name: "/furry [@user]",
     value: "Check whether a user is a furry",
     category: "basic1",
   },
   {
-    name: "/oracle [question]",
+    name: "/oracle -question",
     value: "Consult the oracles for divine wisdom (8ball)",
     category: "basic1",
   },
@@ -127,7 +125,7 @@ const commands: CommandInfo[] = [
     category: "basic2",
   },
   {
-    name: "/link [fandomusername]",
+    name: "/link [-fandomusername]",
     value: "Link thy Discord soul with thy Fandom account",
     category: "basic2",
   },
