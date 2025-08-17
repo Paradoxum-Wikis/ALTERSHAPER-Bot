@@ -137,7 +137,7 @@ function createHpBar(currentHp: number, maxHp: number): string {
   if (percentage < 0.3) color = "🟥";
   else if (percentage < 0.6) color = "🟨";
 
-  return color.repeat(filledBars) + "⬛".repeat(emptyBars);
+  return color.repeat(filledBars) + ":black_large_square:".repeat(emptyBars);
 }
 
 async function createBattleImage(

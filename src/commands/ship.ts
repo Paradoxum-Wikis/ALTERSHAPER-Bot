@@ -59,7 +59,7 @@ function createProgressBar(percentage: number): string {
 
   return (
     "🟪".repeat(filledBars) +
-    "⬛️".repeat(emptyBars)
+    ":black_large_square:".repeat(emptyBars)
   );
 }
 
