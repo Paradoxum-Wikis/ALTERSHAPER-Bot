@@ -97,7 +97,7 @@ function getFlavorText(percentage: number): string {
     15: "Ego stares back disapprovingly...",
     10: "Chaos would ensue from this union!",
     5: "Their alters are about to clash...",
-    0: "May ego have mercy on their souls...",
+    0: "May Ego have mercy on their souls...",
   };
 
   const keys = Object.keys(flavorTexts)
@@ -187,7 +187,7 @@ export async function execute(
   let user1 = interaction.options.getUser("user1");
   let user2 = interaction.options.getUser("user2");
 
-  if (!user1 && !user2) {
+  if (!user1 || !user2) {
     if (!interaction.inGuild()) {
       await interaction.reply({
         content:
@@ -197,37 +197,51 @@ export async function execute(
       return;
     }
 
-    user1 = interaction.user;
-
     try {
       const members = await interaction.guild!.members.fetch();
-      const memberArray = members.filter(
-        (member) => member.user.id !== user1!.id,
-      );
 
-      if (memberArray.size === 0) {
-        await interaction.reply({
-          content: "**No other members found in this server to ship with!**",
-          flags: MessageFlags.Ephemeral,
-        });
-        return;
+      // If no user1, randomize but exclude user2
+      if (!user1) {
+        const availableMembers = user2
+          ? members.filter((member) => member.user.id !== user2!.id)
+          : members;
+
+        if (availableMembers.size === 0) {
+          await interaction.reply({
+            content: "**No available members found to ship with!**",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const randomMember = availableMembers.random();
+        user1 = randomMember!.user;
       }
 
-      const randomMember = memberArray.random();
-      user2 = randomMember!.user;
+      // opposite of 1st case
+      if (!user2) {
+        const availableMembers = members.filter(
+          (member) => member.user.id !== user1!.id,
+        );
+
+        if (availableMembers.size === 0) {
+          await interaction.reply({
+            content: "**No other members found in this server to ship with!**",
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const randomMember = availableMembers.random();
+        user2 = randomMember!.user;
+      }
     } catch (error) {
       await interaction.reply({
-        content: "**Failed to find a random member to ship with!**",
+        content: "**Failed to find random members to ship with!**",
         flags: MessageFlags.Ephemeral,
       });
       return;
     }
-  } else if (!user1 || !user2) {
-    await interaction.reply({
-      content: "**You need to specify both users or no users at all!**",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
   }
 
   if (user1.id === user2.id) {
