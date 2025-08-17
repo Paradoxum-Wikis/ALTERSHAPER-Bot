@@ -28,7 +28,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   // everything else basically
 
   // Basic2
-  anime: PermissionLevel.BASIC2
+  anime: PermissionLevel.BASIC2,
 };
 
 // permission levels
@@ -121,7 +121,10 @@ export class RolePermissions {
     const requiredLevel = COMMAND_PERMISSIONS[commandName];
 
     // mods + admins
-    if (userLevel === PermissionLevel.MODERATOR || userLevel === PermissionLevel.ADMIN) {
+    if (
+      userLevel === PermissionLevel.MODERATOR ||
+      userLevel === PermissionLevel.ADMIN
+    ) {
       return true;
     }
 

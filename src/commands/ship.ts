@@ -33,8 +33,13 @@ function createShipName(name1: string, name2: string): string {
 
 function createRealShipName(name1: string, name2: string): string {
   const sortedNames = [name1, name2].sort();
-  const firstHalf = sortedNames[0].slice(0, Math.ceil(sortedNames[0].length / 2));
-  const secondHalf = sortedNames[1].slice(Math.floor(sortedNames[1].length / 2));
+  const firstHalf = sortedNames[0].slice(
+    0,
+    Math.ceil(sortedNames[0].length / 2),
+  );
+  const secondHalf = sortedNames[1].slice(
+    Math.floor(sortedNames[1].length / 2),
+  );
   return firstHalf + secondHalf;
 }
 
@@ -57,10 +62,7 @@ function createProgressBar(percentage: number): string {
   const filledBars = Math.round((percentage / 100) * totalBars);
   const emptyBars = totalBars - filledBars;
 
-  return (
-    "🟪".repeat(filledBars) +
-    ":black_large_square:".repeat(emptyBars)
-  );
+  return "🟪".repeat(filledBars) + ":black_large_square:".repeat(emptyBars);
 }
 
 function getShipRating(percentage: number): string {
@@ -287,8 +289,8 @@ export async function execute(
       .setTitle("💕 HERE COMES THE SHIP")
       .setDescription(
         `**${user1Name} × ${user2Name}**\n` +
-        `**Ship Name:** ${shipName}\n` +
-        `${percentage}% ${progressBar} ${rating}`,
+          `**Ship Name:** ${shipName}\n` +
+          `${percentage}% ${progressBar} ${rating}`,
       )
       .setImage("attachment://ship.png")
       .setFooter({ text: flavorText })

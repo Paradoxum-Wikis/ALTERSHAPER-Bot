@@ -107,7 +107,11 @@ export async function execute(
             { name: "🏆 Wins", value: stats.wins.toString(), inline: true },
             { name: "💀 Losses", value: stats.losses.toString(), inline: true },
             { name: "📊 Win Rate", value: `${stats.winRate}%`, inline: true },
-            { name: "⭐ Weighted Score", value: `${stats.weightedScore}`, inline: true },
+            {
+              name: "⭐ Weighted Score",
+              value: `${stats.weightedScore}`,
+              inline: true,
+            },
             {
               name: "⚔️ Total Battles",
               value: stats.totalBattles.toString(),
@@ -198,9 +202,11 @@ export async function execute(
             i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
           const wins = isRanked ? warrior.rankedWins : warrior.wins;
           const losses = isRanked ? warrior.rankedLosses : warrior.losses;
-          const weightedScore = isRanked ? warrior.rankedWeightedScore : warrior.weightedScore;
+          const weightedScore = isRanked
+            ? warrior.rankedWeightedScore
+            : warrior.weightedScore;
           const winRate = isRanked ? warrior.rankedWinRate : warrior.winRate;
-          
+
           leaderboardText += `${medal} **${warrior.userTag}** - ${weightedScore.toFixed(2)} WS (${wins}W-${losses}L, ${winRate}% WR)\n`;
         }
 

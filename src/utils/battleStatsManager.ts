@@ -113,13 +113,16 @@ export class BattleStatsManager {
     return totalBattles > 0 ? Math.round((wins / totalBattles) * 100) : 0;
   }
 
-  private static calculateWeightedScore(wins: number, totalBattles: number): number {
+  private static calculateWeightedScore(
+    wins: number,
+    totalBattles: number,
+  ): number {
     if (totalBattles === 0) return 0;
-    
+
     const winRate = wins / totalBattles;
     const gamesFactor = 1 - Math.exp(-0.12 * totalBattles);
     const weightedScore = winRate * gamesFactor;
-    
+
     return Math.round(weightedScore * 100000) / 1000;
   }
 

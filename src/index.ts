@@ -195,7 +195,11 @@ class AltershaperBot {
       }
 
       if (
-        !RolePermissions.canUseCommandInChannel(member, interaction.channelId, interaction.commandName)
+        !RolePermissions.canUseCommandInChannel(
+          member,
+          interaction.channelId,
+          interaction.commandName,
+        )
       ) {
         await interaction.reply({
           content: RolePermissions.getChannelErrorMessage(),
