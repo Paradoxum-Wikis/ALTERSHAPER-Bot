@@ -107,7 +107,7 @@ export async function execute(
             { name: "🏆 Wins", value: stats.wins.toString(), inline: true },
             { name: "💀 Losses", value: stats.losses.toString(), inline: true },
             { name: "📊 Win Rate", value: `${stats.winRate}%`, inline: true },
-            { name: "⭐ Weighted Score", value: `${stats.weightedScore.toFixed(2)}`, inline: true },
+            { name: "⭐ Weighted Score", value: `${stats.weightedScore}`, inline: true },
             {
               name: "⚔️ Total Battles",
               value: stats.totalBattles.toString(),
@@ -148,7 +148,7 @@ export async function execute(
             },
             {
               name: "⭐ Ranked Weighted Score",
-              value: `${stats.rankedWeightedScore.toFixed(2)}`,
+              value: `${stats.rankedWeightedScore}`,
               inline: true,
             },
             {

@@ -24,7 +24,6 @@ import * as furry from "../commands/furry.js";
 import * as anime from "../commands/anime.js";
 import * as ship from "../commands/ship.js";
 // import * as bossfight from "../commands/bossfight.js";
-import * as migrateweightedscores from "../commands/migrateweightedscores.js";
 
 export interface Command {
   data: any;
@@ -60,7 +59,6 @@ export function loadCommands(): Collection<string, Command> {
     anime,
     ship,
     // bossfight,
-    migrateweightedscores,
   ];
 
   for (const command of commandModules) {
