@@ -284,7 +284,7 @@ export async function execute(
 
     const embed = new EmbedBuilder()
       .setColor(percentage >= 60 ? "#ff00cd" : "#bf40a2")
-      .setTitle("💕 SHIP RESULTS")
+      .setTitle("💕 HERE COMES THE SHIP")
       .setDescription(
         `**${user1Name} × ${user2Name}**\n` +
         `**Ship Name:** ${shipName}\n` +
