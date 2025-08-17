@@ -68,49 +68,61 @@ class AltershaperBot {
   }
 
   private logVisibleChannels(): void {
-    console.log("🔍 Visible channels:");
-    console.log("==================");
+    console.log("🔍 Permissions:");
+    console.log("================================");
 
     this.client.guilds.cache.forEach((guild) => {
       console.log(`📁 Server: ${guild.name} (ID: ${guild.id})`);
 
       guild.channels.cache.forEach((channel) => {
         let channelType = "Unknown";
+        let canRead = false;
 
+        const permissions = channel.permissionsFor(this.client.user!);
+        
         switch (channel.type) {
           case ChannelType.GuildText:
             channelType = "Text";
+            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
             break;
           case ChannelType.GuildVoice:
             channelType = "Voice";
+            canRead = permissions?.has("ViewChannel") || false;
             break;
           case ChannelType.GuildCategory:
             channelType = "Category";
+            canRead = permissions?.has("ViewChannel") || false;
             break;
           case ChannelType.GuildAnnouncement:
             channelType = "Announcement";
+            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
             break;
           case ChannelType.GuildStageVoice:
             channelType = "Stage";
+            canRead = permissions?.has("ViewChannel") || false;
             break;
           case ChannelType.GuildForum:
             channelType = "Forum";
+            canRead = permissions?.has("ViewChannel") || false;
             break;
           case ChannelType.PublicThread:
             channelType = "Public Thread";
+            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
             break;
           case ChannelType.PrivateThread:
             channelType = "Private Thread";
+            canRead = permissions?.has("ViewChannel") && permissions?.has("ReadMessageHistory") || false;
             break;
         }
 
-        console.log(`  📝 ${channelType}: #${channel.name} (ID: ${channel.id})`);
+        const readStatus = canRead ? "✅ CAN READ" : "❌ CANNOT READ";
+        console.log(`  📝 ${channelType}: #${channel.name} (ID: ${channel.id}) - ${readStatus}`);
       });
 
       console.log("");
     });
 
-    console.log("==================");
+    console.log("================================");
   }
 
   private async registerSlashCommands(): Promise<void> {
