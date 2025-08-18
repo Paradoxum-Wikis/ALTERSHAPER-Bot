@@ -950,9 +950,7 @@ export async function execute(
             ? `**Updated Ranked Battle Records:**\n` +
               `🏆 **${winner.name}:** ${winnerStats?.rankedWins || 1}W-${winnerStats?.rankedLosses || 0}L (${(winnerStats?.rankedWeightedScore || 0).toFixed(2)} WS)\n` +
               `💀 **${loser.name}:** ${loserStats?.rankedWins || 0}W-${loserStats?.rankedLosses || 1}L (${(loserStats?.rankedWeightedScore || 0).toFixed(2)} WS)\n\n`
-            : `**Updated Battle Records:**\n` +
-              `🏆 **${winner.name}:** ${winnerStats?.wins || 1}W-${winnerStats?.losses || 0}L (${(winnerStats?.weightedScore || 0).toFixed(2)} WS)\n` +
-              `💀 **${loser.name}:** ${loserStats?.wins || 0}W-${loserStats?.losses || 1}L (${(loserStats?.weightedScore || 0).toFixed(2)} WS)\n\n`) +
+            : "") +
           `*The arena falls silent as ${winner.name} stands triumphant...*`,
       )
       .setImage("attachment://deathbattle-final.png")
