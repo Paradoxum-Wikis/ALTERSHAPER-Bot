@@ -34,13 +34,13 @@ export const data = new SlashCommandBuilder()
     option
       .setName("user")
       .setDescription("The Discord soul to check")
-      .setRequired(true),
+      .setRequired(false),
   );
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
-  const targetUser = interaction.options.getUser("user", true);
+  const targetUser = interaction.options.getUser("user") || interaction.user;
   const targetMember = await interaction.guild?.members
     .fetch(targetUser.id)
     .catch(() => null);
@@ -198,12 +198,12 @@ export async function execute(
         )}`,
       );
 
-      if (topContributorResult.roleGranted) {
+      if (topContributorResult.roleGranted || topContributorResult.rank) {
         const topRole = interaction.guild?.roles.cache.get(
           TOP_CONTRIBUTORS_ROLE_ID,
         );
         console.log(
-          `[CHECKLINK DEBUG] Top contributor role granted, found role: ${topRole?.name} (ID: ${TOP_CONTRIBUTORS_ROLE_ID})`,
+          `[CHECKLINK DEBUG] Top contributor role check - granted: ${topContributorResult.roleGranted}, rank: ${topContributorResult.rank}, found role: ${topRole?.name} (ID: ${TOP_CONTRIBUTORS_ROLE_ID})`,
         );
         if (topRole) allGrantedRoles.push(topRole.name);
       }

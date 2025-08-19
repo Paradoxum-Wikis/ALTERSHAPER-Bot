@@ -58,11 +58,6 @@ const commands: CommandInfo[] = [
     category: "moderator",
   },
   {
-    name: "/sins [@user]",
-    value: "Behold the records of the damned",
-    category: "moderator",
-  },
-  {
     name: "/archives [-actionid]",
     value: "View the seraphic archives of purged messages",
     category: "moderator",
@@ -132,8 +127,13 @@ const commands: CommandInfo[] = [
     category: "basic2",
   },
   {
-    name: "/checklink @user",
+    name: "/checklink [@user]",
     value: "Check if a user is linked to Fandom and sync roles",
+    category: "basic2",
+  },
+  {
+    name: "/sins [@user]",
+    value: "Behold the records of the damned",
     category: "basic2",
   },
   {
