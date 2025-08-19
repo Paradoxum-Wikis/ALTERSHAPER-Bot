@@ -3,6 +3,10 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   MessageFlags,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
 } from "discord.js";
 import { ModerationLogger } from "../utils/moderationLogger.js";
 
@@ -45,6 +49,9 @@ export async function execute(
             `**${targetUser.tag} hath a clean slate!**\n\nNo sins recorded in the records of the damned.`,
           )
           .setThumbnail(targetUser.displayAvatarURL())
+          .setFooter({
+            text: "A SOUL WHO HONOURS ALTRUISM. LET OTHERS LEARN.",
+          })
           .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
@@ -64,60 +71,153 @@ export async function execute(
         counts.ban * 10 +
         counts.timeout * 3;
 
-      const embed = new EmbedBuilder()
-        .setColor("#FFA500")
-        .setTitle("📋 RECORDS OF THE DAMNED")
-        .setDescription(
-          `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n**Sin Score:** ${sinScore} points\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
-        )
-        .setThumbnail(targetUser.displayAvatarURL())
-        .setTimestamp();
+      // Filter valid entries and reverse to show newest first
+      const validEntries = userEntries.filter(entry => 
+        ["warn", "kick", "ban", "timeout"].includes(entry.type)
+      ).reverse();
 
-      // Show latest 10 entries
-      const recentEntries = userEntries.slice(-10).reverse();
+      const entriesPerPage = 5;
+      const totalPages = Math.ceil(validEntries.length / entriesPerPage);
+      let currentPage = 0;
 
-      for (const entry of recentEntries) {
-        const date = new Date(entry.timestamp).toLocaleDateString();
-        const time = new Date(entry.timestamp).toLocaleTimeString();
+      const createEmbed = (page: number) => {
+        const embed = new EmbedBuilder()
+          .setColor("#FFA500")
+          .setTitle("📋 RECORDS OF THE DAMNED")
+          .setDescription(
+            `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n**Sin Score:** ${sinScore} ${sinScore === 1 ? 'point' : 'points'}\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
+          )
+          .setThumbnail(targetUser.displayAvatarURL())
+          .setTimestamp();
 
-        const typeEmoji: Record<string, string> = {
-          warn: "⚠️",
-          kick: "👢",
-          ban: "🔨",
-          timeout: "🤐",
-        };
+        const startIndex = page * entriesPerPage;
+        const endIndex = Math.min(startIndex + entriesPerPage, validEntries.length);
+        const pageEntries = validEntries.slice(startIndex, endIndex);
 
-        const typeName: Record<string, string> = {
-          warn: "WARNING",
-          kick: "KICK",
-          ban: "BAN",
-          timeout: "TIMEOUT",
-        };
+        for (const entry of pageEntries) {
+          const date = new Date(entry.timestamp).toLocaleDateString();
+          const time = new Date(entry.timestamp).toLocaleTimeString();
 
-        // Skip clear entries since they don't apply to people
-        if (!typeEmoji[entry.type] || !typeName[entry.type]) {
-          continue;
+          const typeEmoji: Record<string, string> = {
+            warn: "⚠️",
+            kick: "👢",
+            ban: "🔨",
+            timeout: "🤐",
+          };
+
+          const typeName: Record<string, string> = {
+            warn: "WARNING",
+            kick: "KICK",
+            ban: "BAN",
+            timeout: "TIMEOUT",
+          };
+
+          let extraInfo = "";
+          if (entry.type === "timeout" && entry.duration) {
+            extraInfo = `\n**Duration:** ${entry.duration} minutes`;
+          }
+
+          embed.addFields({
+            name: `${typeEmoji[entry.type]} ${typeName[entry.type]} ${entry.id}`,
+            value: `**Executor:** ${entry.moderatorTag}\n**Reason:** ${entry.reason}${extraInfo}\n**Date:** ${date} at ${time}`,
+            inline: false,
+          });
         }
 
-        let extraInfo = "";
-        if (entry.type === "timeout" && entry.duration) {
-          extraInfo = `\n**Duration:** ${entry.duration} minutes`;
+        if (totalPages > 1) {
+          embed.setFooter({
+            text: `Page ${page + 1} of ${totalPages} | DEFYERS WILL FACE JUDGMENT.`,
+          });
+        } else {
+          embed.setFooter({
+            text: "THE FAITHLESS SHALL BE CORRECTED.",
+          });
         }
 
-        embed.addFields({
-          name: `${typeEmoji[entry.type]} ${typeName[entry.type]} ${entry.id}`,
-          value: `**Executor:** ${entry.moderatorTag}\n**Reason:** ${entry.reason}${extraInfo}\n**Date:** ${date} at ${time}`,
-          inline: false,
+        return embed;
+      };
+
+      const createButtons = (page: number) => {
+        const row = new ActionRowBuilder<ButtonBuilder>()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId("first")
+              .setLabel("⏮️ First")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(page === 0),
+            new ButtonBuilder()
+              .setCustomId("prev")
+              .setLabel("◀️ Previous")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(page === 0),
+            new ButtonBuilder()
+              .setCustomId("next")
+              .setLabel("▶️ Next")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(page === totalPages - 1),
+            new ButtonBuilder()
+              .setCustomId("last")
+              .setLabel("⏭️ Last")
+              .setStyle(ButtonStyle.Secondary)
+              .setDisabled(page === totalPages - 1),
+          );
+        return row;
+      };
+
+      const embed = createEmbed(currentPage);
+      const components = totalPages > 1 ? [createButtons(currentPage)] : [];
+
+      const response = await interaction.reply({
+        embeds: [embed],
+        components,
+      });
+
+      if (totalPages > 1) {
+        const collector = response.createMessageComponentCollector({
+          componentType: ComponentType.Button,
+          time: 300000,
+        });
+
+        collector.on("collect", async (buttonInteraction) => {
+          if (buttonInteraction.user.id !== interaction.user.id) {
+            await buttonInteraction.reply({
+              content: "**ONLY THE INVOKER OF THIS SACRED RITUAL MAY NAVIGATE THE RECORDS!**",
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+
+          switch (buttonInteraction.customId) {
+            case "first":
+              currentPage = 0;
+              break;
+            case "prev":
+              currentPage = Math.max(0, currentPage - 1);
+              break;
+            case "next":
+              currentPage = Math.min(totalPages - 1, currentPage + 1);
+              break;
+            case "last":
+              currentPage = totalPages - 1;
+              break;
+          }
+
+          await buttonInteraction.update({
+            embeds: [createEmbed(currentPage)],
+            components: [createButtons(currentPage)],
+          });
+        });
+
+        collector.on("end", async () => {
+          try {
+            await response.edit({
+              components: [],
+            });
+          } catch (error) {
+            // Interaction might have been deleted idfk LOL
+          }
         });
       }
-
-      if (userEntries.length > 10) {
-        embed.setFooter({
-          text: `Showing latest 10 of ${userEntries.length} entries`,
-        });
-      }
-
-      await interaction.reply({ embeds: [embed] });
     } else {
       // Show serverwide stats
       const allEntries = await ModerationLogger.getAllEntries(
@@ -131,6 +231,9 @@ export async function execute(
           .setDescription(
             "**The sacred halls remain pure!**\n\nNo transgressions have been recorded in this realm.",
           )
+          .setFooter({
+            text: "ALL SOULS HONOUR THE DIVINE ALTER EGO. THE SACRED LAW OF ALTRUISM REIGNS SUPREME.",
+          })
           .setTimestamp();
 
         await interaction.reply({ embeds: [embed] });
@@ -198,6 +301,9 @@ export async function execute(
         .setDescription(
           `**Total actions recorded:** ${allEntries.length}\n\n**⚠️ Warnings:** ${typeCounts.warn}\n**👢 Kicks:** ${typeCounts.kick}\n**🔨 Bans:** ${typeCounts.ban}\n**🤐 Timeouts:** ${typeCounts.timeout}\n**🧹 Purges:** ${typeCounts.clear}`,
         )
+        .setFooter({
+          text: "I AM THE HAND OF JUDGMENT. KNOW THAT RIGHTEOUS CORRECTION AWAITS ALL WHO DEFY ALTRUISM.",
+        })
         .setTimestamp();
 
       if (sortedUsers.length > 0) {
@@ -211,14 +317,14 @@ export async function execute(
           if (userData.counts.bans > 0) breakdown.push(`${userData.counts.bans}B`);
           if (userData.counts.timeouts > 0) breakdown.push(`${userData.counts.timeouts}T`);
 
-          leaderboard += `${position} **${userData.tag}** - ${userData.score} points (${breakdown.join(", ")})\n`;
+          leaderboard += `${position} **${userData.tag}** - ${userData.score} ${userData.score === 1 ? 'point' : 'points'} (${breakdown.join(", ")})\n`;
         }
 
         embed.addFields({
           name: "EGO'S LIST OF SHAMEFUL BEINGS",
           value:
             leaderboard +
-            "\n*Warns = 1pt, Timeouts = 3pts, Kicks = 5pts, Bans = 10pts*",
+            "*Warns = 1pt, Timeouts = 3pts, Kicks = 5pts, Bans = 10pts*",
           inline: false,
         });
       }
