@@ -6,13 +6,9 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
-import {
-  FANDOM_ROLE_MAP,
-  FANDOM_ROLE_IDS,
-  LINKED_ROLE_ID,
-  TOP_CONTRIBUTORS_ROLE_ID,
-} from "../utils/roleConstants.js";
+import { TOP_CONTRIBUTORS_ROLE_ID } from "../utils/roleConstants.js";
 import { TopContributorsManager } from "../utils/topContributors.js";
+import { FandomRoleManager } from "../utils/fandomRoleManager.js";
 
 interface FandomUserQueryUser {
   userid: number;
@@ -40,60 +36,6 @@ export const data = new SlashCommandBuilder()
       .setDescription("The Discord soul to check")
       .setRequired(true),
   );
-
-async function manageFandomRoles(
-  member: GuildMember,
-  fandomGroups: string[],
-  interactionGuild: ChatInputCommandInteraction["guild"],
-): Promise<{ grantedRoleNames: string[]; failedRoleNames: string[] }> {
-  const rolesToGrantIds: string[] = [];
-  const grantedRoleNames: string[] = [];
-  const failedRoleNames: string[] = [];
-
-  rolesToGrantIds.push(LINKED_ROLE_ID);
-
-  for (const group of fandomGroups) {
-    const roleId = FANDOM_ROLE_MAP[group.toLowerCase()];
-    if (roleId) {
-      rolesToGrantIds.push(roleId);
-    }
-  }
-
-  let rolesToRemoveFromMember: string[] = [];
-  member.roles.cache.forEach((role) => {
-    if (
-      FANDOM_ROLE_IDS.includes(role.id) &&
-      !rolesToGrantIds.includes(role.id)
-    ) {
-      rolesToRemoveFromMember.push(role.id);
-    }
-  });
-
-  if (rolesToRemoveFromMember.length > 0) {
-    try {
-      await member.roles.remove(rolesToRemoveFromMember);
-    } catch (e) {
-      console.error("Error removing roles from member:", e);
-    }
-  }
-
-  for (const roleId of rolesToGrantIds) {
-    if (member.roles.cache.has(roleId)) {
-      const role = interactionGuild?.roles.cache.get(roleId);
-      if (role) grantedRoleNames.push(role.name);
-      continue;
-    }
-    try {
-      await member.roles.add(roleId);
-      const role = interactionGuild?.roles.cache.get(roleId);
-      if (role) grantedRoleNames.push(role.name);
-    } catch (error) {
-      const role = interactionGuild?.roles.cache.get(roleId);
-      if (role) failedRoleNames.push(role.name);
-    }
-  }
-  return { grantedRoleNames, failedRoleNames };
-}
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -176,10 +118,11 @@ export async function execute(
     let topContributorResult: any = { roleGranted: false, roleRemoved: false };
 
     if (fandomDataStatus === "Active") {
-      const roleResult = await manageFandomRoles(
+      const roleResult = await FandomRoleManager.manageFandomRoles(
         targetMember,
         fandomGroups,
         interaction.guild,
+        existingLink.fandomUsername,
       );
       grantedRoleNames = roleResult.grantedRoleNames;
       failedRoleNames = roleResult.failedRoleNames;
@@ -211,20 +154,8 @@ export async function execute(
           inline: true,
         },
         {
-          name: "FANDOM STATUS",
-          value: fandomDataStatus,
-          inline: true,
-        },
-        {
           name: "LINKED ON",
           value: `<t:${Math.floor(new Date(existingLink.linkedAt).getTime() / 1000)}:F>`,
-          inline: true,
-        },
-        {
-          name: "ROLE SYNC",
-          value: rolesSynced
-            ? "Performed"
-            : "Skipped (Fandom data unavailable)",
           inline: true,
         },
       );
@@ -238,35 +169,11 @@ export async function execute(
         if (topRole) allGrantedRoles.push(topRole.name);
       }
 
-      if (allGrantedRoles.length > 0) {
-        const roleMentions = allGrantedRoles
-          .map((name) => {
-            const linkedRole =
-              interaction.guild?.roles.cache.get(LINKED_ROLE_ID);
-            if (linkedRole && linkedRole.name === name) {
-              return `<@&${LINKED_ROLE_ID}>`;
-            }
-
-            const topRole = interaction.guild?.roles.cache.get(
-              TOP_CONTRIBUTORS_ROLE_ID,
-            );
-            if (topRole && topRole.name === name) {
-              return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
-            }
-
-            const roleEntry = Object.entries(FANDOM_ROLE_MAP).find(
-              ([, id]) => interaction.guild?.roles.cache.get(id)?.name === name,
-            );
-            return roleEntry ? `<@&${roleEntry[1]}>` : `\`${name}\``;
-          })
-          .join(", ");
-        embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
-      } else {
-        embed.addFields({
-          name: "ROLES SYNCHRONIZED",
-          value: "No Fandom specific roles were applicable or needed changes.",
-        });
-      }
+      const roleMentions = FandomRoleManager.createRoleMentions(
+        allGrantedRoles,
+        interaction.guild,
+      );
+      embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
 
       if (topContributorResult.rank) {
         embed.addFields({
