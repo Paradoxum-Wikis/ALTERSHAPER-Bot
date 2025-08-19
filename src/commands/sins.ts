@@ -8,7 +8,7 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("sins")
-  .setDescription("Behold the records of the damned")
+  .setDescription("Behold the records of the damned, no parameters shows global sins")
   .addUserOption((option) =>
     option
       .setName("user")
@@ -58,11 +58,17 @@ export async function execute(
         timeout: userEntries.filter((e) => e.type === "timeout").length,
       };
 
+      const sinScore =
+        counts.warn * 1 +
+        counts.kick * 5 +
+        counts.ban * 10 +
+        counts.timeout * 3;
+
       const embed = new EmbedBuilder()
         .setColor("#FFA500")
         .setTitle("📋 RECORDS OF THE DAMNED")
         .setDescription(
-          `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
+          `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n**Sin Score:** ${sinScore} points\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
         )
         .setThumbnail(targetUser.displayAvatarURL())
         .setTimestamp();
@@ -74,21 +80,24 @@ export async function execute(
         const date = new Date(entry.timestamp).toLocaleDateString();
         const time = new Date(entry.timestamp).toLocaleTimeString();
 
-        const typeEmoji = {
+        const typeEmoji: Record<string, string> = {
           warn: "⚠️",
           kick: "👢",
           ban: "🔨",
           timeout: "🤐",
-          clear: "🧹",
         };
 
-        const typeName = {
+        const typeName: Record<string, string> = {
           warn: "WARNING",
           kick: "KICK",
           ban: "BAN",
           timeout: "TIMEOUT",
-          clear: "CLEAR",
         };
+
+        // Skip clear entries since they don't apply to people
+        if (!typeEmoji[entry.type] || !typeName[entry.type]) {
+          continue;
+        }
 
         let extraInfo = "";
         if (entry.type === "timeout" && entry.duration) {
@@ -136,21 +145,51 @@ export async function execute(
         clear: allEntries.filter((e) => e.type === "clear").length,
       };
 
-      // Count warnings per user for leaderboard
-      const userWarnCounts = new Map<string, { tag: string; count: number }>();
+      const userSinScores = new Map<
+        string,
+        {
+          tag: string;
+          score: number;
+          counts: { warns: number; kicks: number; bans: number; timeouts: number };
+        }
+      >();
 
-      for (const entry of allEntries.filter((e) => e.type === "warn")) {
-        const existing = userWarnCounts.get(entry.userId);
+      for (const entry of allEntries.filter((e) =>
+        ["warn", "kick", "ban", "timeout"].includes(e.type),
+      )) {
+        const existing = userSinScores.get(entry.userId);
+        const points =
+          entry.type === "warn"
+            ? 1
+            : entry.type === "kick"
+            ? 5
+            : entry.type === "ban"
+            ? 10
+            : 3; // timeout = 3
+
         if (existing) {
-          existing.count++;
+          existing.score += points;
+          if (entry.type === "warn") existing.counts.warns++;
+          else if (entry.type === "kick") existing.counts.kicks++;
+          else if (entry.type === "ban") existing.counts.bans++;
+          else if (entry.type === "timeout") existing.counts.timeouts++;
         } else {
-          userWarnCounts.set(entry.userId, { tag: entry.userTag, count: 1 });
+          const counts = { warns: 0, kicks: 0, bans: 0, timeouts: 0 };
+          if (entry.type === "warn") counts.warns = 1;
+          else if (entry.type === "kick") counts.kicks = 1;
+          else if (entry.type === "ban") counts.bans = 1;
+          else if (entry.type === "timeout") counts.timeouts = 1;
+
+          userSinScores.set(entry.userId, {
+            tag: entry.userTag,
+            score: points,
+            counts,
+          });
         }
       }
 
-      // Sort by warning count
-      const sortedUsers = Array.from(userWarnCounts.entries())
-        .sort(([, a], [, b]) => b.count - a.count)
+      const sortedUsers = Array.from(userSinScores.entries())
+        .sort(([, a], [, b]) => b.score - a.score)
         .slice(0, 10);
 
       const embed = new EmbedBuilder()
@@ -164,15 +203,22 @@ export async function execute(
       if (sortedUsers.length > 0) {
         let leaderboard = "";
         for (let i = 0; i < sortedUsers.length; i++) {
-          const [userId, userData] = sortedUsers[i];
-          const medal =
-            i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`;
-          leaderboard += `${medal} **${userData.tag}** - ${userData.count} warning${userData.count !== 1 ? "s" : ""}\n`;
+          const userData = sortedUsers[i][1];
+          const position = `${i + 1}.`;
+          const breakdown = [];
+          if (userData.counts.warns > 0) breakdown.push(`${userData.counts.warns}W`);
+          if (userData.counts.kicks > 0) breakdown.push(`${userData.counts.kicks}K`);
+          if (userData.counts.bans > 0) breakdown.push(`${userData.counts.bans}B`);
+          if (userData.counts.timeouts > 0) breakdown.push(`${userData.counts.timeouts}T`);
+
+          leaderboard += `${position} **${userData.tag}** - ${userData.score} points (${breakdown.join(", ")})\n`;
         }
 
         embed.addFields({
-          name: "HALL OF SHAME (WARNINGS)",
-          value: leaderboard,
+          name: "EGO'S LIST OF SHAMEFUL BEINGS",
+          value:
+            leaderboard +
+            "\n*Warns = 1pt, Timeouts = 3pts, Kicks = 5pts, Bans = 10pts*",
           inline: false,
         });
       }
