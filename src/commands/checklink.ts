@@ -83,7 +83,13 @@ export async function execute(
       return;
     }
 
-    const userQueryUrl = `https://alter-ego.fandom.com/api.php?action=query&format=json&list=users&ususers=${encodeURIComponent(existingLink.fandomUsername)}&usprop=groups%7Cgender%7Cregistration%7Ceditcount`;
+    console.log(
+      `[CHECKLINK DEBUG] Checking user: ${targetUser.tag} linked to: ${existingLink.fandomUsername}`,
+    );
+
+    const userQueryUrl = `https://alter-ego.fandom.com/api.php?action=query&format=json&list=users&ususers=${encodeURIComponent(
+      existingLink.fandomUsername,
+    )}&usprop=groups%7Cgender%7Cregistration%7Ceditcount`;
     const userQueryResponse = await fetch(userQueryUrl);
 
     if (!userQueryResponse.ok) {
@@ -112,12 +118,23 @@ export async function execute(
       }
     }
 
+    console.log(
+      `[CHECKLINK DEBUG] Fandom groups found: ${JSON.stringify(fandomGroups)}`,
+    );
+    console.log(
+      `[CHECKLINK DEBUG] Fandom data status: ${fandomDataStatus}`,
+    );
+
     let rolesSynced = false;
     let grantedRoleNames: string[] = [];
     let failedRoleNames: string[] = [];
     let topContributorResult: any = { roleGranted: false, roleRemoved: false };
 
     if (fandomDataStatus === "Active") {
+      console.log(
+        `[CHECKLINK DEBUG] Starting role sync for ${existingLink.fandomUsername}`,
+      );
+
       const roleResult = await FandomRoleManager.manageFandomRoles(
         targetMember,
         fandomGroups,
@@ -127,11 +144,22 @@ export async function execute(
       grantedRoleNames = roleResult.grantedRoleNames;
       failedRoleNames = roleResult.failedRoleNames;
 
+      console.log(
+        `[CHECKLINK DEBUG] Fandom roles granted: ${JSON.stringify(grantedRoleNames)}`,
+      );
+      console.log(
+        `[CHECKLINK DEBUG] Fandom roles failed: ${JSON.stringify(failedRoleNames)}`,
+      );
+
       topContributorResult =
         await TopContributorsManager.manageTopContributorRole(
           targetMember,
           existingLink.fandomUsername,
         );
+
+      console.log(
+        `[CHECKLINK DEBUG] Top contributor result: ${JSON.stringify(topContributorResult)}`,
+      );
 
       rolesSynced = true;
     }
@@ -155,24 +183,46 @@ export async function execute(
         },
         {
           name: "LINKED ON",
-          value: `<t:${Math.floor(new Date(existingLink.linkedAt).getTime() / 1000)}:F>`,
+          value: `<t:${Math.floor(
+            new Date(existingLink.linkedAt).getTime() / 1000,
+          )}:F>`,
           inline: true,
         },
       );
 
     if (rolesSynced) {
       let allGrantedRoles = [...grantedRoleNames];
+      console.log(
+        `[CHECKLINK DEBUG] Initial allGrantedRoles: ${JSON.stringify(
+          allGrantedRoles,
+        )}`,
+      );
+
       if (topContributorResult.roleGranted) {
         const topRole = interaction.guild?.roles.cache.get(
           TOP_CONTRIBUTORS_ROLE_ID,
         );
+        console.log(
+          `[CHECKLINK DEBUG] Top contributor role granted, found role: ${topRole?.name} (ID: ${TOP_CONTRIBUTORS_ROLE_ID})`,
+        );
         if (topRole) allGrantedRoles.push(topRole.name);
       }
+
+      console.log(
+        `[CHECKLINK DEBUG] Final allGrantedRoles: ${JSON.stringify(
+          allGrantedRoles,
+        )}`,
+      );
 
       const roleMentions = FandomRoleManager.createRoleMentions(
         allGrantedRoles,
         interaction.guild,
       );
+
+      console.log(
+        `[CHECKLINK DEBUG] Role mentions generated: ${roleMentions}`,
+      );
+
       embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
 
       if (topContributorResult.rank) {
@@ -190,7 +240,9 @@ export async function execute(
       if (failedRoleNames.length > 0) {
         embed.addFields({
           name: "ROLE SYNC ISSUES",
-          value: `Failed to grant: ${failedRoleNames.map((rName) => `\`${rName}\``).join(", ")}.`,
+          value: `Failed to grant: ${failedRoleNames
+            .map((rName) => `\`${rName}\``)
+            .join(", ")}.`,
         });
         embed.setColor("#FFA500");
       }

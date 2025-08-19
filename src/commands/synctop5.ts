@@ -53,7 +53,7 @@ export async function execute(
       .setColor(result.errors.length > 0 ? "#FFA500" : "#00FF00")
       .setTitle("🏆 TOP CONTRIBUTORS SYNCHRONIZATION COMPLETE")
       .setDescription(
-        "**The rankings have been synchronized with the reverent roles!**",
+        "**The rankings have been synchronized with the reverent role!**",
       )
       .addFields({
         name: "📊 SYNCHRONIZATION STATISTICS",

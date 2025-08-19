@@ -117,67 +117,10 @@ export async function execute(
         });
         return;
       }
-      const { grantedRoleNames, failedRoleNames } = await FandomRoleManager.manageFandomRoles(
-        member,
-        fandomGroups,
-        interaction.guild,
-        canonicalFandomUsername,
-      );
-
-      const topContributorResult =
-        await TopContributorsManager.manageTopContributorRole(
-          member,
-          canonicalFandomUsername,
-        );
-
-      const syncEmbed = new EmbedBuilder()
-        .setColor(failedRoleNames.length > 0 ? "#FFA500" : "#00FF00")
-        .setTitle("🔗 ALTER AND SOUL SYNCHRONIZED!")
-        .setDescription(
-          `**THY LINK TO FANDOM ALTER "${canonicalFandomUsername}" IS CONFIRMED AND ROLES HAVE BEEN SYNCHRONIZED!**`,
-        );
-
-      let allGrantedRoles = [...grantedRoleNames];
-      if (topContributorResult.roleGranted) {
-        const topRole = interaction.guild?.roles.cache.get(
-          TOP_CONTRIBUTORS_ROLE_ID,
-        );
-        if (topRole) allGrantedRoles.push(topRole.name);
-      }
-
-      const roleMentions = FandomRoleManager.createRoleMentions(
-        allGrantedRoles,
-        interaction.guild,
-      );
-
-      if (roleMentions) {
-        syncEmbed.addFields({
-          name: "ROLES ENSURED/GRANTED",
-          value: roleMentions,
-        });
-      } else {
-        syncEmbed.addFields({
-          name: "ROLES STATUS",
-          value:
-            "No new Fandom specific roles were applicable or needed granting at this time.",
-        });
-      }
-
-      if (topContributorResult.rank) {
-        syncEmbed.addFields({
-          name: "TOP CONTRIBUTOR STATUS",
-          value: `**RANK #${topContributorResult.rank}** in current week's top contributors!`,
-        });
-      }
-
-      if (failedRoleNames.length > 0) {
-        syncEmbed.addFields({
-          name: "ROLE GRANTING ISSUES",
-          value: `Failed to grant: ${failedRoleNames.map((rName) => `\`${rName}\``).join(", ")}.`,
-        });
-      }
-
-      await interaction.reply({ embeds: [syncEmbed] });
+      await interaction.reply({
+        content: `**THY SOUL IS ALREADY LINKED TO "${canonicalFandomUsername}"! USE \`/checklink\` TO SYNC ROLES.**`,
+        flags: MessageFlags.Ephemeral,
+      });
       return;
     }
 
@@ -371,7 +314,7 @@ export async function execute(
         if (topContributorResult.rank) {
           successEmbed.addFields({
             name: "TOP CONTRIBUTOR STATUS",
-            value: `**🏆 CONGRATULATIONS! RANK #${topContributorResult.rank}** in current week's top contributors!`,
+            value: `**🏆 CONGRATULATIONS! Rank #${topContributorResult.rank}** in current week's top contributors!`,
           });
         }
 
