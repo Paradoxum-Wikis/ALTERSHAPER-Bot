@@ -6,7 +6,13 @@ import {
   MessageFlags,
 } from "discord.js";
 import { LinkLogger } from "../utils/linkLogger.js";
-import { FANDOM_ROLE_IDS, LINKED_ROLE_ID } from "../utils/roleConstants.js";
+import {
+  FANDOM_ROLE_IDS,
+  LINKED_ROLE_ID,
+  STAFF_ROLE_ID,
+  EDIT_COUNT_ROLE_IDS,
+  TOP_CONTRIBUTORS_ROLE_ID,
+} from "../utils/roleConstants.js";
 
 export const data = new SlashCommandBuilder()
   .setName("unlink")
@@ -99,7 +105,13 @@ export async function execute(
         await LinkLogger.removeLink(targetUser.id);
 
         if (targetMember) {
-          const rolesToRemove = [LINKED_ROLE_ID, ...FANDOM_ROLE_IDS];
+          const rolesToRemove = [
+            LINKED_ROLE_ID,
+            STAFF_ROLE_ID,
+            TOP_CONTRIBUTORS_ROLE_ID,
+            ...FANDOM_ROLE_IDS,
+            ...EDIT_COUNT_ROLE_IDS,
+          ];
           const rolesToRemoveFiltered = rolesToRemove.filter((roleId) =>
             targetMember.roles.cache.has(roleId),
           );

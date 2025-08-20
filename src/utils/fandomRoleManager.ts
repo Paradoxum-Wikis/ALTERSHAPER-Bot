@@ -4,6 +4,7 @@ import {
   FANDOM_ROLE_IDS,
   LINKED_ROLE_ID,
   TOP_CONTRIBUTORS_ROLE_ID,
+  STAFF_ROLE_ID,
   EDIT_COUNT_ROLES,
   EDIT_COUNT_ROLE_IDS,
 } from "./roleConstants.js";
@@ -125,6 +126,7 @@ export class FandomRoleManager {
     const rolesToGrantIds: string[] = [];
     const grantedRoleNames: string[] = [];
     const failedRoleNames: string[] = [];
+    let hasStaffRole = false;
 
     rolesToGrantIds.push(LINKED_ROLE_ID);
 
@@ -133,7 +135,12 @@ export class FandomRoleManager {
       const roleId = FANDOM_ROLE_MAP[group.toLowerCase()];
       if (roleId) {
         rolesToGrantIds.push(roleId);
+        hasStaffRole = true;
       }
+    }
+
+    if (hasStaffRole) {
+      rolesToGrantIds.push(STAFF_ROLE_ID);
     }
 
     if (fandomUsername) {
@@ -145,7 +152,9 @@ export class FandomRoleManager {
     const rolesToRemoveFromMember: string[] = [];
     member.roles.cache.forEach((role) => {
       if (
-        (FANDOM_ROLE_IDS.includes(role.id) || EDIT_COUNT_ROLE_IDS.includes(role.id)) &&
+        (FANDOM_ROLE_IDS.includes(role.id) || 
+         EDIT_COUNT_ROLE_IDS.includes(role.id) || 
+         role.id === STAFF_ROLE_ID) &&
         !rolesToGrantIds.includes(role.id)
       ) {
         rolesToRemoveFromMember.push(role.id);
@@ -198,6 +207,11 @@ export class FandomRoleManager {
         const topRole = guild?.roles.cache.get(TOP_CONTRIBUTORS_ROLE_ID);
         if (topRole && topRole.name === name) {
           return `<@&${TOP_CONTRIBUTORS_ROLE_ID}>`;
+        }
+
+        const staffRole = guild?.roles.cache.get(STAFF_ROLE_ID);
+        if (staffRole && staffRole.name === name) {
+          return `<@&${STAFF_ROLE_ID}>`;
         }
 
         const editRole250 = guild?.roles.cache.get(EDIT_COUNT_ROLES.EDITS_250);
