@@ -10,6 +10,7 @@ import {
 
 // Maps Discord Role ID to the corresponding Fandom Profile Tag name
 const ROLE_TO_WIKI_TAG_MAP: Record<string, string> = {
+  [WIKI_SYNC_ROLES.DICTATOR]: "Dictalter",
   [FANDOM_ROLE_MAP.bureaucrat]: "Altego Bureau",
   [FANDOM_ROLE_MAP.sysop]: "Alterministrator",
   [FANDOM_ROLE_MAP["content-moderator"]]: "Altertentor",
@@ -29,6 +30,7 @@ const ROLE_TO_WIKI_TAG_MAP: Record<string, string> = {
 
 // Defines the exact order of tags for the wiki page output
 const WIKI_TAG_ORDER = [
+  "Dictalter",
   "Altego Bureau",
   "Holy Altershaper",
   "Alterministrator",
