@@ -92,19 +92,6 @@ export async function execute(
       });
     }
 
-    if (
-      result.rolesGranted === 0 &&
-      result.rolesRemoved === 0 &&
-      result.errors.length === 0
-    ) {
-      embed.addFields({
-        name: "ℹ️ STATUS",
-        value:
-          "All top contributor roles were already properly synchronized. No changes were needed.",
-        inline: false,
-      });
-    }
-
     await interaction.editReply({ embeds: [embed] });
   } catch (error) {
     console.error("Error during manual top contributor sync:", error);
