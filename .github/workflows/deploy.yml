@@ -45,6 +45,18 @@ jobs:
           target: "${{ secrets.DEPLOY_PATH }}/dist/"
           strip_components: 1
 
+      - name: Create .env file on server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            echo "WIKI_BOT_USERNAME=${{ secrets.WIKI_BOT_USERNAME }}" > .env
+            echo "WIKI_BOT_PASSWORD=${{ secrets.WIKI_BOT_PASSWORD }}" >> .env
+
       - name: Install dependencies on server
         uses: appleboy/ssh-action@v1.2.2
         with:

@@ -7,10 +7,11 @@ import {
 } from "discord.js";
 import { TopContributorsManager } from "../utils/topContributors.js";
 import { RolePermissions } from "../utils/rolePermissions.js";
+import { WikiRoleSyncManager } from "../utils/wikiRoleSync.js";
 
 export const data = new SlashCommandBuilder()
   .setName("synctop5")
-  .setDescription("Synchronize the top 5 contributors roles with the rankings");
+  .setDescription("Synchronize the top 5 contributors roles and syncs all roles to the wiki");
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -41,30 +42,40 @@ export async function execute(
     await interaction.deferReply();
 
     console.log(
-      "📊 Manual top contributor sync requested by",
+      "📊 Top contributor & wiki sync requested by",
       interaction.user.tag,
     );
 
     const result = await TopContributorsManager.syncAllTopContributorRoles(
       interaction.guild,
     );
+    const wikiSyncResult = await WikiRoleSyncManager.syncRolesToWiki(
+      interaction.guild,
+    );
 
     const embed = new EmbedBuilder()
-      .setColor(result.errors.length > 0 ? "#FFA500" : "#00FF00")
-      .setTitle("🏆 TOP CONTRIBUTORS SYNCHRONIZATION COMPLETE")
+      .setColor(result.errors.length > 0 || !wikiSyncResult.success ? "#FFA500" : "#00FF00")
+      .setTitle("🏆 TOP CONTRIBUTORS & WIKI SYNC COMPLETE")
       .setDescription(
-        "**The rankings have been synchronized with the reverent role!**",
+        "**The rankings have been synchronized with the reverent roles!**",
       )
-      .addFields({
-        name: "📊 SYNCHRONIZATION STATISTICS",
-        value: [
-          `**Linked Users Processed:** ${result.processed}`,
-          `**Roles Granted:** ${result.rolesGranted}`,
-          `**Roles Removed:** ${result.rolesRemoved}`,
-          `**Errors Encountered:** ${result.errors.length}`,
-        ].join("\n"),
-        inline: false,
-      })
+      .addFields(
+        {
+          name: "📊 TOP 5 SYNC STATISTICS",
+          value: [
+            `**Linked Users Processed:** ${result.processed}`,
+            `**Roles Granted:** ${result.rolesGranted}`,
+            `**Roles Removed:** ${result.rolesRemoved}`,
+            `**Errors Encountered:** ${result.errors.length}`,
+          ].join("\n"),
+          inline: false,
+        },
+        {
+          name: "📚 WIKI SYNC STATUS",
+          value: wikiSyncResult.message,
+          inline: false,
+        },
+      )
       .setTimestamp();
 
     if (result.errors.length > 0) {
