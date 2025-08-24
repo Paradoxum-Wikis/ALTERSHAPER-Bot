@@ -53,9 +53,35 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
+            echo "Deploy path: ${{ secrets.DEPLOY_PATH }}"
+            if [ ! -d "${{ secrets.DEPLOY_PATH }}" ]; then
+              echo "ERROR: Directory ${{ secrets.DEPLOY_PATH }} does not exist"
+              exit 1
+            fi
+
             cd ${{ secrets.DEPLOY_PATH }}
+            echo "Creating .env file in $(pwd)..."
             echo "WIKI_BOT_USERNAME=${{ secrets.WIKI_BOT_USERNAME }}" > .env
             echo "WIKI_BOT_PASSWORD=${{ secrets.WIKI_BOT_PASSWORD }}" >> .env
+            echo ".env file created with content:"
+            cat .env
+            echo "Listing directory:"
+            ls -la
+
+      - name: Verify .env existence
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            if [ -f "${{ secrets.DEPLOY_PATH }}/.env" ]; then
+              echo ".env exists at ${{ secrets.DEPLOY_PATH }}"
+            else
+              echo "ERROR: .env file was not found!"
+              exit 1
+            fi
 
       - name: Install dependencies on server
         uses: appleboy/ssh-action@v1.2.2
