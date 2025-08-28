@@ -121,9 +121,7 @@ export async function execute(
     console.log(
       `[CHECKLINK DEBUG] Fandom groups found: ${JSON.stringify(fandomGroups)}`,
     );
-    console.log(
-      `[CHECKLINK DEBUG] Fandom data status: ${fandomDataStatus}`,
-    );
+    console.log(`[CHECKLINK DEBUG] Fandom data status: ${fandomDataStatus}`);
 
     let rolesSynced = false;
     let grantedRoleNames: string[] = [];
@@ -219,9 +217,7 @@ export async function execute(
         interaction.guild,
       );
 
-      console.log(
-        `[CHECKLINK DEBUG] Role mentions generated: ${roleMentions}`,
-      );
+      console.log(`[CHECKLINK DEBUG] Role mentions generated: ${roleMentions}`);
 
       embed.addFields({ name: "ROLES SYNCHRONIZED", value: roleMentions });
 

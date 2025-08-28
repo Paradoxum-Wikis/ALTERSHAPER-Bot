@@ -123,7 +123,10 @@ export class WikiRoleSyncManager {
     return page.revisions[0].slots.main["*"];
   }
 
-  private static async editPage(content: string, summary: string): Promise<void> {
+  private static async editPage(
+    content: string,
+    summary: string,
+  ): Promise<void> {
     const params = new URLSearchParams({
       action: "edit",
       title: PAGE_TITLE,
@@ -138,9 +141,15 @@ export class WikiRoleSyncManager {
     }
   }
 
-  public static async syncRolesToWiki(guild: Guild): Promise<{ success: boolean; message: string }> {
+  public static async syncRolesToWiki(
+    guild: Guild,
+  ): Promise<{ success: boolean; message: string }> {
     if (!this.botUsername || !this.botPassword) {
-      return { success: false, message: "Wiki bot credentials (WIKI_BOT_USERNAME, WIKI_BOT_PASSWORD) not configured in .env file." };
+      return {
+        success: false,
+        message:
+          "Wiki bot credentials (WIKI_BOT_USERNAME, WIKI_BOT_PASSWORD) not configured in .env file.",
+      };
     }
 
     const allLinks = await LinkLogger.getAllLinks();
@@ -151,7 +160,9 @@ export class WikiRoleSyncManager {
     const userTags: Record<string, string[]> = {};
 
     for (const link of allLinks) {
-      const member = await guild.members.fetch(link.discordUserId).catch(() => null);
+      const member = await guild.members
+        .fetch(link.discordUserId)
+        .catch(() => null);
       if (!member) continue;
 
       const memberTags: Set<string> = new Set();
@@ -163,7 +174,7 @@ export class WikiRoleSyncManager {
       }
 
       if (memberTags.size > 0) {
-        const sortedTags = WIKI_TAG_ORDER.filter(tag => memberTags.has(tag));
+        const sortedTags = WIKI_TAG_ORDER.filter((tag) => memberTags.has(tag));
         userTags[link.fandomUsername] = sortedTags;
       }
     }
@@ -176,7 +187,9 @@ export class WikiRoleSyncManager {
       const header = headerMatch ? headerMatch[0] : "";
 
       let newContent = header;
-      const sortedUsernames = Object.keys(userTags).sort((a, b) => a.localeCompare(b));
+      const sortedUsernames = Object.keys(userTags).sort((a, b) =>
+        a.localeCompare(b),
+      );
       for (const username of sortedUsernames) {
         const tags = userTags[username];
         if (tags.length > 0) {
@@ -189,12 +202,20 @@ export class WikiRoleSyncManager {
         return { success: false, message: "Failed to log in to the wiki." };
       }
 
-      await this.editPage(newContent.trim(), "Automated sync from Discord roles");
-      return { success: true, message: `Successfully synced roles for ${Object.keys(userTags).length} users to MediaWiki:ProfileTags.` };
-
+      await this.editPage(
+        newContent.trim(),
+        "Automated sync from Discord roles",
+      );
+      return {
+        success: true,
+        message: `Successfully synced roles for ${Object.keys(userTags).length} users to MediaWiki:ProfileTags.`,
+      };
     } catch (error) {
       console.error("Error during wiki role sync:", error);
-      return { success: false, message: `An error occurred: ${error instanceof Error ? error.message : String(error)}` };
+      return {
+        success: false,
+        message: `An error occurred: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
   }
 }

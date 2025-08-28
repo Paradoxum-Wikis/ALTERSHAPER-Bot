@@ -12,7 +12,9 @@ import { ModerationLogger } from "../utils/moderationLogger.js";
 
 export const data = new SlashCommandBuilder()
   .setName("sins")
-  .setDescription("Behold the records of the damned, no parameters shows global sins")
+  .setDescription(
+    "Behold the records of the damned, no parameters shows global sins",
+  )
   .addUserOption((option) =>
     option
       .setName("user")
@@ -72,9 +74,11 @@ export async function execute(
         counts.timeout * 3;
 
       // Filter valid entries and reverse to show newest first
-      const validEntries = userEntries.filter(entry => 
-        ["warn", "kick", "ban", "timeout"].includes(entry.type)
-      ).reverse();
+      const validEntries = userEntries
+        .filter((entry) =>
+          ["warn", "kick", "ban", "timeout"].includes(entry.type),
+        )
+        .reverse();
 
       const entriesPerPage = 5;
       const totalPages = Math.ceil(validEntries.length / entriesPerPage);
@@ -85,13 +89,16 @@ export async function execute(
           .setColor("#FFA500")
           .setTitle("📋 RECORDS OF THE DAMNED")
           .setDescription(
-            `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n**Sin Score:** ${sinScore} ${sinScore === 1 ? 'point' : 'points'}\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
+            `**${targetUser.tag}'s sins**\n**Total entries:** ${userEntries.length}\n**Sin Score:** ${sinScore} ${sinScore === 1 ? "point" : "points"}\n\n**⚠️ Warnings:** ${counts.warn}\n**👢 Kicks:** ${counts.kick}\n**🔨 Bans:** ${counts.ban}\n**🤐 Timeouts:** ${counts.timeout}`,
           )
           .setThumbnail(targetUser.displayAvatarURL())
           .setTimestamp();
 
         const startIndex = page * entriesPerPage;
-        const endIndex = Math.min(startIndex + entriesPerPage, validEntries.length);
+        const endIndex = Math.min(
+          startIndex + entriesPerPage,
+          validEntries.length,
+        );
         const pageEntries = validEntries.slice(startIndex, endIndex);
 
         for (const entry of pageEntries) {
@@ -138,29 +145,28 @@ export async function execute(
       };
 
       const createButtons = (page: number) => {
-        const row = new ActionRowBuilder<ButtonBuilder>()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId("first")
-              .setLabel("⏮️ First")
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(page === 0),
-            new ButtonBuilder()
-              .setCustomId("prev")
-              .setLabel("◀️ Previous")
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(page === 0),
-            new ButtonBuilder()
-              .setCustomId("next")
-              .setLabel("▶️ Next")
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(page === totalPages - 1),
-            new ButtonBuilder()
-              .setCustomId("last")
-              .setLabel("⏭️ Last")
-              .setStyle(ButtonStyle.Secondary)
-              .setDisabled(page === totalPages - 1),
-          );
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setCustomId("first")
+            .setLabel("⏮️ First")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page === 0),
+          new ButtonBuilder()
+            .setCustomId("prev")
+            .setLabel("◀️ Previous")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page === 0),
+          new ButtonBuilder()
+            .setCustomId("next")
+            .setLabel("▶️ Next")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page === totalPages - 1),
+          new ButtonBuilder()
+            .setCustomId("last")
+            .setLabel("⏭️ Last")
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(page === totalPages - 1),
+        );
         return row;
       };
 
@@ -181,7 +187,8 @@ export async function execute(
         collector.on("collect", async (buttonInteraction) => {
           if (buttonInteraction.user.id !== interaction.user.id) {
             await buttonInteraction.reply({
-              content: "**ONLY THE INVOKER OF THIS SACRED RITUAL MAY NAVIGATE THE RECORDS!**",
+              content:
+                "**ONLY THE INVOKER OF THIS SACRED RITUAL MAY NAVIGATE THE RECORDS!**",
               flags: MessageFlags.Ephemeral,
             });
             return;
@@ -253,7 +260,12 @@ export async function execute(
         {
           tag: string;
           score: number;
-          counts: { warns: number; kicks: number; bans: number; timeouts: number };
+          counts: {
+            warns: number;
+            kicks: number;
+            bans: number;
+            timeouts: number;
+          };
         }
       >();
 
@@ -265,10 +277,10 @@ export async function execute(
           entry.type === "warn"
             ? 1
             : entry.type === "kick"
-            ? 5
-            : entry.type === "ban"
-            ? 10
-            : 3; // timeout = 3
+              ? 5
+              : entry.type === "ban"
+                ? 10
+                : 3; // timeout = 3
 
         if (existing) {
           existing.score += points;
@@ -312,12 +324,16 @@ export async function execute(
           const userData = sortedUsers[i][1];
           const position = `${i + 1}.`;
           const breakdown = [];
-          if (userData.counts.warns > 0) breakdown.push(`${userData.counts.warns}W`);
-          if (userData.counts.kicks > 0) breakdown.push(`${userData.counts.kicks}K`);
-          if (userData.counts.bans > 0) breakdown.push(`${userData.counts.bans}B`);
-          if (userData.counts.timeouts > 0) breakdown.push(`${userData.counts.timeouts}T`);
+          if (userData.counts.warns > 0)
+            breakdown.push(`${userData.counts.warns}W`);
+          if (userData.counts.kicks > 0)
+            breakdown.push(`${userData.counts.kicks}K`);
+          if (userData.counts.bans > 0)
+            breakdown.push(`${userData.counts.bans}B`);
+          if (userData.counts.timeouts > 0)
+            breakdown.push(`${userData.counts.timeouts}T`);
 
-          leaderboard += `${position} **${userData.tag}** - ${userData.score} ${userData.score === 1 ? 'point' : 'points'} (${breakdown.join(", ")})\n`;
+          leaderboard += `${position} **${userData.tag}** - ${userData.score} ${userData.score === 1 ? "point" : "points"} (${breakdown.join(", ")})\n`;
         }
 
         embed.addFields({

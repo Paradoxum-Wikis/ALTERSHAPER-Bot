@@ -36,6 +36,11 @@ const commands: CommandInfo[] = [
     value: "Sever the link between a Discord soul and a Fandom alter",
     category: "admin",
   },
+  {
+    name: "/webhook >subcommand",
+    value: "Create webhook for the server",
+    category: "admin",
+  },
   // Moderator
   {
     name: "/kick @user [-reason]",

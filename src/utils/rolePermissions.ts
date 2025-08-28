@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { FANDOM_ROLE_MAP } from "./roleConstants.js";
+import { FANDOM_ROLE_MAP, TDS_WIKI_STAFF } from "./roleConstants.js";
 
 const COMMANDS_CHANNEL_ID = "1366497229161894018";
 
@@ -15,6 +15,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   ban: PermissionLevel.ADMIN,
   removesin: PermissionLevel.ADMIN,
   unlink: PermissionLevel.ADMIN,
+  webhook: PermissionLevel.ADMIN,
 
   // Moderator
   kick: PermissionLevel.MODERATOR,
@@ -37,6 +38,7 @@ export const ROLE_PERMISSIONS: Record<string, PermissionLevel> = {
   [FANDOM_ROLE_MAP.sysop]: PermissionLevel.ADMIN,
   [FANDOM_ROLE_MAP["content-moderator"]]: PermissionLevel.MODERATOR,
   [FANDOM_ROLE_MAP.threadmoderator]: PermissionLevel.MODERATOR,
+  [TDS_WIKI_STAFF]: PermissionLevel.ADMIN,
 };
 
 export class RolePermissions {

@@ -23,6 +23,7 @@ import * as battlestats from "../commands/battlestats.js";
 import * as furry from "../commands/furry.js";
 import * as anime from "../commands/anime.js";
 import * as ship from "../commands/ship.js";
+import * as webhook from "../commands/webhook.js";
 // import * as bossfight from "../commands/bossfight.js";
 
 export interface Command {
@@ -58,6 +59,7 @@ export function loadCommands(): Collection<string, Command> {
     furry,
     anime,
     ship,
+    webhook,
     // bossfight,
   ];
 

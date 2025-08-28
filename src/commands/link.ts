@@ -260,11 +260,12 @@ export async function execute(
         confirmed = true;
         collector.stop();
 
-        const { grantedRoleNames, failedRoleNames } = await FandomRoleManager.manageFandomRoles(
-          member,
-          fandomGroups,
-          interaction.guild,
-        );
+        const { grantedRoleNames, failedRoleNames } =
+          await FandomRoleManager.manageFandomRoles(
+            member,
+            fandomGroups,
+            interaction.guild,
+          );
         await LinkLogger.addLink(
           interaction.user.id,
           interaction.user.tag,

@@ -11,7 +11,9 @@ import { WikiRoleSyncManager } from "../utils/wikiRoleSync.js";
 
 export const data = new SlashCommandBuilder()
   .setName("synctop5")
-  .setDescription("Synchronize the top 5 contributors roles and syncs all roles to the wiki");
+  .setDescription(
+    "Synchronize the top 5 contributors roles and syncs all roles to the wiki",
+  );
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -54,7 +56,11 @@ export async function execute(
     );
 
     const embed = new EmbedBuilder()
-      .setColor(result.errors.length > 0 || !wikiSyncResult.success ? "#FFA500" : "#00FF00")
+      .setColor(
+        result.errors.length > 0 || !wikiSyncResult.success
+          ? "#FFA500"
+          : "#00FF00",
+      )
       .setTitle("🏆 TOP CONTRIBUTORS & WIKI SYNC COMPLETE")
       .setDescription(
         "**The rankings have been synchronized with the reverent roles!**",

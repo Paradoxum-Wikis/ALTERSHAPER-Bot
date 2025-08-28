@@ -44,71 +44,77 @@ export class FandomRoleManager {
   /**
    * Fetch user edit count and determine appropriate edit count roles
    */
-  private static async getUserEditCount(fandomUsername: string): Promise<EditCountResult> {
+  private static async getUserEditCount(
+    fandomUsername: string,
+  ): Promise<EditCountResult> {
     try {
       // First request: 499 limit
       const firstUrl = `https://alter-ego.fandom.com/api.php?action=query&list=usercontribs&ucuser=${encodeURIComponent(fandomUsername)}&ucnamespace=0&uclimit=499&ucprop=ids&format=json`;
       const firstResponse = await fetch(firstUrl);
-      
+
       if (!firstResponse.ok) {
         throw new Error(`API request failed: ${firstResponse.status}`);
       }
-      
-      const firstData = await firstResponse.json() as FandomContribsResponse;
-      
+
+      const firstData = (await firstResponse.json()) as FandomContribsResponse;
+
       // If no continue, user has <499
       if (!firstData.continue) {
         // Make 249 limit request to check for 250
         const smallUrl = `https://alter-ego.fandom.com/api.php?action=query&list=usercontribs&ucuser=${encodeURIComponent(fandomUsername)}&ucnamespace=0&uclimit=249&ucprop=ids&format=json`;
         const smallResponse = await fetch(smallUrl);
-        
+
         if (!smallResponse.ok) {
           throw new Error(`API request failed: ${smallResponse.status}`);
         }
-        
-        const smallData = await smallResponse.json() as FandomContribsResponse;
-        
+
+        const smallData =
+          (await smallResponse.json()) as FandomContribsResponse;
+
         if (smallData.continue) {
           // Has continue with 249 limit >= 250
           return {
-            rolesToGrant: [EDIT_COUNT_ROLES.EDITS_250]
+            rolesToGrant: [EDIT_COUNT_ROLES.EDITS_250],
           };
         } else {
           // No continue with 249 limit = <250
           return {
-            rolesToGrant: []
+            rolesToGrant: [],
           };
         }
       }
-      
+
       // Has continue from first request, user has >=499 edits
       // Make second 499 limit request
       const continueToken = firstData.continue.uccontinue;
       const secondUrl = `https://alter-ego.fandom.com/api.php?action=query&list=usercontribs&ucuser=${encodeURIComponent(fandomUsername)}&ucnamespace=0&uclimit=499&ucprop=ids&uccontinue=${encodeURIComponent(continueToken)}&format=json`;
       const secondResponse = await fetch(secondUrl);
-      
+
       if (!secondResponse.ok) {
         throw new Error(`API request failed: ${secondResponse.status}`);
       }
-      
-      const secondData = await secondResponse.json() as FandomContribsResponse;
-      
+
+      const secondData =
+        (await secondResponse.json()) as FandomContribsResponse;
+
       if (secondData.continue) {
         // Second has continue = >=1000 edits
         return {
-          rolesToGrant: [EDIT_COUNT_ROLES.EDITS_1000, EDIT_COUNT_ROLES.EDITS_250]
+          rolesToGrant: [
+            EDIT_COUNT_ROLES.EDITS_1000,
+            EDIT_COUNT_ROLES.EDITS_250,
+          ],
         };
       } else {
         // Second has no continue = 499-999 edits
         return {
-          rolesToGrant: [EDIT_COUNT_ROLES.EDITS_250]
+          rolesToGrant: [EDIT_COUNT_ROLES.EDITS_250],
         };
       }
-      
     } catch (error) {
       console.error(`Error fetching edit count for ${fandomUsername}:`, error);
       return {
-        rolesToGrant: []
+        rolesToGrant: [],
       };
     }
   }
@@ -152,9 +158,9 @@ export class FandomRoleManager {
     const rolesToRemoveFromMember: string[] = [];
     member.roles.cache.forEach((role) => {
       if (
-        (FANDOM_ROLE_IDS.includes(role.id) || 
-         EDIT_COUNT_ROLE_IDS.includes(role.id) || 
-         role.id === STAFF_ROLE_ID) &&
+        (FANDOM_ROLE_IDS.includes(role.id) ||
+          EDIT_COUNT_ROLE_IDS.includes(role.id) ||
+          role.id === STAFF_ROLE_ID) &&
         !rolesToGrantIds.includes(role.id)
       ) {
         rolesToRemoveFromMember.push(role.id);
@@ -176,7 +182,7 @@ export class FandomRoleManager {
         if (role) grantedRoleNames.push(role.name);
         continue;
       }
-      
+
       try {
         await member.roles.add(roleId);
         const role = guild?.roles.cache.get(roleId);
@@ -219,7 +225,9 @@ export class FandomRoleManager {
           return `<@&${EDIT_COUNT_ROLES.EDITS_250}>`;
         }
 
-        const editRole1000 = guild?.roles.cache.get(EDIT_COUNT_ROLES.EDITS_1000);
+        const editRole1000 = guild?.roles.cache.get(
+          EDIT_COUNT_ROLES.EDITS_1000,
+        );
         if (editRole1000 && editRole1000.name === name) {
           return `<@&${EDIT_COUNT_ROLES.EDITS_1000}>`;
         }
