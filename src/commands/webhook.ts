@@ -9,7 +9,7 @@ import { WebhookManager } from "../utils/webhookManager.js";
 
 export const data = new SlashCommandBuilder()
   .setName("webhook")
-  .setDescription("Manage the bot's webhook for automated messaging")
+  .setDescription("Manage the bot's webhooks for automated messaging")
   .addSubcommand((subcommand) =>
     subcommand
       .setName("create")
@@ -18,25 +18,58 @@ export const data = new SlashCommandBuilder()
         option
           .setName("channel")
           .setDescription("Channel to create webhook in")
-          .setRequired(true),
-      ),
+          .setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("name")
+          .setDescription("Custom name for the webhook")
+          .setRequired(false)
+      )
   )
   .addSubcommand((subcommand) =>
-    subcommand.setName("delete").setDescription("Delete the existing webhook"),
+    subcommand
+      .setName("delete")
+      .setDescription("Delete a webhook")
+      .addStringOption((option) =>
+        option
+          .setName("name")
+          .setDescription("Name of the webhook to delete")
+          .setRequired(false)
+      )
   )
   .addSubcommand((subcommand) =>
     subcommand
       .setName("test")
-      .setDescription("Test the webhook by sending a message")
+      .setDescription("Test a webhook by sending a message")
       .addStringOption((option) =>
         option
           .setName("message")
           .setDescription("Test message to send")
-          .setRequired(false),
-      ),
+          .setRequired(false)
+      )
+      .addStringOption((option) =>
+        option
+          .setName("webhook")
+          .setDescription("Name of the webhook to use")
+          .setRequired(false)
+      )
   )
   .addSubcommand((subcommand) =>
-    subcommand.setName("status").setDescription("Check webhook status"),
+    subcommand
+      .setName("list")
+      .setDescription("List all webhooks in this server")
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("status")
+      .setDescription("Check webhook status")
+      .addStringOption((option) =>
+        option
+          .setName("name")
+          .setDescription("Name of the webhook to check")
+          .setRequired(false)
+      )
   );
 
 export async function execute(
@@ -56,6 +89,7 @@ export async function execute(
     switch (subcommand) {
       case "create": {
         const channel = interaction.options.getChannel("channel", true);
+        const webhookName = interaction.options.getString("name") ?? undefined;
 
         if (!(channel instanceof TextChannel)) {
           await interaction.reply({
@@ -70,6 +104,7 @@ export async function execute(
         const result = await WebhookManager.initializeWebhook(
           interaction.guild,
           channel.id,
+          webhookName
         );
 
         const embed = new EmbedBuilder()
@@ -83,16 +118,21 @@ export async function execute(
       }
 
       case "delete": {
+        const webhookName = interaction.options.getString("name") ?? undefined;
+
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-        const deleted = await WebhookManager.deleteWebhook(interaction.guild);
+        const deleted = await WebhookManager.deleteWebhook(
+          interaction.guild,
+          webhookName
+        );
 
         const embed = new EmbedBuilder()
           .setTitle("🗑️ WEBHOOK DELETION")
           .setDescription(
             deleted
-              ? "**The webhook hath been banished from the realm!**"
-              : "**No webhook found to banish, or deletion failed!**",
+              ? `**The webhook${webhookName ? ` "${webhookName}"` : ""} hath been banished from the realm!**`
+              : `**No webhook${webhookName ? ` named "${webhookName}"` : ""} found to banish!**`
           )
           .setColor(deleted ? "#00FF00" : "#FFA500")
           .setTimestamp();
@@ -103,8 +143,9 @@ export async function execute(
 
       case "test": {
         const testMessage =
-          interaction.options.getString("message") ||
+          interaction.options.getString("message") ??
           "**Behold! This is a test message from the Altershaper's herald!**";
+        const webhookName = interaction.options.getString("webhook") ?? undefined;
 
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
@@ -113,16 +154,16 @@ export async function execute(
           testMessage,
           {
             username: "Altershaper Herald",
-            avatarURL: interaction.guild.members.me?.displayAvatarURL(),
-          },
+            webhookName: webhookName
+          }
         );
 
         const embed = new EmbedBuilder()
           .setTitle("🧪 WEBHOOK TEST")
           .setDescription(
             sent
-              ? "**Test message sent successfully through the webhook!**"
-              : "**Failed to send test message! Check webhook status.**",
+              ? `**Test message sent successfully${webhookName ? ` via "${webhookName}"` : ""}!**`
+              : `**Failed to send test message! Check webhook${webhookName ? ` "${webhookName}"` : ""} status.**`
           )
           .setColor(sent ? "#00FF00" : "#FF0000")
           .setTimestamp();
@@ -131,8 +172,42 @@ export async function execute(
         break;
       }
 
+      case "list": {
+        const webhooks = WebhookManager.getGuildWebhooks(interaction.guild);
+
+        const embed = new EmbedBuilder()
+          .setTitle("📋 WEBHOOK LIST")
+          .setColor("#00FF00")
+          .setTimestamp();
+
+        if (webhooks.length === 0) {
+          embed.setDescription("**No webhooks found in this server.**");
+        } else {
+          const webhookList = webhooks
+            .map((w) => {
+              const createdDate = new Date(w.createdAt).toLocaleDateString();
+              return `**${w.name}** - <#${w.channelId}> (${createdDate})`;
+            })
+            .join("\n");
+
+          embed.setDescription(
+            `**Found ${webhooks.length} webhook(s):**\n\n${webhookList}`
+          );
+        }
+
+        await interaction.reply({
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
+        });
+        break;
+      }
+
       case "status": {
-        const webhook = await WebhookManager.getWebhook(interaction.guild);
+        const webhookName = interaction.options.getString("name") ?? undefined;
+        const webhook = await WebhookManager.getWebhook(
+          interaction.guild,
+          webhookName
+        );
 
         const embed = new EmbedBuilder()
           .setTitle("📊 WEBHOOK STATUS")
@@ -141,29 +216,57 @@ export async function execute(
 
         if (webhook) {
           const channel = interaction.guild.channels.cache.get(
-            webhook.channelId,
+            webhook.channelId
           );
-          embed.setDescription("**Webhook Status: ACTIVE**").addFields(
-            {
-              name: "📍 Channel",
-              value: channel ? `<#${channel.id}>` : "Unknown",
-              inline: true,
-            },
-            {
-              name: "🏷️ Name",
-              value: webhook.name || "Unnamed",
-              inline: true,
-            },
-            {
-              name: "🆔 ID",
-              value: webhook.id,
-              inline: true,
-            },
+          const webhookEntry = WebhookManager.getGuildWebhooks(interaction.guild).find(
+            (w) => w.id === webhook.id
           );
+
+          embed
+            .setDescription(
+              `**Webhook "${webhookEntry?.name || "Unknown"}" Status: ACTIVE**`
+            )
+            .addFields(
+              {
+                name: "📍 Channel",
+                value: channel ? `<#${channel.id}>` : "Unknown",
+                inline: true,
+              },
+              {
+                name: "🏷️ Name",
+                value: webhookEntry?.name || "Unnamed",
+                inline: true,
+              },
+              {
+                name: "🆔 ID",
+                value: webhook.id,
+                inline: true,
+              },
+              {
+                name: "📅 Created",
+                value: webhookEntry
+                  ? new Date(webhookEntry.createdAt).toLocaleDateString()
+                  : "Unknown",
+                inline: true,
+              }
+            );
         } else {
-          embed.setDescription(
-            "**Webhook Status: INACTIVE**\n\nNo webhook found. Use `/webhook create` to create one.",
+          const availableWebhooks = WebhookManager.getGuildWebhooks(
+            interaction.guild
           );
+          let description = `**Webhook${
+            webhookName ? ` "${webhookName}"` : ""
+          } Status: INACTIVE**\n\n`;
+
+          if (availableWebhooks.length > 0) {
+            description += `Available webhooks: ${availableWebhooks
+              .map((w) => w.name)
+              .join(", ")}`;
+          } else {
+            description += "No webhooks found. Use `/webhook create` to create one.";
+          }
+
+          embed.setDescription(description);
         }
 
         await interaction.reply({

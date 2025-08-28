@@ -5,14 +5,20 @@ import {
   EmbedBuilder,
   WebhookMessageCreateOptions,
 } from "discord.js";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 
-interface WebhookData {
+interface WebhookEntry {
   id: string;
   token: string;
   channelId: string;
   guildId: string;
+  name: string;
+  createdAt: number;
+}
+
+interface WebhookData {
+  webhooks: WebhookEntry[];
 }
 
 export class WebhookManager {
@@ -31,7 +37,7 @@ export class WebhookManager {
       const data = readFileSync(this.WEBHOOK_DATA_FILE, "utf-8");
       this.webhookData = JSON.parse(data);
     } catch (error) {
-      this.webhookData = null;
+      this.webhookData = { webhooks: [] };
     }
   }
 
@@ -83,7 +89,7 @@ export class WebhookManager {
   public static async createWebhook(
     channel: TextChannel,
     name: string = "Altershaper Herald",
-    avatar?: string,
+    customName?: string,
   ): Promise<Webhook | null> {
     try {
       if (
@@ -96,9 +102,21 @@ export class WebhookManager {
         );
       }
 
-      await this.deleteWebhook(channel.guild);
+      if (!this.webhookData) {
+        this.loadWebhookData();
+      }
 
-      const webhookAvatar = avatar || this.getWebhookAvatar();
+      const existingWebhook = this.webhookData!.webhooks.find(
+        (w) => w.guildId === channel.guild.id && w.name === customName,
+      );
+
+      if (existingWebhook) {
+        throw new Error(
+          `Webhook with name "${customName}" already exists in this guild`,
+        );
+      }
+
+      const webhookAvatar = this.getWebhookAvatar();
 
       const webhook = await channel.createWebhook({
         name: name,
@@ -106,12 +124,16 @@ export class WebhookManager {
         reason: "Automated webhook creation for bot messaging",
       });
 
-      this.webhookData = {
+      const webhookEntry: WebhookEntry = {
         id: webhook.id,
         token: webhook.token!,
         channelId: channel.id,
         guildId: channel.guild.id,
+        name: customName || `webhook_${Date.now()}`,
+        createdAt: Date.now(),
       };
+
+      this.webhookData!.webhooks.push(webhookEntry);
       this.saveWebhookData();
 
       return webhook;
@@ -122,21 +144,37 @@ export class WebhookManager {
   }
 
   /**
-   * Get the existing webhook
+   * Get a specific webhook by name
    */
-  public static async getWebhook(guild: Guild): Promise<Webhook | null> {
+  public static async getWebhook(
+    guild: Guild,
+    webhookName?: string,
+  ): Promise<Webhook | null> {
     if (!this.webhookData) {
       this.loadWebhookData();
     }
 
-    if (!this.webhookData || this.webhookData.guildId !== guild.id) {
+    const guildWebhooks = this.webhookData!.webhooks.filter(
+      (w) => w.guildId === guild.id,
+    );
+
+    if (guildWebhooks.length === 0) {
+      return null;
+    }
+
+    const targetWebhook =
+      webhookName
+        ? guildWebhooks.find((w) => w.name === webhookName)
+        : guildWebhooks[0];
+
+    if (!targetWebhook) {
       return null;
     }
 
     try {
       const webhook = await guild.client.fetchWebhook(
-        this.webhookData.id,
-        this.webhookData.token,
+        targetWebhook.id,
+        targetWebhook.token,
       );
       return webhook;
     } catch (error) {
@@ -146,22 +184,53 @@ export class WebhookManager {
   }
 
   /**
-   * Delete the existing webhook
+   * Get all webhooks for a guild
    */
-  public static async deleteWebhook(guild: Guild): Promise<boolean> {
-    const webhook = await this.getWebhook(guild);
-    if (webhook) {
-      try {
-        await webhook.delete("Cleaning up old webhook");
-        this.webhookData = null;
-        this.saveWebhookData();
-        return true;
-      } catch (error) {
-        console.error("Error deleting webhook:", error);
-        return false;
-      }
+  public static getGuildWebhooks(guild: Guild): WebhookEntry[] {
+    if (!this.webhookData) {
+      this.loadWebhookData();
     }
-    return true;
+
+    return this.webhookData!.webhooks.filter((w) => w.guildId === guild.id);
+  }
+
+  /**
+   * Delete a specific webhook
+   */
+  public static async deleteWebhook(
+    guild: Guild,
+    webhookName?: string,
+  ): Promise<boolean> {
+    if (!this.webhookData) {
+      this.loadWebhookData();
+    }
+
+    const webhookIndex = this.webhookData!.webhooks.findIndex(
+      (w) => w.guildId === guild.id && (webhookName ? w.name === webhookName : true),
+    );
+
+    if (webhookIndex === -1) {
+      return false;
+    }
+
+    const webhookEntry = this.webhookData!.webhooks[webhookIndex];
+
+    try {
+      const webhook = await guild.client.fetchWebhook(
+        webhookEntry.id,
+        webhookEntry.token,
+      );
+      await webhook.delete("Cleaning up webhook");
+
+      this.webhookData!.webhooks.splice(webhookIndex, 1);
+      this.saveWebhookData();
+      return true;
+    } catch (error) {
+      console.error("Error deleting webhook:", error);
+      this.webhookData!.webhooks.splice(webhookIndex, 1);
+      this.saveWebhookData();
+      return true;
+    }
   }
 
   /**
@@ -174,9 +243,10 @@ export class WebhookManager {
       embeds?: EmbedBuilder[];
       username?: string;
       avatarURL?: string;
+      webhookName?: string;
     },
   ): Promise<boolean> {
-    const webhook = await this.getWebhook(guild);
+    const webhook = await this.getWebhook(guild, options?.webhookName);
     if (!webhook) {
       console.error("No webhook available for sending message");
       return false;
@@ -207,6 +277,7 @@ export class WebhookManager {
     options?: {
       username?: string;
       avatarURL?: string;
+      webhookName?: string;
     },
   ): Promise<boolean> {
     return this.sendMessage(guild, "", {
@@ -221,14 +292,15 @@ export class WebhookManager {
   public static async initializeWebhook(
     guild: Guild,
     channelId?: string,
+    webhookName?: string,
   ): Promise<{ success: boolean; message: string }> {
     try {
-      let webhook = await this.getWebhook(guild);
+      let webhook = await this.getWebhook(guild, webhookName);
 
       if (webhook) {
         return {
           success: true,
-          message: "Webhook already exists and is functional",
+          message: `Webhook "${webhookName || "default"}" already exists and is functional`,
         };
       }
 
@@ -268,18 +340,17 @@ export class WebhookManager {
         };
       }
 
-      const webhookAvatar = this.getWebhookAvatar();
-
+      const displayName = webhookName || `webhook_${Date.now()}`;
       webhook = await this.createWebhook(
         targetChannel,
         "Altershaper Herald",
-        webhookAvatar,
+        displayName,
       );
 
       if (webhook) {
         return {
           success: true,
-          message: `Webhook created successfully in #${targetChannel.name}`,
+          message: `Webhook "${displayName}" created successfully in #${targetChannel.name}`,
         };
       } else {
         return { success: false, message: "Failed to create webhook" };
