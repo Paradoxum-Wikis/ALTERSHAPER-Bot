@@ -58,7 +58,7 @@ export const data = new SlashCommandBuilder()
   .addSubcommand((subcommand) =>
     subcommand
       .setName("list")
-      .setDescription("List all webhooks in this server")
+      .setDescription("List all of ALTERSHAPER's webhooks in this server")
   )
   .addSubcommand((subcommand) =>
     subcommand

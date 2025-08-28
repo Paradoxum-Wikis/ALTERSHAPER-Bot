@@ -19,6 +19,7 @@ interface WebhookEntry {
 
 interface WebhookData {
   webhooks: WebhookEntry[];
+  nextHeraldNumber: number;
 }
 
 export class WebhookManager {
@@ -35,9 +36,14 @@ export class WebhookManager {
   private static loadWebhookData(): void {
     try {
       const data = readFileSync(this.WEBHOOK_DATA_FILE, "utf-8");
-      this.webhookData = JSON.parse(data);
+      const parsed = JSON.parse(data);
+      this.webhookData = parsed && parsed.webhooks ? parsed : { webhooks: [], nextHeraldNumber: 1 };
+      if (this.webhookData && typeof this.webhookData.nextHeraldNumber !== 'number') {
+        this.webhookData.nextHeraldNumber = 1;
+      }
     } catch (error) {
-      this.webhookData = { webhooks: [] };
+      console.log("Initializing new webhook data file");
+      this.webhookData = { webhooks: [], nextHeraldNumber: 1 };
     }
   }
 
@@ -106,13 +112,19 @@ export class WebhookManager {
         this.loadWebhookData();
       }
 
-      const existingWebhook = this.webhookData!.webhooks.find(
-        (w) => w.guildId === channel.guild.id && w.name === customName,
+      if (!this.webhookData) {
+        throw new Error("Failed to initialize webhook data");
+      }
+
+      const finalName = customName || `herald_${this.webhookData.nextHeraldNumber}`;
+
+      const existingWebhook = this.webhookData.webhooks.find(
+        (w) => w.guildId === channel.guild.id && w.name === finalName,
       );
 
       if (existingWebhook) {
         throw new Error(
-          `Webhook with name "${customName}" already exists in this guild`,
+          `Webhook with name "${finalName}" already exists in this guild`,
         );
       }
 
@@ -129,11 +141,16 @@ export class WebhookManager {
         token: webhook.token!,
         channelId: channel.id,
         guildId: channel.guild.id,
-        name: customName || `webhook_${Date.now()}`,
+        name: finalName,
         createdAt: Date.now(),
       };
 
-      this.webhookData!.webhooks.push(webhookEntry);
+      this.webhookData.webhooks.push(webhookEntry);
+
+      if (!customName) {
+        this.webhookData.nextHeraldNumber++;
+      }
+
       this.saveWebhookData();
 
       return webhook;
@@ -154,7 +171,12 @@ export class WebhookManager {
       this.loadWebhookData();
     }
 
-    const guildWebhooks = this.webhookData!.webhooks.filter(
+    if (!this.webhookData) {
+      console.error("Failed to load webhook data");
+      return null;
+    }
+
+    const guildWebhooks = this.webhookData.webhooks.filter(
       (w) => w.guildId === guild.id,
     );
 
@@ -191,7 +213,12 @@ export class WebhookManager {
       this.loadWebhookData();
     }
 
-    return this.webhookData!.webhooks.filter((w) => w.guildId === guild.id);
+    if (!this.webhookData) {
+      console.error("Failed to load webhook data");
+      return [];
+    }
+
+    return this.webhookData.webhooks.filter((w) => w.guildId === guild.id);
   }
 
   /**
@@ -205,7 +232,12 @@ export class WebhookManager {
       this.loadWebhookData();
     }
 
-    const webhookIndex = this.webhookData!.webhooks.findIndex(
+    if (!this.webhookData) {
+      console.error("Failed to load webhook data");
+      return false;
+    }
+
+    const webhookIndex = this.webhookData.webhooks.findIndex(
       (w) => w.guildId === guild.id && (webhookName ? w.name === webhookName : true),
     );
 
@@ -213,7 +245,7 @@ export class WebhookManager {
       return false;
     }
 
-    const webhookEntry = this.webhookData!.webhooks[webhookIndex];
+    const webhookEntry = this.webhookData.webhooks[webhookIndex];
 
     try {
       const webhook = await guild.client.fetchWebhook(
@@ -222,12 +254,13 @@ export class WebhookManager {
       );
       await webhook.delete("Cleaning up webhook");
 
-      this.webhookData!.webhooks.splice(webhookIndex, 1);
+      this.webhookData.webhooks.splice(webhookIndex, 1);
       this.saveWebhookData();
       return true;
     } catch (error) {
       console.error("Error deleting webhook:", error);
-      this.webhookData!.webhooks.splice(webhookIndex, 1);
+      // Remove from data even if Discord API call failed
+      this.webhookData.webhooks.splice(webhookIndex, 1);
       this.saveWebhookData();
       return true;
     }
@@ -340,11 +373,11 @@ export class WebhookManager {
         };
       }
 
-      const displayName = webhookName || `webhook_${Date.now()}`;
+      const displayName = webhookName || `herald_${this.webhookData?.nextHeraldNumber || 1}`;
       webhook = await this.createWebhook(
         targetChannel,
         "Altershaper Herald",
-        displayName,
+        webhookName, // Pass the original webhookName since it could be undefined
       );
 
       if (webhook) {
