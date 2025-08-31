@@ -27,7 +27,7 @@ export class WebhookManager {
   private static readonly WEBHOOK_DATA_FILE = join(
     process.cwd(),
     "data",
-    "webhook-data.json",
+    "webhook.json",
   );
 
   /**
@@ -94,7 +94,7 @@ export class WebhookManager {
    */
   public static async createWebhook(
     channel: TextChannel,
-    name: string = "Altershaper Herald",
+    name: string = "Altershaper's Herald",
     customName?: string,
   ): Promise<Webhook | null> {
     try {
@@ -376,7 +376,7 @@ export class WebhookManager {
       const displayName = webhookName || `herald_${this.webhookData?.nextHeraldNumber || 1}`;
       webhook = await this.createWebhook(
         targetChannel,
-        "Altershaper Herald",
+        "Altershaper's Herald",
         webhookName, // Pass the original webhookName since it could be undefined
       );
 

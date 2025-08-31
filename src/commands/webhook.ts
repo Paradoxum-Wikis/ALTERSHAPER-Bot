@@ -153,7 +153,7 @@ export async function execute(
           interaction.guild,
           testMessage,
           {
-            username: "Altershaper Herald",
+            username: "Altershaper's Herald",
             webhookName: webhookName
           }
         );
