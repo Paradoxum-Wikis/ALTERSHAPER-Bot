@@ -383,7 +383,7 @@ async function simulateBattleStep(
         break;
       case "Great Will":
         const missingHp = attacker.maxHp - attacker.hp;
-        damage = Math.floor(attacker.attack + missingHp * 0.5);
+        damage = Math.floor(attacker.attack + missingHp * 0.35);
         narration = `👑 **${attacker.name}** channels their great will, converting their wounds into raw power!`;
         break;
       case "Toxic Fumes":
