@@ -135,7 +135,7 @@ export async function execute(
 
     const speciesHash = hashString(displayName + "species");
     const selectedSpecies = speciesData[speciesHash % speciesData.length];
-    const fursonaDisplay = `${selectedSpecies.category} (${selectedSpecies.specific})`;
+    const fursonaDisplay = `${selectedSpecies.specific} (${selectedSpecies.category})`;
 
     const embed = new EmbedBuilder()
       .setColor(isFurry ? "#FF69B4" : "#808080")
