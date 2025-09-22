@@ -216,7 +216,7 @@ class AltershaperBot {
         interaction.commandName === "archives" ||
         interaction.commandName === "link" ||
         interaction.commandName === "checklink" ||
-        interaction.commandName === "synctop5"
+        interaction.commandName === "syncroles"
       ) {
         await command.execute(interaction);
       } else {

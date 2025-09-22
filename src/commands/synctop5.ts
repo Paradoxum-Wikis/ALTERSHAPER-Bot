@@ -10,7 +10,7 @@ import { RolePermissions } from "../utils/rolePermissions.js";
 import { WikiRoleSyncManager } from "../utils/wikiRoleSync.js";
 
 export const data = new SlashCommandBuilder()
-  .setName("synctop5")
+  .setName("syncroles")
   .setDescription(
     "Synchronize the top 5 contributors roles and syncs all roles to the wiki",
   );
@@ -30,11 +30,11 @@ export async function execute(
   if (
     !RolePermissions.hasCommandPermission(
       interaction.member as GuildMember,
-      "synctop5",
+      "syncroles",
     )
   ) {
     await interaction.reply({
-      content: RolePermissions.getPermissionErrorMessage("synctop5"),
+      content: RolePermissions.getPermissionErrorMessage("syncroles"),
       flags: MessageFlags.Ephemeral,
     });
     return;
@@ -44,7 +44,7 @@ export async function execute(
     await interaction.deferReply();
 
     console.log(
-      "📊 Top contributor & wiki sync requested by",
+      "📊 Wiki roles sync requested by",
       interaction.user.tag,
     );
 
@@ -61,13 +61,13 @@ export async function execute(
           ? "#FFA500"
           : "#00FF00",
       )
-      .setTitle("🏆 TOP CONTRIBUTORS & WIKI SYNC COMPLETE")
+      .setTitle("🏆 WIKI ROLES SYNC COMPLETE")
       .setDescription(
         "**The rankings have been synchronized with the reverent roles!**",
       )
       .addFields(
         {
-          name: "📊 TOP 5 SYNC STATISTICS",
+          name: "📊 SYNCING STATISTICS",
           value: [
             `**Linked Users Processed:** ${result.processed}`,
             `**Roles Granted:** ${result.rolesGranted}`,

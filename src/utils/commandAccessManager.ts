@@ -16,7 +16,7 @@ const RESTRICTED_COMMANDS: string[] = [
   "slowmode",
   "link",
   "checklink",
-  "synctop5",
+  "syncroles",
   "removelink",
   "removesin",
   "anime",

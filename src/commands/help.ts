@@ -142,7 +142,7 @@ const commands: CommandInfo[] = [
     category: "basic2",
   },
   {
-    name: "/synctop5",
+    name: "/syncroles",
     value: "Synchronize the top 5 contributors roles with the rankings",
     category: "basic2",
   },
