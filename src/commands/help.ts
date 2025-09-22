@@ -32,7 +32,7 @@ const commands: CommandInfo[] = [
     category: "admin",
   },
   {
-    name: "/unlink @user",
+    name: "/removelink @user",
     value: "Sever the link between a Discord soul and a Fandom alter",
     category: "admin",
   },

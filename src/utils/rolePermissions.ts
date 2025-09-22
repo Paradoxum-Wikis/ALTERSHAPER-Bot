@@ -14,7 +14,7 @@ export const COMMAND_PERMISSIONS: Record<string, PermissionLevel> = {
   // Admin
   ban: PermissionLevel.ADMIN,
   removesin: PermissionLevel.ADMIN,
-  unlink: PermissionLevel.ADMIN,
+  removelink: PermissionLevel.ADMIN,
   webhook: PermissionLevel.ADMIN,
 
   // Moderator

@@ -11,9 +11,9 @@ import * as help from "../commands/help.js";
 import * as avatar from "../commands/avatar.js";
 import * as info from "../commands/info.js";
 import * as link from "../commands/link.js";
-import * as unlink from "../commands/removelink.js";
+import * as removelink from "../commands/removelink.js";
 import * as checklink from "../commands/checklink.js";
-import * as syncroles from "../commands/synctop5.js";
+import * as syncroles from "../commands/syncroles.js";
 import * as slowmode from "../commands/slowmode.js";
 import * as oracle from "../commands/oracle.js";
 import * as tdstrivia from "../commands/tdstrivia.js";
@@ -47,7 +47,7 @@ export function loadCommands(): Collection<string, Command> {
     avatar,
     info,
     link,
-    unlink,
+    removelink,
     checklink,
     syncroles,
     slowmode,

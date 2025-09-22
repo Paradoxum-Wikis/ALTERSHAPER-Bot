@@ -15,7 +15,7 @@ import {
 } from "../utils/roleConstants.js";
 
 export const data = new SlashCommandBuilder()
-  .setName("unlink")
+  .setName("removelink")
   .setDescription("Sever the link between a Discord soul and a Fandom alter")
   .addUserOption((option) =>
     option
@@ -172,7 +172,7 @@ export async function execute(
         .addFields({
           name: "TO RETRY",
           value:
-            "Run the `/unlink` command again to restart the severance process.",
+            "Run the `/removelink` command again to restart the severance process.",
           inline: false,
         });
 
