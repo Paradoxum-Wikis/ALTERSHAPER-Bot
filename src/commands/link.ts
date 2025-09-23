@@ -43,7 +43,7 @@ interface FandomUserProfileResponse {
 
 export const data = new SlashCommandBuilder()
   .setName("link")
-  .setDescription("Link thy Discord soul with thy Fandom account")
+  .setDescription("Link thy Discord soul with thy Fandom account (case-sensitive)")
   .addStringOption((option) =>
     option
       .setName("fandomusername")
