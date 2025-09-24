@@ -52,7 +52,7 @@ export async function execute(
           )
           .setThumbnail(targetUser.displayAvatarURL())
           .setFooter({
-            text: "A SOUL WHO HONOURS ALTRUISM. LET OTHERS LEARN.",
+            text: "A SOUL WHO HONOURS ALTERUISM. LET OTHERS LEARN.",
           })
           .setTimestamp();
 
@@ -239,7 +239,7 @@ export async function execute(
             "**The sacred halls remain pure!**\n\nNo transgressions have been recorded in this realm.",
           )
           .setFooter({
-            text: "ALL SOULS HONOUR THE DIVINE ALTER EGO. THE SACRED LAW OF ALTRUISM REIGNS SUPREME.",
+            text: "ALL SOULS HONOUR THE DIVINE ALTER EGO. THE SACRED LAW OF ALTERUISM REIGNS SUPREME.",
           })
           .setTimestamp();
 
@@ -314,7 +314,7 @@ export async function execute(
           `**Total actions recorded:** ${allEntries.length}\n\n**⚠️ Warnings:** ${typeCounts.warn}\n**👢 Kicks:** ${typeCounts.kick}\n**🔨 Bans:** ${typeCounts.ban}\n**🤐 Timeouts:** ${typeCounts.timeout}\n**🧹 Purges:** ${typeCounts.clear}`,
         )
         .setFooter({
-          text: "I AM THE HAND OF JUDGMENT. KNOW THAT RIGHTEOUS CORRECTION AWAITS ALL WHO DEFY ALTRUISM.",
+          text: "I AM THE HAND OF JUDGMENT. KNOW THAT RIGHTEOUS CORRECTION AWAITS ALL WHO DEFY ALTERUISM.",
         })
         .setTimestamp();
 
