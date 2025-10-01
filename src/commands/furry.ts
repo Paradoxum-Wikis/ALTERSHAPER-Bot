@@ -146,9 +146,7 @@ export async function execute(
           `the oracles have gazed into the depths of souls and revealed:\n\n` +
           (isFurry
             ? `🐾 **${displayName}** is secretly a furry! 🐾`
-            : `😐 **${displayName}** is NOT a furry.`) +
-          `\n\n` +
-          `*The truth cannot be hidden from the all-seeing divine eye...*`,
+            : `😐 **${displayName}** is NOT a furry.`),
       )
       .setThumbnail(targetUser.displayAvatarURL())
       .addFields(
