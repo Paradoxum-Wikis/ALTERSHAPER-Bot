@@ -24,7 +24,6 @@ import * as furry from "../commands/furry.js";
 import * as anime from "../commands/anime.js";
 import * as ship from "../commands/ship.js";
 import * as webhook from "../commands/webhook.js";
-// import * as bossfight from "../commands/bossfight.js";
 
 export interface Command {
   data: any;
@@ -60,7 +59,6 @@ export function loadCommands(): Collection<string, Command> {
     anime,
     ship,
     webhook,
-    // bossfight,
   ];
 
   for (const command of commandModules) {
