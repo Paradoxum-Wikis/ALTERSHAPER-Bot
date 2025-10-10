@@ -7,6 +7,8 @@ interface BattleLock {
 const locks = new Map<string, BattleLock>();
 export class BattleLockManager {
   private static readonly BATTLE_TIMEOUT = 1000 * 60 * 5; // 5 minutes
+  private static locks: Map<string, Set<string>> = new Map();
+
   // Checks if a battle is active in a specific server
   public static isLocked(guildId: string): boolean {
     this.cleanupOldBattles();
@@ -66,5 +68,9 @@ export class BattleLockManager {
       );
       this.releaseLock(guildId);
     }
+  }
+
+  public static getAllLocks(): Map<string, Set<string>> {
+    return new Map(this.locks);
   }
 }

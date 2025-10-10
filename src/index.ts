@@ -19,11 +19,14 @@ import {
   handleReactionAdd,
   handleReactionRemove,
 } from "./utils/eventHandlers.js";
+import { BattleLockManager } from "./utils/battleLockManager.js";
 
 class AltershaperBot {
   private client: Client;
   private readonly BOT_TOKEN = process.env.DISCORD_TOKEN;
   private commands: Collection<string, Command>;
+  private readyPromise: Promise<void>;
+  private resolveReady!: () => void;
 
   constructor() {
     this.client = new Client({
@@ -35,6 +38,10 @@ class AltershaperBot {
         GatewayIntentBits.GuildModeration,
         GatewayIntentBits.GuildMessageReactions,
       ],
+    });
+
+    this.readyPromise = new Promise((resolve) => {
+      this.resolveReady = resolve;
     });
 
     this.commands = loadCommands();
@@ -52,6 +59,8 @@ class AltershaperBot {
 
       await this.registerSlashCommands();
       await ReactionRoleHandler.initialize(this.client);
+
+      this.resolveReady();
     });
 
     this.client.on("interactionCreate", (interaction) =>
@@ -153,6 +162,10 @@ class AltershaperBot {
     }
   }
 
+  public async waitUntilReady(): Promise<void> {
+    return this.readyPromise;
+  }
+
   public async start(): Promise<void> {
     if (!this.BOT_TOKEN) {
       console.error("❌ Discord token not found in environment variables");
@@ -166,7 +179,7 @@ class AltershaperBot {
       process.exit(1);
     }
 
-    // Graceful shutdown
+    // Graceful shutdowns
     process.on("SIGINT", () => {
       console.log("🛑 Shutting down gracefully...");
       this.client.destroy();
@@ -205,7 +218,7 @@ class AltershaperBot {
   }
 
   public async restart(): Promise<void> {
-    console.log("♻️ Restarting Altershaper bot internals...");
+    console.log("♻️  Restarting Altershaper bot internals..."); // intentional space
 
     try {
       await this.client.destroy();
@@ -221,8 +234,13 @@ class AltershaperBot {
         ],
       });
 
+      this.readyPromise = new Promise((resolve) => {
+        this.resolveReady = resolve;
+      });
+
       this.setupEventListeners();
       await this.client.login(this.BOT_TOKEN!);
+      await this.waitUntilReady();
 
       console.log("✅ Altershaper bot internals restarted successfully!");
     } catch (error) {
@@ -231,6 +249,78 @@ class AltershaperBot {
       await this.shutdown(1);
     }
   }
+
+  public clearCache(): void {
+    console.log("🧹 Clearing Discord.js caches...");
+    const beforeUsers = this.client.users.cache.size;
+    const beforeChannels = this.client.channels.cache.size;
+
+    this.client.users.cache.clear();
+    this.client.channels.cache.clear();
+
+    this.client.guilds.cache.forEach((guild) => {
+      guild.members.cache.clear();
+      guild.channels.cache.clear();
+    });
+
+    console.log(
+      `✅ Cleared ${beforeUsers} users and ${beforeChannels} channels from cache\n`,
+    );
+  }
+
+  public listGuilds(): void {
+    console.log("🏰 Connected Guilds:");
+    console.log("================================");
+
+    this.client.guilds.cache.forEach((guild) => {
+      console.log(`📁 ${guild.name}`);
+      console.log(`   • ID: ${guild.id}`);
+      console.log(`   • Members: ${guild.memberCount}`);
+      console.log(`   • Owner: ${guild.ownerId}`);
+      console.log(`   • Channels: ${guild.channels.cache.size}`);
+      console.log("");
+    });
+
+    console.log(`Total: ${this.client.guilds.cache.size} guild(s)`);
+    console.log("================================\n");
+  }
+
+  public listLocks(): void {
+    console.log("🔒 Active Battle Locks:");
+    console.log("================================");
+
+    const allLocks = BattleLockManager.getAllLocks();
+    
+    if (allLocks.size === 0) {
+      console.log("No active battle locks\n");
+      console.log("================================\n");
+      return;
+    }
+
+    allLocks.forEach((userIds, guildId) => {
+      const guild = this.client.guilds.cache.get(guildId);
+      const guildName = guild ? guild.name : `Unknown (${guildId})`;
+      
+      console.log(`📁 ${guildName}`);
+      console.log(`   • Guild ID: ${guildId}`);
+      console.log(`   • Locked Users: ${userIds.size}`);
+      
+      const userTags: string[] = [];
+      userIds.forEach((userId) => {
+        const user = this.client.users.cache.get(userId);
+        userTags.push(user ? user.tag : userId);
+      });
+      
+      if (userTags.length > 0) {
+        console.log(`   • Users: ${userTags.join(", ")}`);
+      }
+      
+      console.log("");
+    });
+
+    console.log(`Total: ${allLocks.size} guild lock(s)`);
+    console.log("================================\n");
+  }
 }
 
 const bot = new AltershaperBot();
@@ -238,5 +328,7 @@ const consoleCommands = new ConsoleHandler();
 
 registerConsoleCommands(consoleCommands, bot);
 
-consoleCommands.start();
-bot.start();
+bot.start().then(async () => {
+  await bot.waitUntilReady();
+  consoleCommands.start();
+});

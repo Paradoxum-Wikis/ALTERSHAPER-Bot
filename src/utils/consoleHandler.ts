@@ -5,6 +5,7 @@ type CommandAction = () => Promise<void> | void;
 interface ConsoleCommand {
   description: string;
   action: CommandAction;
+  isAlias?: boolean;
 }
 
 export class ConsoleHandler {
@@ -20,14 +21,17 @@ export class ConsoleHandler {
     name: string,
     description: string,
     action: CommandAction,
+    isAlias: boolean = false,
   ): void {
-    this.commands.set(name.toLowerCase(), { description, action });
+    this.commands.set(name.toLowerCase(), { description, action, isAlias });
   }
 
   public listCommands(): void {
     console.log("⚙️ Available console commands:");
-    for (const [name, { description }] of this.commands.entries()) {
-      console.log(`  • ${name} — ${description}`);
+    for (const [name, { description, isAlias }] of this.commands.entries()) {
+      if (!isAlias) {
+        console.log(`  • ${name} — ${description}`);
+      }
     }
     console.log("");
   }
@@ -71,7 +75,7 @@ export class ConsoleHandler {
       console.log("🔚 Console input closed.");
     });
 
-    console.log("🛠️ Console command handler ready. Type \"help\" for options.\n");
+    console.log("🛠️  Console command handler ready. Type \"help\" for options.\n"); // intentional dup space
     this.prompt();
   }
 
