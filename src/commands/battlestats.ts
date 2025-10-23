@@ -24,11 +24,11 @@ export const data = new SlashCommandBuilder()
       .addStringOption((option) =>
         option
           .setName("mode")
-          .setDescription("View normal or ranked stats")
+          .setDescription("View normal, ranked, or all stats (defaults to normal)")
           .addChoices(
             { name: "Normal", value: "normal" },
             { name: "Ranked", value: "ranked" },
-            { name: "Both", value: "both" },
+            { name: "All", value: "all" },
           )
           .setRequired(false),
       ),
@@ -40,7 +40,7 @@ export const data = new SlashCommandBuilder()
       .addStringOption((option) =>
         option
           .setName("mode")
-          .setDescription("View normal or ranked leaderboard")
+          .setDescription("View normal or ranked leaderboard (defaults to normal)")
           .addChoices(
             { name: "Normal", value: "normal" },
             { name: "Ranked", value: "ranked" },
@@ -63,7 +63,7 @@ export const data = new SlashCommandBuilder()
       .addStringOption((option) =>
         option
           .setName("mode")
-          .setDescription("View normal, ranked, or all battles")
+          .setDescription("View normal, ranked, or all battles (defaults to all)")
           .addChoices(
             { name: "Normal", value: "normal" },
             { name: "Ranked", value: "ranked" },
@@ -83,7 +83,7 @@ export async function execute(
       case "user": {
         const targetUser =
           interaction.options.getUser("user") || interaction.user;
-        const mode = interaction.options.getString("mode") || "both";
+        const mode = interaction.options.getString("mode") || "normal";
         const stats = await BattleStatsManager.getUserStats(targetUser.id);
 
         if (!stats) {
@@ -101,7 +101,7 @@ export async function execute(
           .setThumbnail(targetUser.displayAvatarURL())
           .setTimestamp();
 
-        if (mode === "normal" || mode === "both") {
+        if (mode === "normal" || mode === "all") {
           embed.addFields(
             { name: "📊 **NORMAL BATTLES**", value: "\u200B", inline: false },
             { name: "🏆 Wins", value: stats.wins.toString(), inline: true },
@@ -132,7 +132,7 @@ export async function execute(
           );
         }
 
-        if (mode === "ranked" || mode === "both") {
+        if (mode === "ranked" || mode === "all") {
           embed.addFields(
             { name: "🏆 **RANKED BATTLES**", value: "\u200B", inline: false },
             {
