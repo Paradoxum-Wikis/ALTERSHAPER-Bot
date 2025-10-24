@@ -125,32 +125,11 @@ export async function execute(
 
         await interaction.deferReply();
 
-        const spouseIds = await FamilyManager.getSpouses(targetUser.id);
-        const spouses = await Promise.all(
-          spouseIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
-        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
-
-        const childrenIds = await FamilyManager.getChildren(targetUser.id);
-        const children = await Promise.all(
-          childrenIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
-        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
-
-        const parentIds = await FamilyManager.getParents(targetUser.id);
-        const parents = await Promise.all(
-          parentIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
-        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
-
-        const siblingIds = await FamilyManager.getSiblings(targetUser.id);
-        const siblings = await Promise.all(
-          siblingIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
-        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
-
-        const treeBuffer = await FamilyTreeRenderer.generateTree(targetUser, {
-          spouses,
-          parents,
-          children,
-          siblings,
-        });
+        const treeBuffer = await FamilyTreeRenderer.generateTree(
+          targetUser,
+          interaction.client,
+          interaction.guildId!,
+        );
 
         const attachment = new AttachmentBuilder(treeBuffer, {
           name: "family-tree.png",
