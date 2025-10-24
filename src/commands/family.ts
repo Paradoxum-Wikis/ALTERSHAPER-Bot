@@ -7,8 +7,10 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ComponentType,
+  AttachmentBuilder,
 } from "discord.js";
 import { FamilyManager } from "../utils/familyManager.js";
+import { FamilyTreeRenderer } from "../utils/familyTreeRenderer.js";
 
 export const data = new SlashCommandBuilder()
   .setName("family")
@@ -16,11 +18,22 @@ export const data = new SlashCommandBuilder()
   .addSubcommand((subcommand) =>
     subcommand
       .setName("tree")
-      .setDescription("View your family tree or another user's")
+      .setDescription("View a visual family tree")
       .addUserOption((option) =>
         option
           .setName("user")
           .setDescription("The user whose family tree to view")
+          .setRequired(false),
+      ),
+  )
+  .addSubcommand((subcommand) =>
+    subcommand
+      .setName("profile")
+      .setDescription("View family relationships as a text list")
+      .addUserOption((option) =>
+        option
+          .setName("user")
+          .setDescription("The user whose family profile to view")
           .setRequired(false),
       ),
   )
@@ -110,23 +123,87 @@ export async function execute(
           return;
         }
 
-        const spouse = await FamilyManager.getSpouse(targetUser.id);
+        await interaction.deferReply();
+
+        const spouseIds = await FamilyManager.getSpouses(targetUser.id);
+        const spouses = await Promise.all(
+          spouseIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
+        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
+
+        const childrenIds = await FamilyManager.getChildren(targetUser.id);
+        const children = await Promise.all(
+          childrenIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
+        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
+
+        const parentIds = await FamilyManager.getParents(targetUser.id);
+        const parents = await Promise.all(
+          parentIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
+        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
+
+        const siblingIds = await FamilyManager.getSiblings(targetUser.id);
+        const siblings = await Promise.all(
+          siblingIds.map((id) => interaction.client.users.fetch(id).catch(() => null)),
+        ).then(users => users.filter((u): u is NonNullable<typeof u> => u !== null));
+
+        const treeBuffer = await FamilyTreeRenderer.generateTree(targetUser, {
+          spouses,
+          parents,
+          children,
+          siblings,
+        });
+
+        const attachment = new AttachmentBuilder(treeBuffer, {
+          name: "family-tree.png",
+        });
+
+        const embed = new EmbedBuilder()
+          .setColor("#cdcdcd")
+          .setTitle("🌳 FAMILY TREE")
+          .setDescription(`**${targetUser.tag}**'s big old family tree!`)
+          .setImage("attachment://family-tree.png")
+          .setTimestamp();
+
+        await interaction.editReply({
+          embeds: [embed],
+          files: [attachment],
+        });
+        break;
+      }
+
+      case "profile": {
+        const targetUser = interaction.options.getUser("user") || interaction.user;
+        const relationships = await FamilyManager.getUserRelationships(targetUser.id);
+
+        if (relationships.length === 0) {
+          await interaction.reply({
+            content: `**${targetUser.tag} has no family relationships yet!**`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const spouses = await FamilyManager.getSpouses(targetUser.id);
         const children = await FamilyManager.getChildren(targetUser.id);
         const parents = await FamilyManager.getParents(targetUser.id);
         const siblings = await FamilyManager.getSiblings(targetUser.id);
 
         const embed = new EmbedBuilder()
           .setColor("#FFD700")
-          .setTitle("🌳 FAMILY TREE")
+          .setTitle("👤 FAMILY PROFILE")
           .setDescription(`Family relationships for **${targetUser.tag}**`)
           .setThumbnail(targetUser.displayAvatarURL())
           .setTimestamp();
 
-        if (spouse) {
-          const spouseUser = await interaction.client.users.fetch(spouse);
+        if (spouses.length > 0) {
+          const spouseTags = await Promise.all(
+            spouses.map(async (id) => {
+              const user = await interaction.client.users.fetch(id);
+              return user.tag;
+            }),
+          );
           embed.addFields({
-            name: "💍 Spouse",
-            value: spouseUser.tag,
+            name: spouses.length === 1 ? "💍 Spouse" : "💍 Spouses",
+            value: spouseTags.join("\n"),
             inline: true,
           });
         }
@@ -188,25 +265,30 @@ export async function execute(
           return;
         }
 
-        // existing relationships check
         const hasExistingRelationship = await FamilyManager.hasRelationship(
           interaction.user.id,
           targetUser.id,
         );
-        const existingSpouse = await FamilyManager.getSpouse(interaction.user.id);
-        const targetSpouse = await FamilyManager.getSpouse(targetUser.id);
+        const existingSpouses = await FamilyManager.getSpouses(interaction.user.id);
+        const targetSpouses = await FamilyManager.getSpouses(targetUser.id);
 
-        if (hasExistingRelationship || existingSpouse || targetSpouse) {
+        if (hasExistingRelationship || existingSpouses.length > 0 || targetSpouses.length > 0) {
           const warnings: string[] = [];
-          
-          if (existingSpouse) {
-            const spouseUser = await interaction.client.users.fetch(existingSpouse);
-            warnings.push(`⚠️ **You are already married to ${spouseUser.tag}!**`);
+
+          if (existingSpouses.length > 0) {
+            const spouseUsers = await Promise.all(
+              existingSpouses.map(id => interaction.client.users.fetch(id))
+            );
+            const spouseNames = spouseUsers.map(u => u.tag).join(", ");
+            warnings.push(`⚠️ **You are already married to ${spouseNames}!**`);
           }
-          
-          if (targetSpouse) {
-            const targetSpouseUser = await interaction.client.users.fetch(targetSpouse);
-            warnings.push(`⚠️ **${targetUser.tag} is already married to ${targetSpouseUser.tag}!**`);
+
+          if (targetSpouses.length > 0) {
+            const targetSpouseUsers = await Promise.all(
+              targetSpouses.map(id => interaction.client.users.fetch(id))
+            );
+            const targetSpouseNames = targetSpouseUsers.map(u => u.tag).join(", ");
+            warnings.push(`⚠️ **${targetUser.tag} is already married to ${targetSpouseNames}!**`);
           }
           
           if (hasExistingRelationship) {
@@ -461,8 +543,8 @@ export async function execute(
       case "divorce": {
         const targetUser = interaction.options.getUser("user", true);
 
-        const spouse = await FamilyManager.getSpouse(interaction.user.id);
-        if (!spouse || spouse !== targetUser.id) {
+        const spouses = await FamilyManager.getSpouses(interaction.user.id);
+        if (!spouses.includes(targetUser.id)) {
           await interaction.reply({
             content: `**${targetUser.tag} IS NOT YOUR SPOUSE!**`,
             flags: MessageFlags.Ephemeral,

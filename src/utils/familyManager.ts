@@ -76,18 +76,21 @@ export class FamilyManager {
     );
   }
 
-  public static async getSpouse(userId: string): Promise<string | null> {
+  public static async getSpouses(userId: string): Promise<string[]> {
     const data = await this.loadData();
-    const marriage = data.relationships.find(
-      (rel) =>
-        rel.relationshipType === "spouse" &&
-        (rel.userId === userId || rel.relatedUserId === userId),
-    );
+    const spouses = new Set<string>();
 
-    if (!marriage) return null;
-    return marriage.userId === userId
-      ? marriage.relatedUserId
-      : marriage.userId;
+    for (const rel of data.relationships) {
+      if (rel.relationshipType === "spouse") {
+        if (rel.userId === userId) {
+          spouses.add(rel.relatedUserId);
+        } else if (rel.relatedUserId === userId) {
+          spouses.add(rel.userId);
+        }
+      }
+    }
+
+    return Array.from(spouses);
   }
 
   public static async getChildren(userId: string): Promise<string[]> {
@@ -110,19 +113,19 @@ export class FamilyManager {
 
   public static async getSiblings(userId: string): Promise<string[]> {
     const data = await this.loadData();
-    const siblings: string[] = [];
+    const siblings = new Set<string>();
 
     for (const rel of data.relationships) {
       if (rel.relationshipType === "sibling") {
         if (rel.userId === userId) {
-          siblings.push(rel.relatedUserId);
+          siblings.add(rel.relatedUserId);
         } else if (rel.relatedUserId === userId) {
-          siblings.push(rel.userId);
+          siblings.add(rel.userId);
         }
       }
     }
 
-    return siblings;
+    return Array.from(siblings);
   }
 
   public static async addRelationship(
