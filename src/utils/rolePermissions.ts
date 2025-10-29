@@ -1,7 +1,7 @@
 import { GuildMember } from "discord.js";
 import { FANDOM_ROLE_MAP, TDS_WIKI_STAFF } from "./roleConstants.js";
 
-const COMMANDS_CHANNEL_ID = "1366497229161894018";
+const COMMANDS_CHANNEL_ID = process.env.CMDS_CHANNEL_ID;
 
 export enum PermissionLevel {
   BASIC = "basic",

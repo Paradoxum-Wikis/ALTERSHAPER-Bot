@@ -5,7 +5,7 @@ import {
   AttachmentBuilder,
 } from "discord.js";
 
-export const data = new SlashCommandBuilder()
+const builder = new SlashCommandBuilder()
   .setName("anime")
   .setDescription("Summon a random anime image from the archives")
   .addStringOption((option) =>
@@ -23,43 +23,43 @@ export const data = new SlashCommandBuilder()
         "Exclude specific tags (comma-separated, e.g: boy, short_hair)",
       )
       .setRequired(false),
-  )
-  .addIntegerOption((option) =>
-    option
-      .setName("min_size")
-      .setDescription("Minimum image size (width/height)")
-      .setMinValue(100)
-      .setMaxValue(4000)
-      .setRequired(false),
-  )
-  .addIntegerOption((option) =>
-    option
-      .setName("max_size")
-      .setDescription("Maximum image size (width/height)")
-      .setMinValue(500)
-      .setMaxValue(8000)
-      .setRequired(false),
-  )
-  .addBooleanOption((option) =>
-    option
-      .setName("high_quality")
-      .setDescription("Use high quality (non-compressed) images")
-      .setRequired(false),
   );
 
-interface AnimeImageResponse {
-  file_url: string;
-  md5: string;
-  tags: string[];
-  width: number;
-  height: number;
-  source?: string;
-  author?: string;
-  has_children: boolean;
-  _id: number;
+const RATING_MODE_ENABLED = process.env.ANIME_RATING_MODE === "true";
+
+if (RATING_MODE_ENABLED) {
+  builder.addStringOption((option) =>
+    option
+      .setName("rating")
+      .setDescription("Content rating filter")
+      .addChoices(
+        { name: "Safe", value: "safe" },
+        { name: "Suggestive", value: "suggestive" },
+        { name: "Borderline", value: "borderline" },
+        { name: "Explicit", value: "explicit" },
+      )
+      .setRequired(false),
+  );
 }
 
-const API_BASE_URL = "https://pic.re";
+export const data = builder;
+
+interface AnimeImageResponse {
+  id: number;
+  url: string;
+  width?: number;
+  height?: number;
+  artist_id?: number;
+  artist_name?: string | null;
+  tags: string[];
+  source_url?: string | null;
+  rating: "safe" | "suggestive" | "borderline" | "explicit";
+  color_dominant?: number[];
+  color_palette?: number[][];
+}
+
+const API_BASE_URL = "https://api.nekosapi.com/v4";
+const FETCH_TIMEOUT = 15000; // 15 seconds
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -69,10 +69,14 @@ export async function execute(
   try {
     const includeParam = interaction.options.getString("include");
     const excludeParam = interaction.options.getString("exclude");
-    const minSize = interaction.options.getInteger("min_size");
-    const maxSize = interaction.options.getInteger("max_size");
-    const highQuality = interaction.options.getBoolean("high_quality") ?? false;
+    let rating = interaction.options.getString("rating");
+
+    if (process.env.ANIME_RATING_MODE !== "true") {
+      rating = "safe";
+    }
+
     const params = new URLSearchParams();
+    params.append("limit", "1");
 
     if (includeParam) {
       const includeTags = includeParam
@@ -80,7 +84,7 @@ export async function execute(
         .map((tag) => tag.trim().toLowerCase())
         .filter((tag) => tag.length > 0);
       if (includeTags.length > 0) {
-        params.append("in", includeTags.join(","));
+        params.append("tags", includeTags.join(","));
       }
     }
 
@@ -90,81 +94,81 @@ export async function execute(
         .map((tag) => tag.trim().toLowerCase())
         .filter((tag) => tag.length > 0);
       if (excludeTags.length > 0) {
-        params.append("nin", excludeTags.join(","));
+        params.append("without_tags", excludeTags.join(","));
       }
     }
 
-    if (minSize) {
-      params.append("min_size", minSize.toString());
+    if (rating) {
+      params.append("rating", rating);
     }
 
-    if (maxSize) {
-      params.append("max_size", maxSize.toString());
-    }
-
-    if (!highQuality) {
-      params.append("compress", "true");
-    }
-
-    const metadataUrl = `${API_BASE_URL}/image.json${params.toString() ? "?" + params.toString() : ""}`;
+    const metadataUrl = `${API_BASE_URL}/images/random?${params.toString()}`;
     console.log(`[ANIME] Fetching metadata from: ${metadataUrl}`);
 
-    const response = await fetch(metadataUrl);
+    const metadataResponse = await fetchT(metadataUrl, FETCH_TIMEOUT);
 
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+    if (!metadataResponse.ok) {
+      throw new Error(`Metadata fetch failed with status: ${metadataResponse.status}`);
     }
 
-    const imageData = (await response.json()) as AnimeImageResponse;
+    const data = (await metadataResponse.json()) as AnimeImageResponse[];
 
-    let imageUrl = imageData.file_url;
-    if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
-      imageUrl = `https://${imageUrl}`;
+    if (!data || data.length === 0) {
+      throw new Error("No images found");
     }
+
+    const imageData = data[0];
+    const imageUrl = imageData.url;
 
     console.log(`[ANIME] Fetching image from: ${imageUrl}`);
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse = await fetchT(imageUrl, FETCH_TIMEOUT);
 
     if (!imageResponse.ok) {
-      throw new Error(
-        `Image fetch failed with status: ${imageResponse.status}`,
-      );
+      throw new Error(`Image fetch failed with status: ${imageResponse.status}`);
     }
 
     const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-    const urlParts = imageUrl.split(".");
-    const extension = urlParts[urlParts.length - 1].split("?")[0] || "jpg";
+    const contentType = imageResponse.headers.get("content-type") || "image/webp";
+    const extension = contentType.split("/")[1] || "webp";
     const attachment = new AttachmentBuilder(imageBuffer, {
-      name: `anime_${imageData._id}.${extension}`,
+      name: `anime_${imageData.id}.${extension}`,
     });
 
     const embed = new EmbedBuilder()
       .setColor("#ff90c8")
       .setTitle("🎨 ARTWORK SUMMONED")
       .setDescription("**An image has been retrieved from the archives!**")
-      .setImage(`attachment://anime_${imageData._id}.${extension}`)
+      .setImage(`attachment://anime_${imageData.id}.${extension}`)
       .addFields({
         name: "📊 Details",
-        value: `**Dimensions:** ${imageData.width} × ${imageData.height}px`,
+        value: `**ID:** ${imageData.id}`,
         inline: true,
       })
       .setFooter({
-        text: "Sacred archives of pic.re",
+        text: "Sacred archives of Nekos",
       })
       .setTimestamp();
 
-    if (imageData.author) {
+    if (RATING_MODE_ENABLED) {
       embed.addFields({
-        name: "👤 Artist",
-        value: imageData.author,
+        name: "🔒 Rating",
+        value: imageData.rating,
         inline: true,
       });
     }
 
-    if (imageData.source) {
+    if (imageData.artist_name) {
+      embed.addFields({
+        name: "👤 Artist",
+        value: imageData.artist_name,
+        inline: true,
+      });
+    }
+
+    if (imageData.source_url) {
       embed.addFields({
         name: "🔗 Source",
-        value: `[Original Artwork](${imageData.source})`,
+        value: `[Original Artwork](${imageData.source_url})`,
         inline: true,
       });
     }
@@ -193,24 +197,35 @@ export async function execute(
 
     let errorMessage = "**THE ARCHIVES HAVE FAILED TO RESPOND!**";
 
-    // i may make these ephemerals in the future,
-    // but for now i want to know errors in pubs too
-    // in case the moment someone run into this issue
     if (error instanceof Error) {
-      if (error.message.includes("404")) {
+      if (error.message.includes("No images found")) {
         errorMessage =
           "**NO IMAGES FOUND MATCHING YOUR CRITERIA!** Try different tags or remove some filters.";
+      } else if (error.message.includes("timeout")) {
+        errorMessage =
+          "**THE ARCHIVES ARE TAKING TOO LONG TO RESPOND!** The image server is slow. Please try again.";
       } else if (error.message.includes("403")) {
         errorMessage =
           "**ACCESS TO THE ARCHIVES IS FORBIDDEN!** The API may be temporarily unavailable.";
-      } else if (error.message.includes("timeout")) {
-        errorMessage =
-          "**THE ARCHIVES ARE TAKING TOO LONG TO RESPOND!** Please try again.";
       }
     }
 
     await interaction.editReply({
       content: errorMessage,
     });
+  }
+}
+
+async function fetchT(
+  url: string,
+  timeout: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

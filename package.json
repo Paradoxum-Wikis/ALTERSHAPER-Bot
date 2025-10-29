@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc && cp src/webhook.png src/ship.png src/ship2.png src/deathbattle.png src/deathbattle2.png src/deathbattle3.png dist/",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "dev": "tsx --require dotenv/config src/index.ts",
     "watch": "tsc -w",
     "format": "prettier . --write"
   },
