@@ -85,8 +85,8 @@ const commands: CommandInfo[] = [
     category: "basic1",
   },
   {
-    name: "/anime [-include] [-exclude] [-min_size] [-max_size] [-high_quality]",
-    value: "Summon a random anime image from sacred archives of pic.re",
+    name: "/anime [-include] [-exclude] [-rating]",
+    value: "Summon a random anime image from the cultured realms",
     category: "basic1",
   },
   {
@@ -98,11 +98,6 @@ const commands: CommandInfo[] = [
   {
     name: "/battlestats >subcommand [@user] [-mode]",
     value: "View deathbattle statistics and leaderboards",
-    category: "basic1",
-  },
-  {
-    name: "/bossfight [@user1] [@user2] [@user3] [@user4]",
-    value: "Four warriors unite against a mighty boss in epic combat",
     category: "basic1",
   },
   {
@@ -149,6 +144,11 @@ const commands: CommandInfo[] = [
   {
     name: "/tdstrivia",
     value: "Fetch a random trivia fact from the TDS Wiki",
+    category: "basic2",
+  },
+  {
+    name: "/family >subcommand",
+    value: "Manage and view family relationships and trees",
     category: "basic2",
   },
   {

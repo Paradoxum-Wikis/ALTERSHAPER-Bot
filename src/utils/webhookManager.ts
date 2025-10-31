@@ -326,7 +326,7 @@ export class WebhookManager {
     guild: Guild,
     channelId?: string,
     webhookName?: string,
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; message: string; webhook?: import("discord.js").Webhook }> {
     try {
       let webhook = await this.getWebhook(guild, webhookName);
 
@@ -334,6 +334,7 @@ export class WebhookManager {
         return {
           success: true,
           message: `Webhook "${webhookName || "default"}" already exists and is functional`,
+          webhook,
         };
       }
 

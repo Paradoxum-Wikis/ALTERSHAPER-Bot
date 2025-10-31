@@ -104,7 +104,7 @@ export async function execute(
         const result = await WebhookManager.initializeWebhook(
           interaction.guild,
           channel.id,
-          webhookName
+          webhookName,
         );
 
         const embed = new EmbedBuilder()
@@ -112,6 +112,13 @@ export async function execute(
           .setDescription(result.message)
           .setColor(result.success ? "#00FF00" : "#FF0000")
           .setTimestamp();
+
+        if (result.success && result.webhook) {
+          embed.addFields({
+            name: "URL",
+            value: `\`${result.webhook.url}\``,
+          });
+        }
 
         await interaction.editReply({ embeds: [embed] });
         break;
