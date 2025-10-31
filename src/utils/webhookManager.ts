@@ -385,6 +385,7 @@ export class WebhookManager {
         return {
           success: true,
           message: `Webhook "${displayName}" created successfully in #${targetChannel.name}`,
+          webhook,
         };
       } else {
         return { success: false, message: "Failed to create webhook" };
